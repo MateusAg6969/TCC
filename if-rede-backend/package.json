@@ -1,0 +1,41 @@
+{
+  "name": "if-rede-backend",
+  "version": "1.0.0",
+  "description": "Backend da rede social acadêmica IF REDE com MongoDB",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "example": "node exemplos-uso.js",
+    "seed": "node seed.js",
+    "test": "echo \"Erro: teste ainda não configurado\" && exit 1",
+    "docs": "echo \"Veja DOCUMENTACAO.md para mais informações\""
+  },
+  "keywords": [
+    "mongodb",
+    "mongoose",
+    "rede-social",
+    "ifc",
+    "if-rede"
+  ],
+  "author": "Seu Nome",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.0.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,368 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const { Postagem, Usuario, Seguidor, TagSubtipo } = require('../models');
+const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
+const { detectarPalavraEmPartes } = require('../services/palavras-filtro.service');
+const { uploadPostArquivo, LIMITES_POR_TIPO } = require('../middleware/upload-post.middleware');
+
+const router = express.Router();
+
+function parsePageParams(req) {
+  const page = Math.max(Number(req.query.page || 1), 1);
+  const limit = Math.min(Math.max(Number(req.query.limit || 10), 1), 50);
+  const skip = (page - 1) * limit;
+  return { page, limit, skip };
+}
+
+router.post('/', authMiddleware, uploadPostArquivo.single('arquivo'), async (req, res, next) => {
+  try {
+    const {
+      titulo,
+      descricao = '',
+      tipo,
+      subtipo = '',
+      subtipo_tag_id = null,
+      tags,
+      categorias,
+      config,
+    } = req.body;
+
+    const arquivo = req.file;
+
+    // O que faz: valida campos obrigatorios para fluxo de upload.
+    // Por que: agora toda postagem depende de arquivo real, nao apenas URL manual.
+    // Fluxo de dados: multipart/form-data -> multer(req.file + req.body) -> validacao.
+    if (!titulo || !tipo || !arquivo) {
+      return res.fail('Campos obrigatorios: titulo, tipo e arquivo.', 400);
+    }
+
+    const limiteTipo = LIMITES_POR_TIPO[tipo];
+    if (!limiteTipo) {
+      return res.fail('Tipo de postagem invalido.', 400);
+    }
+
+    if (arquivo.size > limiteTipo) {
+      return res.fail(
+        `Arquivo excede o limite para ${tipo}. Limite: ${Math.round(limiteTipo / (1024 * 1024))}MB.`,
+        413
+      );
+    }
+
+    // Resolve tag oficial de subtipo, quando enviada.
+    // Entrada: subtipo_tag_id vindo do formulario.
+    // Saida: referencia persistida e subtipo textual sincronizado.
+    let subtipoTag = null;
+    if (subtipo_tag_id && mongoose.Types.ObjectId.isValid(subtipo_tag_id)) {
+      subtipoTag = await TagSubtipo.findById(subtipo_tag_id).lean();
+      if (!subtipoTag || !subtipoTag.ativo || subtipoTag.tipo !== tipo) {
+        return res.fail('Tag de subtipo invalida para o tipo informado.', 400);
+      }
+    }
+
+    const conteudo = {
+      url: `/uploads/postagens/${arquivo.filename}`,
+      texto_longo: tipo === 'texto' ? String(req.body.texto_longo || '').trim() : '',
+      arquivo: {
+        nome_original: arquivo.originalname,
+        nome_servidor: arquivo.filename,
+        mimetype: arquivo.mimetype,
+        tamanho_bytes: arquivo.size,
+      },
+    };
+
+    const palavraDetectada = await detectarPalavraEmPartes([
+      titulo,
+      descricao,
+      conteudo.texto_longo,
+      subtipoTag?.nome || subtipo,
+    ]);
+
+    const configFinal = { ...(config || { eh_rascunho: true }) };
+    // Padrao de fluxo: toda postagem nova entra como pendente para manter
+    // consistencia com o metodo publicar() do schema e com a fila de moderacao.
+    // Entrada: dados enviados no body pelo autor autenticado.
+    // Saida: status inicial da postagem para o motor de visibilidade.
+    let statusModeracao = 'pendente';
+
+    if (palavraDetectada) {
+      configFinal.eh_rascunho = true;
+      statusModeracao = 'em_revisao';
+    }
+
+    const post = await Postagem.create({
+      autor_id: req.usuario.id,
+      titulo,
+      descricao,
+      tipo,
+      subtipo: subtipoTag?.nome || subtipo,
+      subtipo_tag_id: subtipoTag?._id || null,
+      conteudo,
+      config: configFinal,
+      tags: (() => {
+        // Normaliza tags livres mantendo compatibilidade do schema atual.
+        if (Array.isArray(tags)) return tags;
+        if (typeof tags === 'string' && tags.trim()) {
+          return tags.split(',').map((item) => item.trim()).filter(Boolean);
+        }
+        return [];
+      })(),
+      categorias: (() => {
+        if (Array.isArray(categorias)) return categorias;
+        if (typeof categorias === 'string' && categorias.trim()) {
+          return categorias.split(',').map((item) => item.trim()).filter(Boolean);
+        }
+        return ['geral'];
+      })(),
+      status_moderacao: statusModeracao,
+      denuncias: palavraDetectada
+        ? {
+            total: 1,
+            motivos: [
+              {
+                usuario_id: req.usuario.id,
+                motivo: `Filtro automatico detectou o termo: ${palavraDetectada}`,
+              },
+            ],
+          }
+        : undefined,
+    });
+
+    await Usuario.updateOne({ _id: req.usuario.id }, { $inc: { 'stats.total_postagens': 1 } });
+
+    return res.success(post, 'Postagem criada com sucesso.', undefined, 201);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/feed', authMiddleware, async (req, res, next) => {
+  try {
+    const { page, limit, skip } = parsePageParams(req);
+
+    const seguindo = await Seguidor.find({ seguidor_id: req.usuario.id }).select('seguido_id');
+    const seguindoIds = seguindo.map((s) => s.seguido_id);
+
+    const criterio = {
+      'config.eh_rascunho': false,
+      'denuncias.bloqueado': false,
+      status_moderacao: { $in: ['aprovado', 'pendente'] },
+      $or: [
+        { 'config.visibilidade': 'todos' },
+        { autor_id: req.usuario.id },
+        { autor_id: { $in: seguindoIds }, 'config.visibilidade': 'seguidores' },
+      ],
+    };
+
+    const [items, total] = await Promise.all([
+      Postagem.find(criterio)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.banner_url'),
+      Postagem.countDocuments(criterio),
+    ]);
+
+    return res.success(items, 'Feed carregado com sucesso.', {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/usuario/:usuarioId', optionalAuthMiddleware, async (req, res, next) => {
+  try {
+    const { page, limit, skip } = parsePageParams(req);
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.usuarioId)) {
+      return res.fail('ID de usuário inválido.', 400);
+    }
+
+    const usuario = await Usuario.findById(req.params.usuarioId).select('perfil.privacidade');
+    if (!usuario) {
+      return res.fail('Usuário não encontrado.', 404);
+    }
+
+    const usuarioLogadoId = req.usuario?.id || null;
+    const ehProprio = usuarioLogadoId && String(usuarioLogadoId) === String(req.params.usuarioId);
+
+    const segue = usuarioLogadoId
+      ? await Seguidor.exists({
+          seguidor_id: usuarioLogadoId,
+          seguido_id: req.params.usuarioId,
+        })
+      : null;
+
+    if (!ehProprio && usuario.perfil.privacidade === 'privado' && !segue) {
+      return res.success([], 'Perfil privado. Nenhuma postagem disponível.', {
+        page,
+        limit,
+        total: 0,
+        totalPages: 0,
+      });
+    }
+
+    const criterio = {
+      autor_id: req.params.usuarioId,
+      'config.eh_rascunho': false,
+      'denuncias.bloqueado': false,
+      status_moderacao: 'aprovado',
+    };
+
+    const [items, total] = await Promise.all([
+      Postagem.find(criterio).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Postagem.countDocuments(criterio),
+    ]);
+
+    return res.success(items, 'Postagens do usuário carregadas com sucesso.', {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.fail('ID de postagem inválido.', 400);
+    }
+
+    const post = await Postagem.findById(req.params.id).populate(
+      'autor_id',
+      'perfil.nome perfil.privacidade customizacao.banner_url'
+    );
+
+    if (!post) {
+      return res.fail('Postagem não encontrada.', 404);
+    }
+
+    const usuarioLogadoId = req.usuario?.id || null;
+    const ehAutor = usuarioLogadoId && String(post.autor_id._id) === String(usuarioLogadoId);
+    const autorPrivado = post.autor_id.perfil?.privacidade === 'privado';
+
+    if (autorPrivado && !ehAutor) {
+      const segue = usuarioLogadoId
+        ? await Seguidor.exists({
+            seguidor_id: usuarioLogadoId,
+            seguido_id: post.autor_id._id,
+          })
+        : null;
+
+      if (!segue) {
+        return res.fail('Postagem de perfil privado.', 403);
+      }
+    }
+
+    return res.success(post, 'Postagem carregada com sucesso.');
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.patch('/:id', authMiddleware, async (req, res, next) => {
+  try {
+    const post = await Postagem.findById(req.params.id);
+    if (!post) {
+      return res.fail('Postagem não encontrada.', 404);
+    }
+
+    if (String(post.autor_id) !== String(req.usuario.id)) {
+      return res.fail('Você não pode editar esta postagem.', 403);
+    }
+
+    const camposPermitidos = [
+      'titulo',
+      'descricao',
+      'subtipo',
+      'subtipo_tag_id',
+      'conteudo',
+      'config',
+      'tags',
+      'categorias',
+    ];
+    camposPermitidos.forEach((campo) => {
+      if (req.body[campo] !== undefined) {
+        post[campo] = req.body[campo];
+      }
+    });
+
+    const palavraDetectada = await detectarPalavraEmPartes([
+      post.titulo,
+      post.descricao,
+      post.conteudo?.texto_longo,
+    ]);
+
+    if (palavraDetectada) {
+      post.status_moderacao = 'em_revisao';
+      post.config.eh_rascunho = true;
+      post.denuncias.total = Math.max(1, Number(post.denuncias.total || 0) + 1);
+      post.denuncias.motivos.push({
+        usuario_id: req.usuario.id,
+        motivo: `Filtro automatico detectou o termo: ${palavraDetectada}`,
+      });
+    }
+
+    await post.save();
+
+    return res.success(post, 'Postagem atualizada com sucesso.');
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.delete('/:id', authMiddleware, async (req, res, next) => {
+  try {
+    const post = await Postagem.findById(req.params.id);
+    if (!post) {
+      return res.fail('Postagem não encontrada.', 404);
+    }
+
+    if (String(post.autor_id) !== String(req.usuario.id)) {
+      return res.fail('Você não pode remover esta postagem.', 403);
+    }
+
+    await Postagem.deleteOne({ _id: post._id });
+    await Usuario.updateOne({ _id: req.usuario.id }, { $inc: { 'stats.total_postagens': -1 } });
+
+    return res.success(null, 'Postagem removida com sucesso.');
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/:id/curtir', authMiddleware, async (req, res, next) => {
+  try {
+    const post = await Postagem.findById(req.params.id);
+    if (!post) {
+      return res.fail('Postagem não encontrada.', 404);
+    }
+
+    await post.adicionarCurtida(req.usuario.id);
+    return res.success({ likes: post.stats.likes + 0 }, 'Curtida registrada com sucesso.');
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.delete('/:id/curtir', authMiddleware, async (req, res, next) => {
+  try {
+    const post = await Postagem.findById(req.params.id);
+    if (!post) {
+      return res.fail('Postagem não encontrada.', 404);
+    }
+
+    await post.removerCurtida(req.usuario.id);
+    return res.success({ likes: post.stats.likes + 0 }, 'Curtida removida com sucesso.');
+  } catch (error) {
+    return next(error);
+  }
+});
+
+module.exports = router;

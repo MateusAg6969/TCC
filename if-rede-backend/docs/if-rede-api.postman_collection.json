@@ -1,0 +1,118 @@
+{
+  "info": {
+    "name": "IF REDE API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "usuarioId", "value": "" },
+    { "key": "postagemId", "value": "" },
+    { "key": "comentarioId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Frontend Tester\",\n  \"email\": \"frontend@test.com\",\n  \"matricula\": \"20269999\",\n  \"senha\": \"12345678\",\n  \"status_vinculo\": \"estudante\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"frontend@test.com\",\n  \"senha\": \"12345678\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/usuarios/me"
+          }
+        },
+        {
+          "name": "Seguir Usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/usuarios/{{usuarioId}}/seguir"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Postagens",
+      "item": [
+        {
+          "name": "Criar Postagem",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Primeira postagem via Postman\",\n  \"descricao\": \"Teste de integração frontend\",\n  \"tipo\": \"texto\",\n  \"subtipo\": \"post\",\n  \"conteudo\": {\n    \"texto_longo\": \"Conteúdo da postagem\",\n    \"sensivel\": false\n  },\n  \"config\": {\n    \"eh_rascunho\": false,\n    \"visibilidade\": \"todos\",\n    \"comentarios_ativos\": true\n  },\n  \"tags\": [\"ifrede\"],\n  \"categorias\": [\"geral\"]\n}"
+            },
+            "url": "{{baseUrl}}/postagens"
+          }
+        },
+        {
+          "name": "Feed",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/postagens/feed?page=1&limit=10"
+          }
+        }
+      ]
+    }
+  ]
+}
