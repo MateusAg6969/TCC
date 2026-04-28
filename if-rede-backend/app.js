@@ -28,19 +28,21 @@ const apiLimiter = rateLimit({
 
 app.use(helmet());
 
+const defaultCorsOrigins = ['http://localhost:3000', 'http://localhost:5173'];
 const corsOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
 
+// Fallback seguro: sem variável de ambiente, libera apenas os ambientes locais comuns.
+const allowedCorsOrigins = corsOrigins.length ? corsOrigins : defaultCorsOrigins;
+
 app.use(
   cors(
-    corsOrigins.length
-      ? {
-          origin: corsOrigins,
-          credentials: true,
-        }
-      : undefined
+    {
+      origin: allowedCorsOrigins,
+      credentials: true,
+    }
   )
 );
 app.use(express.json({ limit: '1mb' }));

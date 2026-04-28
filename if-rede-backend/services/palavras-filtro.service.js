@@ -11,7 +11,22 @@ function escaparRegex(valor) {
 }
 
 function normalizar(texto) {
-  return String(texto || '').toLowerCase();
+  // Substitui leet speak (ex.: @=>a, 4=>a, 3=>e, 1=>i, !=>i, 0=>o, $=>s) antes de converter para minúsculas
+  const leetMap = {
+    '@': 'a',
+    '4': 'a',
+    '3': 'e',
+    '1': 'i',
+    '!': 'i',
+    '0': 'o',
+    '$': 's',
+  };
+  const textoLeet = String(texto || '')
+    .toLowerCase()
+    .split('')
+    .map(ch => leetMap[ch] || ch)
+    .join('');
+  return textoLeet;
 }
 
 async function obterPalavrasAtivas() {
