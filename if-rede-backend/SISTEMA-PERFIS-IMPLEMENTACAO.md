@@ -13,6 +13,67 @@ Este arquivo contém instruções completas para usar o novo sistema de perfis i
 - ✅ `schemas/badges.schema.js` - Badges e realizações
 - ✅ `schemas/auditoria.schema.js` - Auditoria de ações
 
+### 🧩 Estrutura principal de usuário (`usuarios`)
+
+Modelo de referência para a collection de usuários usando Mongoose:
+
+```javascript
+const usuarioSchema = new mongoose.Schema(
+  {
+    nome: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    senhaHash: { type: String, required: true, select: false },
+    fotoPerfil: { type: String, default: '' },
+    customizacao: {
+      corFundo: { type: String, default: '#ffffff' },
+      bio: { type: String, default: '', maxlength: 240 },
+      tema: { type: String, default: 'escuro' },
+    },
+    ativo: { type: Boolean, default: true },
+  },
+  { timestamps: true, collection: 'usuarios' }
+);
+
+usuarioSchema.index({ email: 1 }, { unique: true });
+usuarioSchema.index({ nome: 'text' });
+```
+
+Observações:
+- `email` é o índice único obrigatório para evitar duplicidade e acelerar login/busca.
+- `nome` pode receber índice textual caso a busca por nome seja usada.
+- `ativo` aplica soft delete, mantendo o histórico do documento.
+
+### 🤝 Estrutura de amizades (`amizades`)
+
+Modelo de referência para representar amizades como referência separada, sem embutir listas de amigos no documento do usuário:
+
+```javascript
+const amizadeSchema = new mongoose.Schema(
+  {
+    usuarioId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+    amigoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+    status: {
+      type: String,
+      enum: ['pendente', 'aceito', 'recusado'],
+      default: 'pendente',
+    },
+    dataSolicitacao: { type: Date, default: Date.now },
+    dataResposta: { type: Date, default: null },
+  },
+  { timestamps: true, collection: 'amizades' }
+);
+
+amizadeSchema.index({ usuarioId: 1, amigoId: 1 }, { unique: true });
+amizadeSchema.index({ usuarioId: 1, status: 1 });
+amizadeSchema.index({ amigoId: 1 });
+```
+
+Regras de negócio:
+- Se `A` convida `B`, grava-se `{ usuarioId: B, amigoId: A, status: 'pendente' }`.
+- Quando `B` aceita, esse documento vira `status: 'aceito'` e grava-se o espelho `{ usuarioId: A, amigoId: B, status: 'aceito' }`.
+- Para listar amigos de `A`, basta consultar `amizades` por `{ usuarioId: A, status: 'aceito' }`.
+- Para desfazer amizade, remover os dois documentos na mesma operação/transação.
+
 ### 🎮 Novos Controllers
 - ✅ `controllers/perfil.controller.js` - Gerenciar perfil
 - ✅ `controllers/privacidade.controller.js` - Privacidade

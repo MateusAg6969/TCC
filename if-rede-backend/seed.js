@@ -1,11 +1,12 @@
 /**
  * ============================================================================
- * SCRIPT: CRIAR USUÁRIO DE TESTE
+ * SCRIPT: CRIAR USUÁRIOS DE TESTE (matrículas)
  * ============================================================================
  * Executa: npm run seed
- * 
- * Este script cria um usuário de teste no banco de dados para permitir
- * testes do login e outras funcionalidades.
+ *
+ * Cria múltiplos usuários de teste no banco de dados usando uma lista de
+ * matrículas no formato AAAAxxxxxx (AAAA = ano de ingresso). Cada usuário tem a
+ * mesma senha (12345678) que é armazenada como hash Bcrypt.
  */
 
 require('dotenv').config();
@@ -14,70 +15,81 @@ const bcrypt = require('bcryptjs');
 const db = require('./db/connection');
 const { Usuario } = require('./models');
 
-async function criarUsuarioTeste() {
+// ---------------------------------------------------
+// LISTA DE MATRICULAS DE TESTE (formato AAAANNNNNN)
+// ---------------------------------------------------
+const matriculasTeste = [
+  '2024001234',
+  '2024015678',
+  '2024029012',
+  '2024033456',
+  '2024047890',
+  '2024052345',
+  '2024066789',
+  '2024070123',
+  '2024084567',
+  '2024098901',
+];
+
+async function criarUsuariosTeste() {
   try {
-    // Conectar ao banco
     await db.conectar();
 
-    console.log('\n========================================');
-    console.log('CRIANDO USUÁRIO DE TESTE');
-    console.log('========================================\n');
+    // ---------------------------------------------------
+    // INSERIR USUÁRIOS PARA CADA MATRÍCULA DA LISTA
+    // ---------------------------------------------------
+    for (let i = 0; i < matriculasTeste.length; i++) {
+      const matricula = matriculasTeste[i];
+      const email = `teste${i + 1}@example.com`;
 
-    // Verificar se usuário já existe
-    const usuarioExistente = await Usuario.findOne({
-      'perfil.email': 'frontend@test.com',
-    });
+      // Verifica se já existe usuário com a mesma matrícula ou e‑mail
+      const existe = await Usuario.findOne({
+        $or: [
+          { 'perfil.matricula': matricula },
+          { 'perfil.email': email },
+        ],
+      });
+      if (existe) {
+        console.log(`⚠️  Usuário já existe → matrícula ${matricula}`);
+        continue;
+      }
 
-    if (usuarioExistente) {
-      console.log('⚠️  Usuário de teste já existe!');
-      console.log('   Email: frontend@test.com');
-      console.log('   Senha: 12345678\n');
-      process.exit(0);
+      const senhaHash = await bcrypt.hash('12345678', 10);
+
+      await Usuario.create({
+        senha: senhaHash,
+        perfil: {
+          nome: `Teste ${i + 1}`,
+          email,
+          matricula,
+          bio: 'Usuário de teste automático',
+          status_vinculo: 'estudante',
+          privacidade: 'publico',
+        },
+        customizacao: {
+          cor_fundo: '#E8F4F8',
+          cor_botoes: '#0066CC',
+          medalhas: [],
+        },
+        configuracoes: {
+          mod_voluntario: false,
+          melhores_amigos: [],
+          notificacoes: { likes: true, comentarios: true },
+          egresso_limitado: false,
+          permitir_mensagens: true,
+        },
+      });
+
+      console.log(`✅ Criado → matrícula ${matricula} / email ${email}`);
     }
 
-    // Criar hash da senha
-    const senhaHash = await bcrypt.hash('12345678', 10);
-
-    // Criar usuário
-    const usuario = await Usuario.create({
-      senha: senhaHash,
-      perfil: {
-        nome: 'Frontend Tester',
-        email: 'frontend@test.com',
-        matricula: '20269999',
-        bio: 'Usuário para testes do frontend',
-        status_vinculo: 'estudante',
-        privacidade: 'publico',
-      },
-      customizacao: {
-        cor_fundo: '#E8F4F8',
-        cor_botoes: '#0066CC',
-        medalhas: [],
-      },
-      configuracoes: {
-        mod_voluntario: false,
-        melhores_amigos: [],
-        notificacoes: {
-          likes: true,
-          comentarios: true,
-        },
-        egresso_limitado: false,
-        permitir_mensagens: true,
-      },
-    });
-
-    console.log('✅ Usuário de teste criado com sucesso!\n');
-    console.log('📋 Credenciais para teste:');
-    console.log('   Email:  frontend@test.com');
-    console.log('   Senha:  12345678\n');
-    console.log('💡 Use essas credenciais para fazer login no frontend.\n');
-
+    console.log('\n🎉 Todos os usuários de teste foram processados.\n');
     process.exit(0);
   } catch (erro) {
-    console.error('❌ Erro ao criar usuário de teste:');
+    console.error('❌ Erro ao criar usuários de teste:');
     console.error(erro);
     process.exit(1);
   }
 }
 
-criarUsuarioTeste();
+criarUsuariosTeste();

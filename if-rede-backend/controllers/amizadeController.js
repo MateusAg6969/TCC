@@ -63,10 +63,7 @@ const { Amizade, Usuario, Auditoria } = require('../models');
  */
 exports.enviarSolicitacao = async (req, res, next) => {
   try {
-    // Extrai usuarioId do JWT (garantido pelo authMiddleware)
     const usuarioId = req.usuario.id;
-    
-    // Extrai amigoId do corpo da requisição
     const { amigoId } = req.body;
 
     // ========== VALIDAÇÃO 1: amigoId é obrigatório ==========
@@ -99,11 +96,10 @@ exports.enviarSolicitacao = async (req, res, next) => {
     }
 
     // ========== VALIDAÇÃO 5: Verificar se já existe relação ==========
-    // Busca QUALQUER relação ativa (pendente ou aceito)
     const jaExiste = await Amizade.findOne({
       $or: [
-        { usuarioId, amigoId, status: { $in: ['pendente', 'aceito'] } },
-        { usuarioId: amigoId, amigoId: usuarioId, status: { $in: ['pendente', 'aceito'] } },
+        { usuarioId, amigoId },
+        { usuarioId: amigoId, amigoId: usuarioId },
       ],
     });
 
@@ -116,8 +112,8 @@ exports.enviarSolicitacao = async (req, res, next) => {
 
     // ========== CRIAR SOLICITAÇÃO ==========
     const amizade = new Amizade({
-      usuarioId: amigoId,  // Quem vai RECEBER a solicitação
-      amigoId: usuarioId,  // Quem ENVIOU a solicitação
+      usuarioId: amigoId,
+      amigoId: usuarioId,
       status: 'pendente',
       dataSolicitacao: new Date(),
     });
@@ -224,14 +220,30 @@ exports.aceitarSolicitacao = async (req, res, next) => {
     }
 
     // ========== ACEITAR SOLICITAÇÃO ==========
-    // Usar método do schema se disponível
-    if (typeof amizade.aceitar === 'function') {
-      await amizade.aceitar();
-    } else {
-      amizade.status = 'aceito';
-      amizade.dataResposta = new Date();
-      await amizade.save();
-    }
+    amizade.status = 'aceito';
+    amizade.dataResposta = new Date();
+    await amizade.save();
+
+    // Cria o espelho para tornar a consulta de amigos trivial
+    await Amizade.findOneAndUpdate(
+      {
+        usuarioId: amizade.amigoId,
+        amigoId: amizade.usuarioId,
+      },
+      {
+        usuarioId: amizade.amigoId,
+        amigoId: amizade.usuarioId,
+        status: 'aceito',
+        dataSolicitacao: amizade.dataSolicitacao,
+        dataResposta: amizade.dataResposta,
+      },
+      {
+        upsert: true,
+        new: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+      }
+    );
 
     // ========== REGISTRAR NA AUDITORIA ==========
     const solicitante = await Usuario.findById(amizade.amigoId);
@@ -323,14 +335,10 @@ exports.recusarSolicitacao = async (req, res, next) => {
     }
 
     // ========== RECUSAR ==========
-    if (typeof amizade.recusar === 'function') {
-      await amizade.recusar(motivo);
-    } else {
-      amizade.status = 'recusado';
-      amizade.motivoRecusa = motivo;
-      amizade.dataResposta = new Date();
-      await amizade.save();
-    }
+    amizade.status = 'recusado';
+    amizade.motivoRecusa = motivo;
+    amizade.dataResposta = new Date();
+    await amizade.save();
 
     // ========== AUDITORIA ==========
     await Auditoria.create({
@@ -413,15 +421,13 @@ exports.desfazerAmizade = async (req, res, next) => {
       return res.fail('Apenas amizades ativas podem ser desfeitas.', 409);
     }
 
-    // ========== DESFAZER ==========
-    if (typeof amizade.desfazer === 'function') {
-      await amizade.desfazer();
-    } else {
-      amizade.status = 'recusado';
-      amizade.motivoRecusa = 'Amizade desfeita';
-      amizade.dataResposta = new Date();
-      await amizade.save();
-    }
+    // Remove os dois documentos da amizade aceita
+    await Amizade.deleteMany({
+      $or: [
+        { usuarioId: amizade.usuarioId, amigoId: amizade.amigoId },
+        { usuarioId: amizade.amigoId, amigoId: amizade.usuarioId },
+      ],
+    });
 
     // ========== AUDITORIA ==========
     await Auditoria.create({
@@ -484,49 +490,29 @@ exports.listarAmigos = async (req, res, next) => {
     // Calcular skip
     const skip = (page - 1) * limit;
 
-    // ========== BUSCAR AMIGOS ==========
-    // Busca em ambas as direções:
-    // 1. onde eu sou usuarioId (solicitei e foi aceito)
-    // 2. onde eu sou amigoId (recebi e aceitei)
     const amigos = await Amizade.find({
-      $or: [
-        { usuarioId, status: 'aceito' },
-        { amigoId: usuarioId, status: 'aceito' },
-      ],
+      usuarioId,
+      status: 'aceito',
     })
       .populate({
         path: 'amigoId',
-        select: 'perfil.nome perfil.bio customizacao.foto_perfil_url',
-      })
-      .populate({
-        path: 'usuarioId',
         select: 'perfil.nome perfil.bio customizacao.foto_perfil_url',
       })
       .sort({ dataSolicitacao: -1 })
       .skip(skip)
       .limit(limit);
 
-    // Mapear para retornar o outro amigo (não o próprio usuário)
-    const amigosFormatados = amigos.map((rel) => {
-      const amigo = String(rel.usuarioId._id) === String(usuarioId)
-        ? rel.amigoId
-        : rel.usuarioId;
-      return amigo;
-    });
-
     // ========== CONTAR TOTAL ==========
     const total = await Amizade.countDocuments({
-      $or: [
-        { usuarioId, status: 'aceito' },
-        { amigoId: usuarioId, status: 'aceito' },
-      ],
+      usuarioId,
+      status: 'aceito',
     });
 
     const pages = Math.ceil(total / limit);
 
     return res.success(
       {
-        amigos: amigosFormatados,
+        amigos: amigos.map((relacao) => relacao.amigoId),
         total,
         page,
         pages,
@@ -574,7 +560,6 @@ exports.listarSolicitacoes = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     // ========== BUSCAR SOLICITAÇÕES RECEBIDAS ==========
-    // Recebidas = onde EU sou usuarioId e status é "pendente"
     const solicitacoes = await Amizade.find({
       usuarioId,
       status: 'pendente',
@@ -660,13 +645,12 @@ exports.verificarAmizade = async (req, res, next) => {
       return res.fail('Você não pode verificar relação consigo mesmo.', 400);
     }
 
-    // ========== BUSCAR RELAÇÃO ==========
-    const relacao = await Amizade.findOne({
-      $or: [
-        { usuarioId, amigoId },
-        { usuarioId: amigoId, amigoId: usuarioId },
-      ],
-    });
+    const [relacaoRecebida, relacaoEnviada] = await Promise.all([
+      Amizade.findOne({ usuarioId, amigoId }),
+      Amizade.findOne({ usuarioId: amigoId, amigoId: usuarioId }),
+    ]);
+
+    const relacao = relacaoRecebida || relacaoEnviada;
 
     if (!relacao) {
       return res.success(
@@ -686,7 +670,7 @@ exports.verificarAmizade = async (req, res, next) => {
 
     let quemEnviou = null;
     if (temSolicitacaoPendente) {
-      quemEnviou = String(relacao.amigoId) === String(usuarioId) ? 'outro' : 'eu';
+      quemEnviou = relacaoRecebida ? 'outro' : 'eu';
     }
 
     return res.success(

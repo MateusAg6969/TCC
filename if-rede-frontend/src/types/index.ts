@@ -92,3 +92,41 @@ export interface TagSubtipo {
   tipo: 'imagem' | 'audio' | 'texto';
   ativo: boolean;
 }
+
+// ============ AMIZADES ============
+export type StatusAmizade = 'amigo' | 'solicitacao_enviada' | 'solicitacao_recebida' | 'nao_amigo';
+
+export interface Amizade {
+  _id: string;
+  usuario_origem_id: string;
+  usuario_destino_id: string;
+  status: 'pendente' | 'aceita';
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface SolicitacaoAmizade {
+  _id: string;
+  usuario_origem_id: Usuario;
+  usuario_destino_id: Usuario;
+  status: 'pendente' | 'aceita' | 'recusada';
+  criado_em: string;
+}
+
+export interface UsuarioComStatus extends Usuario {
+  statusAmizade?: StatusAmizade;
+  totalAmigos?: number;
+}
+
+// ============ CUSTOMIZAÇÃO ============
+export interface CustomizacaoCompleta {
+  _id?: string;
+  usuario_id?: string;
+  cor_fundo: string;
+  cor_botoes: string;
+  tema: 'claro' | 'escuro' | 'roxo';
+  banner_url?: string;
+  medalhas?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}

@@ -10,7 +10,7 @@ const { inicializarDocumentosPerfil } = require('../middleware/inicializar-perfi
 
 const router = express.Router();
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', require('../controllers/auth.controller').register)
   try {
     const { nome, email, matricula, senha, status_vinculo = 'estudante' } = req.body;
 

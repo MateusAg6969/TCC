@@ -11,7 +11,6 @@
  * ✓ Evita operações complexas de array ($push, $pull, $unwind)
  * ✓ Melhor escalabilidade em sistemas com muitos amigos por usuário
  * ✓ Validação de integridade no nível do documento
- * ✓ TTL opcional para recusas (limpeza automática após tempo)
  *
  * ESTRUTURA:
  * - usuarioId: Quem recebeu a solicitação (se pendente) ou um dos amigos
@@ -124,22 +123,13 @@ amizadeSchema.pre('save', function (next) {
 // ============================================================================
 
 /**
- * ÍNDICE 1: Composto ÚNICO para evitar duplicatas
- * Exemplo: Dois documentos com {usuarioId: A, amigoId: B, status: aceito}
- * A ordem importa: query (usuarioId, amigoId, status)
- *
- * Não usar { unique: true } aqui pois queremos permitir:
- * - pendente (A->B)
- * - e depois aceito (A<->B)
- * Porém, evitar duplicatas do mesmo tipo.
- *
- * Solução: Validação em aplicação OU usar validador Mongoose customizado
+ * ÍNDICE 1: Composto ÚNICO para evitar duplicatas por direção
+ * Exemplo: um único documento para {usuarioId: B, amigoId: A}
  */
 amizadeSchema.index(
-  { usuarioId: 1, amigoId: 1, status: 1 },
+  { usuarioId: 1, amigoId: 1 },
   {
     unique: true,
-    sparse: true,
     name: 'idx_relacao_unica',
   }
 );
@@ -147,65 +137,22 @@ amizadeSchema.index(
 /**
  * ÍNDICE 2: Para listar amigos de um usuário (aceitos)
  * Query: db.amizades.find({usuarioId: X, status: "aceito"})
- * Ordem: usuarioId DESC (filtro), status ASC (filtro)
  */
 amizadeSchema.index(
-  { usuarioId: 1, status: 1, dataSolicitacao: -1 },
+  { usuarioId: 1, status: 1 },
   {
     name: 'idx_lista_amigos',
   }
 );
 
 /**
- * ÍNDICE 3: Para listar solicitações pendentes recebidas
- * Query: db.amizades.find({usuarioId: X, status: "pendente"})
+ * ÍNDICE 3: Para consultas inversas esporádicas
+ * Query: db.amizades.find({amigoId: X})
  */
 amizadeSchema.index(
-  { usuarioId: 1, status: 1, dataSolicitacao: -1 },
+  { amigoId: 1 },
   {
-    name: 'idx_solicitacoes_recebidas',
-  }
-);
-
-/**
- * ÍNDICE 4: Para listar solicitações enviadas
- * Query: db.amizades.find({amigoId: X, status: "pendente"})
- */
-amizadeSchema.index(
-  { amigoId: 1, status: 1, dataSolicitacao: -1 },
-  {
-    name: 'idx_solicitacoes_enviadas',
-  }
-);
-
-/**
- * ÍNDICE 5: Para verificar se dois usuários são amigos
- * Query: db.amizades.findOne({
- *   $or: [
- *     {usuarioId: A, amigoId: B, status: "aceito"},
- *     {usuarioId: B, amigoId: A, status: "aceito"}
- *   ]
- * })
- * Este é complexo, mas podemos agilizar com índice bidirecional
- */
-amizadeSchema.index(
-  { status: 1, dataSolicitacao: -1 },
-  {
-    name: 'idx_filtro_status_data',
-  }
-);
-
-/**
- * ÍNDICE 6: TTL para limpeza automática de recusas
- * Recusas expiram após 90 dias (opcional, depende de negócio)
- * Se remover este índice, recusas permanecerão indefinidamente
- */
-amizadeSchema.index(
-  { dataSolicitacao: 1 },
-  {
-    expireAfterSeconds: 7776000, // 90 dias
-    partialFilterExpression: { status: 'recusado' },
-    name: 'idx_ttl_recusas',
+    name: 'idx_consulta_inversa',
   }
 );
 
