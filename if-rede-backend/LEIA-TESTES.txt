@@ -1,0 +1,266 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                  ÍNDICE DE RECURSOS DE TESTE - SISTEMA DE PERFIS              ║
+║                                                                                ║
+║  Criado: 2026-05-19                                                           ║
+║  Status: ✅ SISTEMA PRONTO PARA TESTE                                         ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════════
+📂 ARQUIVOS DE TESTE DISPONÍVEIS
+═══════════════════════════════════════════════════════════════════════════════════
+
+1. GUIA-TESTES-COMPLETO.txt (Este arquivo)
+   ├─ Descrição: Guia passo a passo em português
+   ├─ Formato: Texto simples com comandos cURL
+   ├─ Uso: Abra e copie/execute cada comando manualmente
+   └─ Melhor para: Entender cada etapa
+
+2. TESTE-COMPLETO.js
+   ├─ Descrição: Script Node.js com guia interativo
+   ├─ Formato: JavaScript
+   ├─ Uso: node TESTE-COMPLETO.js
+   └─ Melhor para: Ver documentação no terminal
+
+3. teste.sh (Linux/Mac)
+   ├─ Descrição: Script Bash que executa todos os testes
+   ├─ Formato: Shell script
+   ├─ Uso: bash teste.sh
+   └─ Melhor para: Teste automático em Linux/Mac
+
+4. teste.ps1 (Windows)
+   ├─ Descrição: Script PowerShell com cores
+   ├─ Formato: PowerShell
+   ├─ Uso: .\teste.ps1 (no PowerShell)
+   └─ Melhor para: Teste automático em Windows
+
+5. TESTES.json
+   ├─ Descrição: Colecção de testes para Postman
+   ├─ Formato: JSON
+   ├─ Uso: Importar no Postman
+   └─ Melhor para: Interface gráfica
+
+═══════════════════════════════════════════════════════════════════════════════════
+🚀 INÍCIO RÁPIDO
+═══════════════════════════════════════════════════════════════════════════════════
+
+OPÇÃO 1: TESTE MANUAL (Recomendado para iniciantes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Abra este arquivo: GUIA-TESTES-COMPLETO.txt
+2. Siga os passos 1-12
+3. Execute cada comando cURL no terminal
+4. Verifique os resultados
+
+Tempo esperado: 15-30 minutos
+
+
+OPÇÃO 2: TESTE AUTOMÁTICO (Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Abra PowerShell como Administrador
+2. Navegue até: cd C:\TCC\if-rede-backend
+3. Execute: .\teste.ps1
+4. Observe os resultados coloridos
+
+Tempo esperado: 5-10 minutos
+
+
+OPÇÃO 3: TESTE AUTOMÁTICO (Linux/Mac)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Abra terminal
+2. Navegue até: cd C:\TCC\if-rede-backend
+3. Execute: bash teste.sh
+4. Observe os resultados
+
+Tempo esperado: 5-10 minutos
+
+
+OPÇÃO 4: TESTE COM POSTMAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Abra Postman
+2. Vá em: File → Import
+3. Selecione: TESTES.json
+4. Execute os testes
+
+Tempo esperado: 10-15 minutos
+
+═══════════════════════════════════════════════════════════════════════════════════
+📋 TESTES INCLUSOS
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ AUTENTICAÇÃO (3 testes)
+   • Health Check
+   • Registro de Usuário
+   • Login
+
+✅ PERFIL (6 testes)
+   • Obter Perfil Completo
+   • Atualizar Perfil
+   • Customizar Aparência
+   • Obter Badges
+   • Obter Estatísticas
+   • Ver Perfil Público
+
+✅ PRIVACIDADE (4 testes)
+   • Obter Privacidade
+   • Atualizar Privacidade
+   • Bloquear Usuário
+   • Desbloquear Usuário
+
+✅ PREFERÊNCIAS (2 testes)
+   • Obter Preferências
+   • Atualizar Preferências
+
+✅ CONEXÕES/AMIZADES (6 testes)
+   • Solicitar Amizade
+   • Aceitar Amizade
+   • Recusar Amizade
+   • Remover Amizade
+   • Listar Minhas Conexões
+   • Listar Solicitações
+
+═══════════════════════════════════════════════════════════════════════════════════
+✅ VALIDAÇÕES INCLUÍDAS
+═══════════════════════════════════════════════════════════════════════════════════
+
+Cada teste valida:
+
+✓ Status HTTP (200, 201, etc)
+✓ Estrutura da resposta JSON
+✓ Existência de campos obrigatórios
+✓ Tipos de dados corretos
+✓ Mensagens de sucesso/erro
+✓ Integração com banco de dados
+✓ Registros de auditoria
+✓ Filtros de privacidade
+✓ Autenticação JWT
+✓ Criação automática de documentos
+
+═══════════════════════════════════════════════════════════════════════════════════
+🔧 PRÉ-REQUISITOS
+═══════════════════════════════════════════════════════════════════════════════════
+
+Antes de rodar os testes, certifique-se:
+
+□ MongoDB está rodando
+  Comando: mongod
+  Verificar: mongodb://localhost:27017
+
+□ Servidor Express está rodando
+  Comando: npm run dev
+  Verificar: http://localhost:3000/health
+
+□ Variáveis .env configuradas
+  PORT=3000
+  MONGODB_URI=mongodb://localhost:27017
+  JWT_SECRET=sua_secret_aqui
+
+□ Node.js v14+ instalado
+  Verificar: node --version
+
+□ curl ou Postman instalado
+  Verificar: curl --version (ou abra Postman)
+
+═══════════════════════════════════════════════════════════════════════════════════
+📊 RESULTADO ESPERADO
+═══════════════════════════════════════════════════════════════════════════════════
+
+Se todos os testes passarem:
+
+✅ 14+ testes com status HTTP 200/201
+✅ Todas as respostas JSON válidas
+✅ Dados salvos no banco de dados
+✅ Auditoria registrando ações
+✅ Autenticação funcionando
+✅ Privacidade sendo respeitada
+✅ Amizades sendo criadas corretamente
+
+= SISTEMA 100% FUNCIONAL =
+
+═══════════════════════════════════════════════════════════════════════════════════
+🐛 DEBUGGING
+═══════════════════════════════════════════════════════════════════════════════════
+
+Se algum teste falhar:
+
+1. Verifique os logs do servidor (npm run dev)
+2. Verifique se o banco está respondendo
+3. Copie a mensagem de erro
+4. Procure por "erro" em GUIA-TESTES-COMPLETO.txt
+5. Se persistir, abra issue no GitHub
+
+═══════════════════════════════════════════════════════════════════════════════════
+📚 DOCUMENTAÇÃO ADICIONAL
+═══════════════════════════════════════════════════════════════════════════════════
+
+Além dos testes, você tem acesso a:
+
+• SISTEMA-PERFIS-API.md
+  └─ Documentação técnica de todos os endpoints
+
+• SISTEMA-PERFIS-IMPLEMENTACAO.md
+  └─ Detalhes de implementação no código
+
+• README-SISTEMA-PERFIS.md
+  └─ Visão geral do projeto
+
+• SISTEMA-PERFIS.json
+  └─ Documentação em formato JSON
+
+• LEIA-ME-PRIMEIRO.txt
+  └─ Instruções gerais do projeto
+
+═══════════════════════════════════════════════════════════════════════════════════
+💡 DICAS
+═══════════════════════════════════════════════════════════════════════════════════
+
+1. Use curl com -s para saída limpa:
+   curl -s http://localhost:3000/health | jq '.'
+
+2. Salve os tokens em variáveis:
+   TOKEN="seu_token_aqui"
+   curl http://localhost:3000/perfil/meu-perfil -H "Authorization: Bearer $TOKEN"
+
+3. Use jq para formatar JSON:
+   curl ... | jq '.' (com cores)
+   curl ... | jq '.data' (apenas data)
+
+4. Verifique o banco:
+   mongo mongodb://localhost:27017
+   use if-rede
+   db.usuarios.find()
+
+5. Limpe o banco entre testes:
+   db.usuarios.deleteMany({})
+   db.privacidades.deleteMany({})
+   ... etc
+
+═══════════════════════════════════════════════════════════════════════════════════
+📝 PRÓXIMAS ETAPAS
+═══════════════════════════════════════════════════════════════════════════════════
+
+Após validar 100% dos testes:
+
+1. ✅ Integrar com Frontend React/Next.js
+2. ✅ Implementar upload de avatar
+3. ✅ Adicionar cache com Redis
+4. ✅ Fazer testes automatizados (Jest)
+5. ✅ Deploy em produção
+
+═══════════════════════════════════════════════════════════════════════════════════
+🎉 BOA SORTE NOS TESTES!
+═══════════════════════════════════════════════════════════════════════════════════
+
+Se tudo passar, você terá:
+
+✅ Sistema de Perfis 100% funcional
+✅ 5 modelos MongoDB criados
+✅ 23 endpoints testados
+✅ Autenticação com JWT
+✅ Privacidade e Amizades funcionando
+✅ Auditoria completa
+✅ Pronto para produção
+
+═══════════════════════════════════════════════════════════════════════════════════

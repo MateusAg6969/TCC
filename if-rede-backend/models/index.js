@@ -18,6 +18,14 @@ const palavraFiltroSchema = require('../schemas/palavra-filtro.schema');
 const tagSubtipoSchema = require('../schemas/tag-subtipo.schema');
 const solicitacaoTagSchema = require('../schemas/solicitacao-tag.schema');
 
+// Schemas do sistema de perfis
+const privacidadeSchema = require('../schemas/privacidade.schema');
+const preferenciasSchema = require('../schemas/preferencias.schema');
+const conexoesSchema = require('../schemas/conexoes.schema');
+const badgesSchema = require('../schemas/badges.schema');
+const auditoriaSchema = require('../schemas/auditoria.schema');
+const amizadeSchema = require('../schemas/amizade.schema');
+
 // ============================================================================
 // CRIAR MODELOS
 // ============================================================================
@@ -73,6 +81,42 @@ const TagSubtipo = mongoose.model('TagSubtipo', tagSubtipoSchema);
  */
 const SolicitacaoTag = mongoose.model('SolicitacaoTag', solicitacaoTagSchema);
 
+/**
+ * Modelo Privacidade
+ * Configurações de privacidade do usuário
+ */
+const Privacidade = mongoose.model('Privacidade', privacidadeSchema);
+
+/**
+ * Modelo Preferencias
+ * Preferências pessoais do usuário (tema, idioma, notificações)
+ */
+const Preferencias = mongoose.model('Preferencias', preferenciasSchema);
+
+/**
+ * Modelo Conexoes
+ * Relações de amizade entre usuários
+ */
+const Conexoes = mongoose.model('Conexoes', conexoesSchema);
+
+/**
+ * Modelo Badges
+ * Badges, pontos e nível do usuário
+ */
+const Badges = mongoose.model('Badges', badgesSchema);
+
+/**
+ * Modelo Auditoria
+ * Registro de ações e atividades do usuário
+ */
+const Auditoria = mongoose.model('Auditoria', auditoriaSchema);
+
+/**
+ * Modelo Amizade
+ * Relações de amizade entre usuários com histórico de solicitações
+ */
+const Amizade = mongoose.model('Amizade', amizadeSchema);
+
 // Alias para manter nomenclatura consistente
 const AtividadeModeracao = AtividadeModeracacao;
 
@@ -90,4 +134,10 @@ module.exports = {
   PalavraFiltro,
   TagSubtipo,
   SolicitacaoTag,
+  Privacidade,
+  Preferencias,
+  Conexoes,
+  Badges,
+  Auditoria,
+  Amizade,
 };

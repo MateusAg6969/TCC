@@ -1,0 +1,633 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                  GUIA COMPLETO DE TESTES - SISTEMA DE PERFIS                   ║
+║                                                                                ║
+║  Versão: 1.0.0                                                                ║
+║  Data: 2026-05-19                                                             ║
+║  Objetivo: Verificar 100% da funcionalidade do sistema de perfis              ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════════
+📋 ÍNDICE
+═══════════════════════════════════════════════════════════════════════════════════
+
+1. PRÉ-REQUISITOS
+2. ROTEIROS DE TESTE
+3. LISTA DE ENDPOINTS
+4. TESTE PASSO A PASSO
+5. VERIFICAÇÃO NO BANCO DE DADOS
+6. TROUBLESHOOTING
+7. CHECKLIST FINAL
+
+═══════════════════════════════════════════════════════════════════════════════════
+✅ 1. PRÉ-REQUISITOS
+═══════════════════════════════════════════════════════════════════════════════════
+
+Antes de começar, certifique-se de que:
+
+□ MongoDB está instalado e rodando
+  - Windows: Use MongoDB Compass ou comando: mongod
+  - Verifique: mongodb://localhost:27017
+
+□ Servidor Express está rodando
+  - Terminal: cd C:\TCC\if-rede-backend
+  - Comando: npm run dev
+  - Resultado esperado: "Servidor iniciado na porta 3000"
+
+□ Tem curl instalado (ou usará Postman)
+  - Windows: curl já vem com Windows 10+
+  - Alternativa: Postman (https://www.postman.com)
+
+□ Variáveis de ambiente (.env) configuradas
+  - Verifique: PORT=3000
+  - Verifique: MONGODB_URI=mongodb://localhost:27017
+
+═══════════════════════════════════════════════════════════════════════════════════
+🧪 2. ROTEIROS DE TESTE DISPONÍVEIS
+═══════════════════════════════════════════════════════════════════════════════════
+
+OPÇÃO 1: SCRIPT SHELL (Linux/Mac)
+├─ Arquivo: teste.sh
+├─ Como usar: bash teste.sh
+└─ Executa todos os testes automaticamente
+
+OPÇÃO 2: SCRIPT POWERSHELL (Windows)
+├─ Arquivo: teste.ps1
+├─ Como usar: .\teste.ps1 (no PowerShell)
+└─ Executa todos os testes com cores
+
+OPÇÃO 3: MANUAL COM CURL (Qualquer SO)
+├─ Arquivo: Este arquivo
+├─ Como usar: Copie e execute cada comando
+└─ Melhor para debug individual
+
+OPÇÃO 4: POSTMAN
+├─ Arquivo: TESTES.json
+├─ Como usar: Importe no Postman
+└─ Interface gráfica
+
+═══════════════════════════════════════════════════════════════════════════════════
+🔗 3. LISTA DE ENDPOINTS A TESTAR
+═══════════════════════════════════════════════════════════════════════════════════
+
+AUTENTICAÇÃO
+  POST   /auth/register          - Registrar novo usuário
+  POST   /auth/login             - Fazer login
+  POST   /auth/refresh           - Renovar token
+
+PERFIL
+  GET    /perfil/meu-perfil      - Obter meu perfil completo
+  GET    /perfil/:id             - Obter perfil de outro usuário
+  PUT    /perfil/atualizar       - Atualizar dados pessoais
+  PUT    /perfil/atualizar-customizacao  - Atualizar cores/tema
+  GET    /perfil/:id/badges      - Obter badges
+  GET    /perfil/:id/estatisticas       - Obter estatísticas
+
+PRIVACIDADE
+  GET    /privacidade/minha-privacidade      - Obter configurações
+  PUT    /privacidade/atualizar              - Atualizar privacidade
+  POST   /privacidade/bloquear/:id           - Bloquear usuário
+  DELETE /privacidade/desbloquear/:id        - Desbloquear usuário
+
+PREFERÊNCIAS
+  GET    /preferencias/minhas-preferencias   - Obter preferências
+  PUT    /preferencias/atualizar             - Atualizar preferências
+
+CONEXÕES (Amizades)
+  POST   /conexoes/:id/solicitar-amizade     - Solicitar amizade
+  POST   /conexoes/:id/aceitar-amizade       - Aceitar solicitação
+  DELETE /conexoes/:id/recusar-amizade       - Recusar solicitação
+  DELETE /conexoes/:id/remover-amizade       - Remover amizade
+  GET    /conexoes/minhas-conexoes           - Listar meus amigos
+  GET    /conexoes/:id/amigos                - Listar amigos de outro
+  GET    /conexoes/minhas-solicitacoes       - Solicitações pendentes
+
+═══════════════════════════════════════════════════════════════════════════════════
+🎯 4. TESTE PASSO A PASSO
+═══════════════════════════════════════════════════════════════════════════════════
+
+PASSO 1: VERIFICAR SAÚDE DO SERVIDOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Comando:
+  curl http://localhost:3000/health
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "service": "if-rede-backend",
+      "now": "2026-05-19T10:30:00.000Z"
+    },
+    "message": "Serviço disponível."
+  }
+
+Validação: ✅ Se retornar 200, servidor está OK
+
+---
+
+PASSO 2: REGISTRAR PRIMEIRO USUÁRIO (JOÃO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Comando:
+  curl -X POST http://localhost:3000/auth/register ^
+    -H "Content-Type: application/json" ^
+    -d "{ ^
+      \"nome\": \"João Silva\", ^
+      \"email\": \"joao@test.ifrede.com\", ^
+      \"matricula\": \"2024001\", ^
+      \"senha\": \"Senha@123456\", ^
+      \"status_vinculo\": \"estudante\" ^
+    }"
+
+Esperado:
+  HTTP 201
+  {
+    "data": {
+      "usuario": {
+        "_id": "USER_ID_1",
+        "nome": "João Silva",
+        "email": "joao@test.ifrede.com"
+      },
+      "tokens": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+      }
+    }
+  }
+
+Ação: 💾 SALVE ESTES DADOS:
+  - TOKEN1 = accessToken (use em próximos testes)
+  - USUARIO1 = _id
+
+Validação: ✅ Se retornar 201 com tokens, registro OK
+
+---
+
+PASSO 3: FAZER LOGIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Comando:
+  curl -X POST http://localhost:3000/auth/login ^
+    -H "Content-Type: application/json" ^
+    -d "{ ^
+      \"email\": \"joao@test.ifrede.com\", ^
+      \"senha\": \"Senha@123456\" ^
+    }"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "tokens": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+        "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+      }
+    }
+  }
+
+Validação: ✅ Se retornar 200 com tokens, login OK
+
+---
+
+PASSO 4: OBTER MEU PERFIL COMPLETO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Comando (use o TOKEN1 extraído acima):
+  curl http://localhost:3000/perfil/meu-perfil ^
+    -H "Authorization: Bearer TOKEN1"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "usuario": { ... },
+      "perfil": { 
+        "customizacao": { cor_fundo, cor_botoes, tema }
+      },
+      "privacidade": { ... },
+      "preferencias": { ... },
+      "conexoes": { ... },
+      "badges": { ... }
+    }
+  }
+
+Validação: 
+  ✅ Contém todos os 5 objetos (perfil, privacidade, preferências, conexões, badges)
+  ✅ Documentos foram criados automaticamente
+
+---
+
+PASSO 5: ATUALIZAR PERFIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Comando:
+  curl -X PUT http://localhost:3000/perfil/atualizar ^
+    -H "Authorization: Bearer TOKEN1" ^
+    -H "Content-Type: application/json" ^
+    -d "{ ^
+      \"nome\": \"João Silva Atualizado\", ^
+      \"bio\": \"Desenvolvedor Full Stack\", ^
+      \"ocupacao\": \"Estudante de TI\" ^
+    }"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "_id": "USUARIO_ID",
+      "nome": "João Silva Atualizado",
+      "bio": "Desenvolvedor Full Stack"
+    },
+    "message": "Perfil atualizado com sucesso."
+  }
+
+Validação: 
+  ✅ Retorna 200
+  ✅ Nome foi atualizado
+  ✅ Registro foi criado na auditoria
+
+---
+
+PASSO 6: CUSTOMIZAR APARÊNCIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Comando:
+  curl -X PUT http://localhost:3000/perfil/atualizar-customizacao ^
+    -H "Authorization: Bearer TOKEN1" ^
+    -H "Content-Type: application/json" ^
+    -d "{ ^
+      \"cor_fundo\": \"#F3F4F6\", ^
+      \"cor_botoes\": \"#7C3AED\", ^
+      \"tema\": \"dark\" ^
+    }"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "cor_fundo": "#F3F4F6",
+      "cor_botoes": "#7C3AED",
+      "tema": "dark"
+    }
+  }
+
+Validação: ✅ Cores e tema foram atualizados
+
+---
+
+PASSO 7: TESTAR PRIVACIDADE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Obter:
+  curl http://localhost:3000/privacidade/minha-privacidade ^
+    -H "Authorization: Bearer TOKEN1"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "usuario_id": "USUARIO_ID",
+      "perfil_publico": true,
+      "quem_pode_mensagear": "todos",
+      "bloqueados": []
+    }
+  }
+
+Atualizar:
+  curl -X PUT http://localhost:3000/privacidade/atualizar ^
+    -H "Authorization: Bearer TOKEN1" ^
+    -H "Content-Type: application/json" ^
+    -d "{ ^
+      \"perfil_publico\": true, ^
+      \"quem_pode_mensagear\": \"amigos\", ^
+      \"mostrar_email_publicamente\": false ^
+    }"
+
+Esperado:
+  HTTP 200 com dados atualizados
+
+Validação: ✅ Privacidade foi atualizada
+
+---
+
+PASSO 8: TESTAR PREFERÊNCIAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Obter:
+  curl http://localhost:3000/preferencias/minhas-preferencias ^
+    -H "Authorization: Bearer TOKEN1"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "usuario_id": "USUARIO_ID",
+      "tema_preferido": "auto",
+      "idioma": "pt-BR",
+      "tamanho_fonte": 1.0,
+      "session_timeout": 30,
+      "notificacoes_email": { ... }
+    }
+  }
+
+Atualizar:
+  curl -X PUT http://localhost:3000/preferencias/atualizar ^
+    -H "Authorization: Bearer TOKEN1" ^
+    -H "Content-Type: application/json" ^
+    -d "{ ^
+      \"tema_preferido\": \"dark\", ^
+      \"tamanho_fonte\": 1.2, ^
+      \"session_timeout\": 60 ^
+    }"
+
+Esperado:
+  HTTP 200 com dados atualizados
+
+Validação: ✅ Preferências foram atualizadas
+
+---
+
+PASSO 9: REGISTRAR SEGUNDO USUÁRIO (MARIA)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Comando:
+  curl -X POST http://localhost:3000/auth/register ^
+    -H "Content-Type: application/json" ^
+    -d "{ ^
+      \"nome\": \"Maria Santos\", ^
+      \"email\": \"maria@test.ifrede.com\", ^
+      \"matricula\": \"2024002\", ^
+      \"senha\": \"Senha@654321\", ^
+      \"status_vinculo\": \"estudante\" ^
+    }"
+
+Esperado:
+  HTTP 201 com novo usuário
+
+Ação: 💾 SALVE:
+  - TOKEN2 = accessToken
+  - USUARIO2 = _id
+
+Validação: ✅ Segundo usuário criado
+
+---
+
+PASSO 10: TESTAR FLUXO DE AMIZADE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+10.1 JOÃO solicita amizade com MARIA:
+  curl -X POST http://localhost:3000/conexoes/USUARIO2/solicitar-amizade ^
+    -H "Authorization: Bearer TOKEN1"
+
+Esperado:
+  HTTP 200
+  { "message": "Solicitação de amizade enviada com sucesso." }
+
+10.2 MARIA verifica solicitações:
+  curl http://localhost:3000/conexoes/minhas-solicitacoes ^
+    -H "Authorization: Bearer TOKEN2"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "solicitacoes_enviadas": [],
+      "solicitacoes_recebidas": [ JOAO_ID ]
+    }
+  }
+
+10.3 MARIA aceita amizade:
+  curl -X POST http://localhost:3000/conexoes/USUARIO1/aceitar-amizade ^
+    -H "Authorization: Bearer TOKEN2"
+
+Esperado:
+  HTTP 200
+  { "message": "Amizade aceita com sucesso." }
+
+10.4 JOÃO verifica amigos:
+  curl http://localhost:3000/conexoes/minhas-conexoes ^
+    -H "Authorization: Bearer TOKEN1"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "amigos": [ MARIA_ID ],
+      "total": 1
+    }
+  }
+
+Validação: ✅ Fluxo completo de amizade funcionando
+
+---
+
+PASSO 11: TESTAR PERFIL PÚBLICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ver perfil de JOÃO sem autenticação:
+  curl http://localhost:3000/perfil/USUARIO1
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "_id": "USUARIO1",
+      "perfil": {
+        "nome": "João Silva",
+        "bio": "Desenvolvedor Full Stack",
+        "customizacao": { ... }
+      }
+    }
+  }
+
+⚠️ IMPORTANTE: Dados sensíveis (email, etc) não devem aparecer!
+
+Ver perfil de JOÃO com autenticação (MARIA):
+  curl http://localhost:3000/perfil/USUARIO1 ^
+    -H "Authorization: Bearer TOKEN2"
+
+Esperado:
+  HTTP 200 com mais detalhes (amigos)
+
+Validação: ✅ Filtro de privacidade funcionando
+
+---
+
+PASSO 12: TESTAR BLOQUEIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+JOÃO bloqueia MARIA:
+  curl -X POST http://localhost:3000/privacidade/bloquear/USUARIO2 ^
+    -H "Authorization: Bearer TOKEN1"
+
+Esperado:
+  HTTP 200
+  { "message": "Usuário bloqueado com sucesso." }
+
+JOÃO verifica bloqueados:
+  curl http://localhost:3000/privacidade/minha-privacidade ^
+    -H "Authorization: Bearer TOKEN1"
+
+Esperado:
+  HTTP 200
+  {
+    "data": {
+      "bloqueados": [ USUARIO2 ]
+    }
+  }
+
+JOÃO desbloqueia MARIA:
+  curl -X DELETE http://localhost:3000/privacidade/desbloquear/USUARIO2 ^
+    -H "Authorization: Bearer TOKEN1"
+
+Esperado:
+  HTTP 200
+  { "message": "Usuário desbloqueado com sucesso." }
+
+Validação: ✅ Bloqueio/desbloqueio funcionando
+
+═══════════════════════════════════════════════════════════════════════════════════
+🗄️ 5. VERIFICAÇÃO NO BANCO DE DADOS
+═══════════════════════════════════════════════════════════════════════════════════
+
+Abra MongoDB Compass ou terminal mongo e execute:
+
+use if-rede
+
+db.usuarios.countDocuments()
+→ Esperado: 2 (João e Maria)
+
+db.privacidades.countDocuments()
+→ Esperado: 2
+
+db.preferencias.countDocuments()
+→ Esperado: 2
+
+db.conexoes.countDocuments()
+→ Esperado: 2
+
+db.badges.countDocuments()
+→ Esperado: 2
+
+db.auditorias.countDocuments()
+→ Esperado: > 0 (registra todas as ações)
+
+Verificar documento de usuário:
+db.usuarios.findOne({ email: "joao@test.ifrede.com" })
+→ Deve conter: nome, email, matricula, status_vinculo, senha (criptografada)
+
+Verificar documento de conexões:
+db.conexoes.findOne({ usuario_id: ObjectId("...") })
+→ Deve conter: amigos: [], solicitacoes_enviadas: [], solicitacoes_recebidas: []
+
+Verificar auditoria:
+db.auditorias.find({ usuario_id: ObjectId("...") }).limit(10)
+→ Deve conter registros de ações (atualização perfil, etc)
+
+═══════════════════════════════════════════════════════════════════════════════════
+🐛 6. TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════════
+
+PROBLEMA: "Connection refused"
+SOLUÇÃO:
+  1. Verifique se servidor está rodando: npm run dev
+  2. Verifique porta: netstat -ano | findstr :3000
+  3. Reinicie o servidor
+
+PROBLEMA: "MongoDB connection error"
+SOLUÇÃO:
+  1. Verifique se MongoDB está rodando: mongod
+  2. Verifique variável MONGODB_URI no .env
+  3. Conecte com: mongo mongodb://localhost:27017
+
+PROBLEMA: "Invalid token"
+SOLUÇÃO:
+  1. Verifique se token está correto
+  2. Verifique se está usando Bearer corretamente
+  3. Gere novo token fazendo login novamente
+
+PROBLEMA: "User not found"
+SOLUÇÃO:
+  1. Verifique se o usuário foi registrado
+  2. Copie o ID correto do registro
+  3. Registre novo usuário se necessário
+
+PROBLEMA: "Email already exists"
+SOLUÇÃO:
+  1. Use email diferente (ex: joao2@test.ifrede.com)
+  2. Ou delete usuários antigos do banco
+
+PROBLEMA: Erro 400 - Validação
+SOLUÇÃO:
+  1. Verifique campos obrigatórios
+  2. Verifique formatos esperados
+  3. Leia mensagem de erro
+
+═══════════════════════════════════════════════════════════════════════════════════
+✅ 7. CHECKLIST FINAL
+═══════════════════════════════════════════════════════════════════════════════════
+
+AUTENTICAÇÃO
+  [ ] GET /health retorna 200
+  [ ] POST /auth/register retorna 201
+  [ ] POST /auth/login retorna 200
+  [ ] Token extraído com sucesso
+
+PERFIL
+  [ ] GET /perfil/meu-perfil retorna 200
+  [ ] Contém: usuario, perfil, privacidade, preferencias, conexoes, badges
+  [ ] PUT /perfil/atualizar retorna 200
+  [ ] PUT /perfil/atualizar-customizacao retorna 200
+  [ ] GET /perfil/:id retorna 200 (público)
+  [ ] GET /perfil/:id/badges retorna 200
+  [ ] GET /perfil/:id/estatisticas retorna 200
+
+PRIVACIDADE
+  [ ] GET /privacidade/minha-privacidade retorna 200
+  [ ] PUT /privacidade/atualizar retorna 200
+  [ ] POST /privacidade/bloquear/:id retorna 200
+  [ ] DELETE /privacidade/desbloquear/:id retorna 200
+
+PREFERÊNCIAS
+  [ ] GET /preferencias/minhas-preferencias retorna 200
+  [ ] PUT /preferencias/atualizar retorna 200
+
+CONEXÕES (AMIZADES)
+  [ ] POST /conexoes/:id/solicitar-amizade retorna 200
+  [ ] GET /conexoes/minhas-solicitacoes retorna 200
+  [ ] POST /conexoes/:id/aceitar-amizade retorna 200
+  [ ] GET /conexoes/minhas-conexoes retorna 200
+  [ ] GET /conexoes/:id/amigos retorna 200
+  [ ] DELETE /conexoes/:id/remover-amizade retorna 200
+
+BANCO DE DADOS
+  [ ] Usuários criados no banco
+  [ ] Documentos de privacidade criados
+  [ ] Documentos de preferências criados
+  [ ] Documentos de conexões criados
+  [ ] Documentos de badges criados
+  [ ] Auditoria registrando ações
+  [ ] Índices funcionando
+
+SEGURANÇA
+  [ ] Endpoints autenticados exigem token
+  [ ] Dados sensíveis filtrados em perfil público
+  [ ] Senhas criptografadas no banco
+  [ ] Usuário não pode acessar dados de outro
+
+═══════════════════════════════════════════════════════════════════════════════════
+🎉 RESULTADO FINAL
+═══════════════════════════════════════════════════════════════════════════════════
+
+Se todos os itens do checklist estão ✅, então:
+
+✅ SISTEMA DE PERFIS ESTÁ 100% FUNCIONAL!
+
+Próximas etapas:
+  1. Integrar com frontend React/Next.js
+  2. Adicionar upload de avatar
+  3. Implementar cache com Redis
+  4. Fazer testes automatizados com Jest
+  5. Deploy em produção
+
+═══════════════════════════════════════════════════════════════════════════════════

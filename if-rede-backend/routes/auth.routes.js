@@ -6,6 +6,7 @@ const {
   gerarRefreshToken,
   validarRefreshToken,
 } = require('../services/token.service');
+const { inicializarDocumentosPerfil } = require('../middleware/inicializar-perfil.middleware');
 
 const router = express.Router();
 
@@ -28,6 +29,9 @@ router.post('/register', async (req, res, next) => {
         status_vinculo,
       },
     });
+
+    // Inicializar documentos de perfil
+    await inicializarDocumentosPerfil(usuario._id);
 
     const accessToken = gerarAccessToken(usuario);
     const refreshToken = gerarRefreshToken(usuario);

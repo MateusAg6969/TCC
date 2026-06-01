@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { Usuario, Seguidor } = require('../models');
 const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
+const usuarioController = require('../controllers/usuarioController');
 
 const router = express.Router();
 
@@ -182,5 +183,21 @@ router.get('/:id/seguindo', optionalAuthMiddleware, async (req, res, next) => {
     return next(error);
   }
 });
+
+// ============================================================================
+// ROTAS DE PERFIL USANDO usuarioController
+// ============================================================================
+
+// GET /usuarios/me - Obter meu perfil completo (autenticado)
+router.get('/me', authMiddleware, usuarioController.obterMeuPerfil);
+
+// PUT /usuarios/me - Atualizar meu perfil (autenticado)
+router.put('/me', authMiddleware, usuarioController.atualizarMeuPerfil);
+
+// PUT /usuarios/me/customizacao - Atualizar customização (autenticado)
+router.put('/me/customizacao', authMiddleware, usuarioController.atualizarCustomizacao);
+
+// GET /usuarios/:id - Obter perfil público (qualquer um)
+router.get('/:id', optionalAuthMiddleware, usuarioController.obterPerfilPublico);
 
 module.exports = router;

@@ -53,6 +53,27 @@ const perfilSchema = new mongoose.Schema(
       default: '',
     },
 
+    // Localização pública do usuário (cidade, estado, país)
+    localizacao: {
+      type: String,
+      maxlength: [200, 'Localização não pode exceder 200 caracteres'],
+      default: '',
+    },
+
+    // Website pessoal ou página do usuário
+    website: {
+      type: String,
+      match: [/^https?:\/\/.+/, 'Website deve ser uma URL válida (http ou https)'],
+      default: '',
+    },
+
+    // Ocupação / cargo
+    ocupacao: {
+      type: String,
+      maxlength: [100, 'Ocupação não pode exceder 100 caracteres'],
+      default: '',
+    },
+
     // Tipo de vínculo (essencial para regras de acesso e moderação)
     status_vinculo: {
       type: String,
@@ -174,7 +195,7 @@ const configuracoesSchema = new mongoose.Schema(
     egresso_limitado: {
       type: Boolean,
       default: function () {
-        return this.perfil.status_vinculo === 'egresso';
+        return this.perfil?.status_vinculo === 'egresso';
       },
     },
   },

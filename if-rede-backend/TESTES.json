@@ -1,0 +1,350 @@
+{
+  "titulo": "Plano de Testes - Sistema de Perfis",
+  "versao": "1.0.0",
+  "data_criacao": "2026-05-19",
+  "total_testes": 14,
+  "url_base": "http://localhost:3000",
+  
+  "pre_requisitos": [
+    "MongoDB rodando em mongodb://localhost:27017",
+    "Servidor Express rodando em http://localhost:3000",
+    "Ter acesso a curl ou Postman",
+    "Variáveis de ambiente configuradas em .env"
+  ],
+
+  "testes": [
+    {
+      "numero": 1,
+      "nome": "Health Check",
+      "descricao": "Verificar se o servidor está rodando",
+      "endpoint": "GET /health",
+      "autenticacao": false,
+      "corpo_requisicao": null,
+      "exemplo_curl": "curl http://localhost:3000/health",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo": {
+          "data": {
+            "service": "if-rede-backend",
+            "now": "2026-05-19T..."
+          },
+          "message": "Serviço disponível."
+        }
+      },
+      "o_que_valida": "Servidor está rodando corretamente"
+    },
+
+    {
+      "numero": 2,
+      "nome": "Registrar Primeiro Usuário",
+      "descricao": "Criar usuário para testes (João)",
+      "endpoint": "POST /auth/register",
+      "autenticacao": false,
+      "corpo_requisicao": {
+        "nome": "João Silva",
+        "email": "joao@test.ifrede.com",
+        "matricula": "2024001",
+        "senha": "Senha@123456",
+        "status_vinculo": "estudante"
+      },
+      "exemplo_curl": "curl -X POST http://localhost:3000/auth/register -H 'Content-Type: application/json' -d '{...}'",
+      "resposta_esperada": {
+        "status": 201,
+        "corpo_contem": ["usuario", "tokens", "accessToken", "refreshToken"]
+      },
+      "o_que_valida": "Autenticação e criação de usuário com perfis automáticos",
+      "importante": "GUARDE O accessToken PARA OS PRÓXIMOS TESTES!"
+    },
+
+    {
+      "numero": 3,
+      "nome": "Login",
+      "descricao": "Fazer login com as credenciais",
+      "endpoint": "POST /auth/login",
+      "autenticacao": false,
+      "corpo_requisicao": {
+        "email": "joao@test.ifrede.com",
+        "senha": "Senha@123456"
+      },
+      "exemplo_curl": "curl -X POST http://localhost:3000/auth/login -H 'Content-Type: application/json' -d '{...}'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["tokens", "accessToken"]
+      },
+      "o_que_valida": "Autenticação JWT funcionando"
+    },
+
+    {
+      "numero": 4,
+      "nome": "Obter Meu Perfil Completo",
+      "descricao": "Obter dados completos do perfil autenticado",
+      "endpoint": "GET /perfil/meu-perfil",
+      "autenticacao": true,
+      "corpo_requisicao": null,
+      "exemplo_curl": "curl http://localhost:3000/perfil/meu-perfil -H 'Authorization: Bearer TOKEN'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["usuario", "perfil", "privacidade", "preferencias", "conexoes", "badges"]
+      },
+      "o_que_valida": "Inicialização automática de todos os documentos de perfil"
+    },
+
+    {
+      "numero": 5,
+      "nome": "Atualizar Perfil",
+      "descricao": "Atualizar dados pessoais",
+      "endpoint": "PUT /perfil/atualizar",
+      "autenticacao": true,
+      "corpo_requisicao": {
+        "nome": "João Silva Atualizado",
+        "bio": "Desenvolvedor Full Stack apaixonado por tecnologia"
+      },
+      "exemplo_curl": "curl -X PUT http://localhost:3000/perfil/atualizar -H 'Authorization: Bearer TOKEN' -H 'Content-Type: application/json' -d '{...}'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["_id", "perfil", "customizacao"]
+      },
+      "o_que_valida": "Atualização de perfil com auditoria"
+    },
+
+    {
+      "numero": 6,
+      "nome": "Customizar Aparência",
+      "descricao": "Atualizar cores e tema",
+      "endpoint": "PUT /perfil/atualizar-customizacao",
+      "autenticacao": true,
+      "corpo_requisicao": {
+        "cor_fundo": "#F3F4F6",
+        "cor_botoes": "#7C3AED",
+        "tema": "dark"
+      },
+      "exemplo_curl": "curl -X PUT http://localhost:3000/perfil/atualizar-customizacao -H 'Authorization: Bearer TOKEN' -H 'Content-Type: application/json' -d '{...}'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["cor_fundo", "cor_botoes", "tema"]
+      },
+      "o_que_valida": "Customização visual do perfil"
+    },
+
+    {
+      "numero": 7,
+      "nome": "Obter Privacidade",
+      "descricao": "Obter configurações de privacidade",
+      "endpoint": "GET /privacidade/minha-privacidade",
+      "autenticacao": true,
+      "corpo_requisicao": null,
+      "exemplo_curl": "curl http://localhost:3000/privacidade/minha-privacidade -H 'Authorization: Bearer TOKEN'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["usuario_id", "perfil_publico", "quem_pode_mensagear"]
+      },
+      "o_que_valida": "Documento de privacidade foi criado"
+    },
+
+    {
+      "numero": 8,
+      "nome": "Atualizar Privacidade",
+      "descricao": "Modificar configurações de privacidade",
+      "endpoint": "PUT /privacidade/atualizar",
+      "autenticacao": true,
+      "corpo_requisicao": {
+        "perfil_publico": true,
+        "quem_pode_mensagear": "amigos",
+        "mostrar_email_publicamente": false
+      },
+      "exemplo_curl": "curl -X PUT http://localhost:3000/privacidade/atualizar -H 'Authorization: Bearer TOKEN' -H 'Content-Type: application/json' -d '{...}'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["perfil_publico", "quem_pode_mensagear"]
+      },
+      "o_que_valida": "Atualização de privacidade com auditoria"
+    },
+
+    {
+      "numero": 9,
+      "nome": "Obter Preferências",
+      "descricao": "Obter preferências do usuário",
+      "endpoint": "GET /preferencias/minhas-preferencias",
+      "autenticacao": true,
+      "corpo_requisicao": null,
+      "exemplo_curl": "curl http://localhost:3000/preferencias/minhas-preferencias -H 'Authorization: Bearer TOKEN'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["usuario_id", "tema_preferido", "idioma"]
+      },
+      "o_que_valida": "Documento de preferências foi criado"
+    },
+
+    {
+      "numero": 10,
+      "nome": "Atualizar Preferências",
+      "descricao": "Modificar preferências",
+      "endpoint": "PUT /preferencias/atualizar",
+      "autenticacao": true,
+      "corpo_requisicao": {
+        "tema_preferido": "dark",
+        "tamanho_fonte": 1.2,
+        "notificacoes_email": {
+          "novo_mensagem": true,
+          "novo_comentario": false
+        }
+      },
+      "exemplo_curl": "curl -X PUT http://localhost:3000/preferencias/atualizar -H 'Authorization: Bearer TOKEN' -H 'Content-Type: application/json' -d '{...}'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["tema_preferido", "tamanho_fonte"]
+      },
+      "o_que_valida": "Atualização de preferências"
+    },
+
+    {
+      "numero": 11,
+      "nome": "Registrar Segundo Usuário",
+      "descricao": "Criar segundo usuário para testes de conexão (Maria)",
+      "endpoint": "POST /auth/register",
+      "autenticacao": false,
+      "corpo_requisicao": {
+        "nome": "Maria Santos",
+        "email": "maria@test.ifrede.com",
+        "matricula": "2024002",
+        "senha": "Senha@654321",
+        "status_vinculo": "estudante"
+      },
+      "exemplo_curl": "curl -X POST http://localhost:3000/auth/register -H 'Content-Type: application/json' -d '{...}'",
+      "resposta_esperada": {
+        "status": 201,
+        "corpo_contem": ["usuario", "tokens"]
+      },
+      "o_que_valida": "Segundo usuário criado com perfil automático",
+      "importante": "GUARDE O ID DO USUÁRIO!"
+    },
+
+    {
+      "numero": 12,
+      "nome": "Solicitar Amizade",
+      "descricao": "Solicitar amizade para segundo usuário",
+      "endpoint": "POST /conexoes/:id/solicitar-amizade",
+      "autenticacao": true,
+      "corpo_requisicao": null,
+      "exemplo_curl": "curl -X POST http://localhost:3000/conexoes/ID_MARIA/solicitar-amizade -H 'Authorization: Bearer TOKEN'",
+      "resposta_esperada": {
+        "status": 200,
+        "mensagem": "Solicitação de amizade enviada com sucesso."
+      },
+      "o_que_valida": "Sistema de amizade funcionando",
+      "parametro": "ID_MARIA - ID do segundo usuário"
+    },
+
+    {
+      "numero": 13,
+      "nome": "Listar Minhas Conexões",
+      "descricao": "Listar meus amigos",
+      "endpoint": "GET /conexoes/minhas-conexoes",
+      "autenticacao": true,
+      "corpo_requisicao": null,
+      "exemplo_curl": "curl http://localhost:3000/conexoes/minhas-conexoes -H 'Authorization: Bearer TOKEN'",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["amigos", "total", "pagina"]
+      },
+      "o_que_valida": "Listagem de conexões com paginação"
+    },
+
+    {
+      "numero": 14,
+      "nome": "Ver Perfil Público",
+      "descricao": "Visualizar perfil público de outro usuário",
+      "endpoint": "GET /perfil/:id",
+      "autenticacao": false,
+      "corpo_requisicao": null,
+      "exemplo_curl": "curl http://localhost:3000/perfil/ID_JOAO",
+      "resposta_esperada": {
+        "status": 200,
+        "corpo_contem": ["_id", "perfil", "stats"]
+      },
+      "o_que_valida": "Filtro de privacidade em perfis públicos",
+      "parametro": "ID_JOAO - ID do primeiro usuário"
+    }
+  ],
+
+  "checklist_sucesso": [
+    "[ ] Health Check retorna 200",
+    "[ ] Registro retorna 201 com token",
+    "[ ] Login retorna 200",
+    "[ ] Perfil completo retorna 200",
+    "[ ] Atualização de perfil retorna 200",
+    "[ ] Customização retorna 200",
+    "[ ] Privacidade retorna 200",
+    "[ ] Preferências retorna 200",
+    "[ ] Segundo usuário registrado",
+    "[ ] Solicitação de amizade retorna 200",
+    "[ ] Lista de conexões retorna 200",
+    "[ ] Perfil público retorna 200"
+  ],
+
+  "banco_de_dados": {
+    "colecoes_verificar": [
+      {
+        "colecao": "usuarios",
+        "verificar": "Deve ter documento com email 'joao@test.ifrede.com' e 'maria@test.ifrede.com'"
+      },
+      {
+        "colecao": "privacidades",
+        "verificar": "Deve ter 2 documentos (um para cada usuário)"
+      },
+      {
+        "colecao": "preferencias",
+        "verificar": "Deve ter 2 documentos"
+      },
+      {
+        "colecao": "conexoes",
+        "verificar": "Deve ter 2 documentos"
+      },
+      {
+        "colecao": "badges",
+        "verificar": "Deve ter 2 documentos"
+      },
+      {
+        "colecao": "auditorias",
+        "verificar": "Deve ter registros de ações dos usuários"
+      }
+    ],
+    "comandos_mongodb": [
+      "db.usuarios.countDocuments() // Deve retornar 2",
+      "db.privacidades.countDocuments() // Deve retornar 2",
+      "db.preferencias.countDocuments() // Deve retornar 2",
+      "db.conexoes.countDocuments() // Deve retornar 2",
+      "db.badges.countDocuments() // Deve retornar 2",
+      "db.auditorias.countDocuments() // Deve retornar > 0"
+    ]
+  },
+
+  "dicas_importantes": [
+    "Execute os testes na ordem correta",
+    "Guarde o accessToken do primeiro usuário",
+    "Guarde o ID do segundo usuário",
+    "Espere resposta 200 ou 201 em todos os testes",
+    "Verifique a estrutura da resposta JSON",
+    "Verifique se os dados foram salvos no banco",
+    "Verifique se a auditoria está registrando as ações",
+    "Se algum teste falhar, verifique os logs do servidor"
+  ],
+
+  "troubleshooting": {
+    "Connection refused": "Certifique-se que o servidor está rodando em http://localhost:3000",
+    "Token inválido": "Verifique se está usando o accessToken correto no header Authorization",
+    "Usuário não encontrado": "Verifique se o usuário foi criado e copie o ID corretamente",
+    "Campos obrigatórios": "Envie todos os campos obrigatórios conforme a documentação",
+    "MongoDB connection error": "Certifique-se que MongoDB está rodando em mongodb://localhost:27017"
+  },
+
+  "resultado_final": {
+    "se_todos_passarem": "✅ SISTEMA 100% FUNCIONAL",
+    "proximos_passos": [
+      "Revisar logs do servidor",
+      "Verificar banco de dados",
+      "Integrar com frontend",
+      "Fazer deploy em produção"
+    ]
+  }
+}

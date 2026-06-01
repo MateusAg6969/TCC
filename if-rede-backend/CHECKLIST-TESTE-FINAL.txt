@@ -1,0 +1,340 @@
+═══════════════════════════════════════════════════════════════════════════════════
+                         ✅ CHECKLIST DE TESTE FINAL
+                         SISTEMA DE PERFIS DE USUÁRIOS
+═══════════════════════════════════════════════════════════════════════════════════
+
+INSTRUÇÕES: Marque [X] após completar cada etapa
+Data: ____/____/______    Testador: ________________
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+📋 PASSO 1: PREPARAÇÃO DO AMBIENTE
+───────────────────────────────────────────────────────────────────────────────
+
+Pré-requisitos:
+  [ ] MongoDB está instalado
+  [ ] Node.js v14+ está instalado
+  [ ] .env está configurado (PORT=3000, MONGODB_URI=...)
+  [ ] npm install foi executado
+  [ ] Todas as dependências foram instaladas
+
+Ambiente de Teste:
+  [ ] Abri terminal/PowerShell
+  [ ] Naveguei para: C:\TCC\if-rede-backend
+  [ ] Executei: npm run dev (servidor deve iniciar na porta 3000)
+  [ ] Servidor retorna "Servidor iniciado na porta 3000"
+
+Verificação:
+  [ ] MongoDB rodando: mongod (em outro terminal)
+  [ ] Servidor Express rodando: npm run dev
+  [ ] Ambos estão respondendo
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+🧪 PASSO 2: ESCOLHER MÉTODO DE TESTE
+───────────────────────────────────────────────────────────────────────────────
+
+Escolha UM dos métodos abaixo:
+
+OPÇÃO A - Script Automático (Recomendado)
+  [ ] Windows: .\teste.ps1
+  [ ] ou Linux/Mac: bash teste.sh
+  [ ] Script iniciou sem erros
+  [ ] Todos os 21 testes foram listados
+
+OPÇÃO B - Manual com Curl
+  [ ] Abri: GUIA-TESTES-COMPLETO.txt
+  [ ] Li os passos 1-12
+  [ ] Tenho curl disponível
+
+OPÇÃO C - Postman
+  [ ] Postman está instalado
+  [ ] Arquivo TESTES.json disponível
+  [ ] Postman foi aberto
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 3: EXECUTAR TESTES - AUTENTICAÇÃO
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] TEST 1: Health Check
+    Esperado: HTTP 200
+    Comando: GET /health
+    Status: ___
+
+[ ] TEST 2: Registrar Primeiro Usuário (João)
+    Esperado: HTTP 201 com tokens
+    Comando: POST /auth/register
+    Status: ___
+    ⚠️ SALVE: TOKEN1 = ________________
+    ⚠️ SALVE: USUARIO1 = ________________
+
+[ ] TEST 3: Login
+    Esperado: HTTP 200 com tokens
+    Comando: POST /auth/login
+    Status: ___
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 4: EXECUTAR TESTES - PERFIL
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] TEST 4: Obter Meu Perfil Completo
+    Esperado: HTTP 200 com usuario, perfil, privacidade, preferencias, conexoes, badges
+    Comando: GET /perfil/meu-perfil
+    Status: ___
+    Validação:
+      [ ] Contém todos os 5 objetos
+      [ ] Documentos foram criados automaticamente
+      [ ] Dados são do usuário logado
+
+[ ] TEST 5: Atualizar Perfil
+    Esperado: HTTP 200 com dados atualizados
+    Comando: PUT /perfil/atualizar
+    Status: ___
+    Validação:
+      [ ] Nome foi atualizado
+      [ ] Bio foi atualizada
+      [ ] Registro na auditoria
+
+[ ] TEST 6: Customizar Aparência
+    Esperado: HTTP 200 com cores atualizadas
+    Comando: PUT /perfil/atualizar-customizacao
+    Status: ___
+    Validação:
+      [ ] cor_fundo foi atualizada
+      [ ] tema foi atualizado
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 5: EXECUTAR TESTES - PRIVACIDADE
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] TEST 7: Obter Privacidade
+    Esperado: HTTP 200 com configurações
+    Comando: GET /privacidade/minha-privacidade
+    Status: ___
+    Validação:
+      [ ] Documento de privacidade foi criado
+      [ ] perfil_publico existe
+      [ ] quem_pode_mensagear existe
+
+[ ] TEST 8: Atualizar Privacidade
+    Esperado: HTTP 200 com dados atualizados
+    Comando: PUT /privacidade/atualizar
+    Status: ___
+    Validação:
+      [ ] Configurações foram atualizadas
+      [ ] Registro na auditoria
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 6: EXECUTAR TESTES - PREFERÊNCIAS
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] TEST 9: Obter Preferências
+    Esperado: HTTP 200 com preferências
+    Comando: GET /preferencias/minhas-preferencias
+    Status: ___
+    Validação:
+      [ ] Documento de preferências foi criado
+      [ ] tema_preferido existe
+      [ ] idioma existe
+
+[ ] TEST 10: Atualizar Preferências
+    Esperado: HTTP 200 com dados atualizados
+    Comando: PUT /preferencias/atualizar
+    Status: ___
+    Validação:
+      [ ] tema_preferido foi atualizado
+      [ ] tamanho_fonte foi atualizado
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 7: REGISTRAR SEGUNDO USUÁRIO
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] TEST 11: Registrar Segundo Usuário (Maria)
+    Esperado: HTTP 201 com novo usuário
+    Comando: POST /auth/register
+    Status: ___
+    ⚠️ SALVE: TOKEN2 = ________________
+    ⚠️ SALVE: USUARIO2 = ________________
+    Validação:
+      [ ] Segundo usuário criado
+      [ ] Perfis automáticos criados
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 8: EXECUTAR TESTES - AMIZADES/CONEXÕES
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] TEST 12: Solicitar Amizade
+    Esperado: HTTP 200
+    Comando: POST /conexoes/:id/solicitar-amizade
+    Status: ___
+    Validação:
+      [ ] Mensagem de sucesso retornada
+      [ ] Solicitação foi registrada
+
+[ ] TEST 13: Listar Minhas Conexões
+    Esperado: HTTP 200 com lista de amigos
+    Comando: GET /conexoes/minhas-conexoes
+    Status: ___
+    Validação:
+      [ ] Array de amigos retornado
+      [ ] Paginação funciona
+
+[ ] TEST 14: Listar Solicitações
+    Esperado: HTTP 200 com solicitações pendentes
+    Comando: GET /conexoes/minhas-solicitacoes
+    Status: ___
+    Validação:
+      [ ] Solicitações retornadas
+      [ ] Primeiro usuário (João) aparece nas solicitações de Maria
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 9: EXECUTAR TESTES - PERFIL PÚBLICO
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] TEST 15: Ver Perfil Público de Outro Usuário
+    Esperado: HTTP 200 com dados públicos
+    Comando: GET /perfil/:id
+    Status: ___
+    Validação:
+      [ ] Dados públicos retornados
+      [ ] Email NÃO aparece (privacidade!)
+      [ ] Dados sensíveis filtrados
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 10: TESTES DE SEGURANÇA E VALIDAÇÃO
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] TEST 16: Acesso não autenticado a endpoint protegido
+    Esperado: HTTP 401 Unauthorized
+    Comando: GET /perfil/meu-perfil (sem token)
+    Status: ___
+    Validação:
+      [ ] Acesso negado
+      [ ] Mensagem de erro apropriada
+
+[ ] TEST 17: Email duplicado no registro
+    Esperado: HTTP 409 Conflict
+    Comando: POST /auth/register (com email já usado)
+    Status: ___
+    Validação:
+      [ ] Email duplicado rejeitado
+      [ ] Mensagem de erro apropriada
+
+[ ] TEST 18: Bio muito longa
+    Esperado: HTTP 400 Bad Request
+    Comando: PUT /perfil/atualizar (bio > 500 caracteres)
+    Status: ___
+    Validação:
+      [ ] Validação funcionando
+      [ ] Mensagem de erro apropriada
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 11: VERIFICAÇÃO NO BANCO DE DADOS
+───────────────────────────────────────────────────────────────────────────────
+
+Conectar ao MongoDB:
+
+[ ] use if-rede
+
+[ ] Contar documentos:
+    [ ] db.usuarios.countDocuments() → Esperado: 2 ________
+    [ ] db.privacidades.countDocuments() → Esperado: 2 ________
+    [ ] db.preferencias.countDocuments() → Esperado: 2 ________
+    [ ] db.conexoes.countDocuments() → Esperado: 2 ________
+    [ ] db.badges.countDocuments() → Esperado: 2 ________
+    [ ] db.auditorias.countDocuments() → Esperado: > 0 ________
+
+[ ] Verificar estrutura:
+    [ ] db.usuarios.findOne() - Contém: nome, email, matricula, senha
+    [ ] db.privacidades.findOne() - Contém: perfil_publico, bloqueados
+    [ ] db.conexoes.findOne() - Contém: amigos, solicitacoes_enviadas
+    [ ] db.auditorias.findOne() - Contém: usuario_id, acao, timestamp
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ PASSO 12: VERIFICAÇÃO DE LOGS
+───────────────────────────────────────────────────────────────────────────────
+
+No terminal onde npm run dev está rodando:
+
+[ ] Verificar se houve erros
+[ ] Verificar se houve warnings
+[ ] Verificar se houve exceções não capturadas
+[ ] Logs mostram as requisições sendo processadas
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+📊 RESUMO FINAL
+───────────────────────────────────────────────────────────────────────────────
+
+Contar os checkmarks:
+
+Total de testes: ___ / 18
+Total de validações: ___ / 40
+Total de verificações BD: ___ / 8
+
+Porcentagem: ___% (360+ pontos possíveis)
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✅ RESULTADO FINAL
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] 100% dos testes passaram (18/18)
+[ ] 100% das validações passaram (40/40)
+[ ] 100% das verificações no BD passaram (8/8)
+[ ] Zero erros nos logs
+[ ] Sistema está pronto para produção
+
+SE TODOS OS BOXES ESTÃO MARCADOS:
+
+    ✅ SISTEMA DE PERFIS ESTÁ 100% FUNCIONAL! ✅
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+🔍 SE ALGUM TESTE FALHOU
+───────────────────────────────────────────────────────────────────────────────
+
+Siga os passos abaixo:
+
+1. [ ] Anote o teste que falhou: ________________________________
+2. [ ] Copie a mensagem de erro: ________________________________
+3. [ ] Verifique os logs do servidor
+4. [ ] Consulte: GUIA-TESTES-COMPLETO.txt → Seção 6: Troubleshooting
+5. [ ] Se necessário, recrie o ambiente
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+📝 NOTAS E OBSERVAÇÕES
+───────────────────────────────────────────────────────────────────────────────
+
+________________________________________________________________
+________________________________________________________________
+________________________________________________________________
+________________________________________________________________
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+✨ PRÓXIMAS ETAPAS (Após 100% de sucesso)
+───────────────────────────────────────────────────────────────────────────────
+
+[ ] 1. Integrar com Frontend React/Next.js
+[ ] 2. Implementar upload de avatar
+[ ] 3. Adicionar cache com Redis
+[ ] 4. Fazer testes automatizados (Jest)
+[ ] 5. Deploy em produção
+
+═══════════════════════════════════════════════════════════════════════════════════
+
+Assinatura do Testador: ________________     Data: ____/____/______
+
+═══════════════════════════════════════════════════════════════════════════════════

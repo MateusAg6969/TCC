@@ -13,6 +13,11 @@ const usuariosRoutes = require('./routes/usuarios.routes');
 const postagensRoutes = require('./routes/postagens.routes');
 const filtroPalavrasRoutes = require('./routes/filtro-palavras.routes');
 const tagsRoutes = require('./routes/tags.routes');
+const perfilRoutes = require('./routes/perfil.routes');
+const privacidadeRoutes = require('./routes/privacidade.routes');
+const preferenciasRoutes = require('./routes/preferencias.routes');
+const conexoesRoutes = require('./routes/conexoes.routes');
+const amizadeRoutes = require('./routes/amizade.routes');
 const { responseMiddleware } = require('./middleware/response.middleware');
 const { notFoundMiddleware, errorMiddleware } = require('./middleware/error.middleware');
 
@@ -64,6 +69,11 @@ app.get('/health', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/usuarios', usuariosRoutes);
+app.use('/perfil', perfilRoutes);
+app.use('/privacidade', privacidadeRoutes);
+app.use('/preferencias', preferenciasRoutes);
+app.use('/conexoes', conexoesRoutes);
+app.use('/amizades', amizadeRoutes);
 app.use('/postagens', postagensRoutes);
 app.use('/comentarios', comentariosRoutes);
 app.use('/filtro-palavras', filtroPalavrasRoutes);
