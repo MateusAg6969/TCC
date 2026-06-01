@@ -4,6 +4,7 @@ const { Postagem, Usuario, Seguidor, TagSubtipo } = require('../models');
 const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
 const { detectarPalavraEmPartes } = require('../services/palavras-filtro.service');
 const { uploadPostArquivo, LIMITES_POR_TIPO } = require('../middleware/upload-post.middleware');
+const { notificarLike } = require('../services/notificacoes.service');
 
 const router = express.Router();
 
@@ -345,6 +346,12 @@ router.post('/:id/curtir', authMiddleware, async (req, res, next) => {
     }
 
     await post.adicionarCurtida(req.usuario.id);
+
+    // Disparar notificação apenas se o autor da postagem não for o próprio usuário
+    if (String(post.autor_id) !== String(req.usuario.id)) {
+      await notificarLike(post.autor_id, req.usuario.id, post._id);
+    }
+
     return res.success({ likes: post.stats.likes + 0 }, 'Curtida registrada com sucesso.');
   } catch (error) {
     return next(error);

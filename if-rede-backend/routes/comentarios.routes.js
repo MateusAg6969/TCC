@@ -2,6 +2,7 @@ const express = require('express');
 const { Comentario, Postagem, AtividadeModeracacao } = require('../models');
 const { authMiddleware, moderadorMiddleware } = require('../middleware/auth.middleware');
 const { detectarPalavraProibida } = require('../services/palavras-filtro.service');
+const { notificarComentario } = require('../services/notificacoes.service');
 
 const router = express.Router();
 
@@ -96,6 +97,15 @@ router.patch('/:id/aprovar', authMiddleware, moderadorMiddleware, async (req, re
     }
 
     await comentario.aprovar(req.usuario.id, req.body?.observacao || 'Aprovado pela moderação.');
+
+    // Disparar notificação para o autor da postagem
+    // Buscamos a postagem para saber quem é o autor
+    const { Postagem } = require('../models');
+    const postagem = await Postagem.findById(comentario.postagem_id);
+    
+    if (postagem && String(postagem.autor_id) !== String(comentario.autor_id)) {
+      await notificarComentario(postagem.autor_id, comentario.autor_id, postagem._id, comentario._id);
+    }
 
     return res.success({ comentario }, 'Comentário aprovado com sucesso.');
   } catch (error) {

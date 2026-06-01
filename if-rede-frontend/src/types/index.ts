@@ -92,3 +92,24 @@ export interface TagSubtipo {
   tipo: 'imagem' | 'audio' | 'texto';
   ativo: boolean;
 }
+
+export type TipoNotificacao = 'like' | 'comentario' | 'seguidor' | 'repost' | 'tag' | 'resposta';
+
+export interface Notificacao {
+  _id: string;
+  usuario_id: string;
+  ator_id: {
+    _id: string;
+    perfil: {
+      nome: string;
+      email: string;
+    };
+  };
+  tipo: TipoNotificacao;
+  mensagem: string;
+  objeto_id?: string;
+  objeto_tipo?: 'postagem' | 'comentario' | 'usuario';
+  lida: boolean;
+  data_leitura?: string;
+  criada_em: string;
+}

@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { Usuario, Seguidor } = require('../models');
 const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
+const { notificarNovoSeguidor } = require('../services/notificacoes.service');
 
 const router = express.Router();
 
@@ -118,11 +119,16 @@ router.post('/:id/seguir', authMiddleware, async (req, res, next) => {
       return res.fail('Usuário não encontrado.', 404);
     }
 
-    await Seguidor.updateOne(
+    const resultado = await Seguidor.updateOne(
       { seguidor_id: seguidorId, seguido_id: seguidoId },
       { $setOnInsert: { seguidor_id: seguidorId, seguido_id: seguidoId } },
       { upsert: true }
     );
+
+    // Se houve um novo registro (upserted), disparar notificação
+    if (resultado.upsertedCount > 0) {
+      await notificarNovoSeguidor(seguidoId, seguidorId);
+    }
 
     return res.success(null, 'Usuário seguido com sucesso.');
   } catch (error) {

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { PlusSquare, Search, Sparkles, UserCircle2 } from 'lucide-react';
 import PostCard from '@/components/PostCard';
 import WordFilterManager from '@/components/WordFilterManager';
+import NotificationBell from '@/components/NotificationBell';
 import type { Post } from '@/types';
 
 type HomeFeedClientProps = {
@@ -47,6 +48,9 @@ export default function HomeFeedClient({ feed, profileHref }: HomeFeedClientProp
               placeholder="Busque projetos, poemas, artistas e orientadores..."
             />
           </form>
+          
+          <NotificationBell />
+          
           <Link
             href={profileHref}
             className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-bg"

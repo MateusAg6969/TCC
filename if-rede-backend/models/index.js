@@ -17,6 +17,7 @@ const seguidorSchema = require('../schemas/seguidor.schema');
 const palavraFiltroSchema = require('../schemas/palavra-filtro.schema');
 const tagSubtipoSchema = require('../schemas/tag-subtipo.schema');
 const solicitacaoTagSchema = require('../schemas/solicitacao-tag.schema');
+const notificacaoSchema = require('../schemas/notificacao.schema');
 
 // ============================================================================
 // CRIAR MODELOS
@@ -73,6 +74,12 @@ const TagSubtipo = mongoose.model('TagSubtipo', tagSubtipoSchema);
  */
 const SolicitacaoTag = mongoose.model('SolicitacaoTag', solicitacaoTagSchema);
 
+/**
+ * Modelo Notificacao
+ * Notificações de eventos (likes, comentários, novos seguidores, etc)
+ */
+const Notificacao = mongoose.model('Notificacao', notificacaoSchema);
+
 // Alias para manter nomenclatura consistente
 const AtividadeModeracao = AtividadeModeracacao;
 
@@ -90,4 +97,5 @@ module.exports = {
   PalavraFiltro,
   TagSubtipo,
   SolicitacaoTag,
+  Notificacao,
 };
