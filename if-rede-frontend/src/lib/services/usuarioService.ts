@@ -141,7 +141,7 @@ export const usuarioService = {
     limite: number = 10
   ): Promise<Usuario[]> {
     try {
-      const res = await api.get<ApiSuccess<Usuario[]>>(
+      const res = await api.get<ApiResponse<Usuario[]>>(
         '/usuarios/buscar',
         {
           params: { q: termo, limite },
@@ -161,7 +161,7 @@ export const usuarioService = {
   /**
    * Handler centralizado de erros
    */
-  private handleError(error: unknown): Error {
+  handleError(error: unknown): Error {
     if (error instanceof Error) {
       if ('response' in error) {
         const response = (error as any).response;

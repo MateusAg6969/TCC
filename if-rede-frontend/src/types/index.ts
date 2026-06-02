@@ -13,6 +13,7 @@ export interface Customizacao {
   cor_botoes?: string;
   banner_url?: string;
   medalhas?: string[];
+  tema?: 'claro' | 'escuro' | 'roxo' | string;
 }
 
 export interface Usuario {

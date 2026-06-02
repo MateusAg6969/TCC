@@ -33,7 +33,7 @@ const apiLimiter = rateLimit({
 
 app.use(helmet());
 
-const defaultCorsOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+const defaultCorsOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'];
 const corsOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
   .map((s) => s.trim())

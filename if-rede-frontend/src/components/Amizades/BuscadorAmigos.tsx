@@ -195,7 +195,7 @@ export default function BuscadorAmigos({
 
                 {/* Status e Botão */}
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  {getStatusBadge(status)}
+                  {getStatusBadge(status ?? null)}
 
                   {status === 'nao_amigo' && (
                     <button

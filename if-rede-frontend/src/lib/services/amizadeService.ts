@@ -111,7 +111,7 @@ export const amizadeService = {
   }> {
     try {
       const res = await api.get<
-        ApiSuccess<{
+        ApiResponse<{
           amigos: Usuario[];
         }>
       >(`/usuarios/${usuarioId}/amigos`, {
@@ -124,11 +124,11 @@ export const amizadeService = {
 
       return {
         amigos: res.data.data.amigos,
-        paginacao: res.data.meta || {
-          page: pagina,
-          limit: limite,
-          total: res.data.data.amigos.length,
-          totalPages: Math.ceil(res.data.data.amigos.length / limite),
+        paginacao: {
+          page: res.data.meta?.page ?? pagina,
+          limit: res.data.meta?.limit ?? limite,
+          total: res.data.meta?.total ?? res.data.data.amigos.length,
+          totalPages: res.data.meta?.totalPages ?? Math.ceil(res.data.data.amigos.length / limite),
         },
       };
     } catch (error) {
@@ -142,7 +142,7 @@ export const amizadeService = {
    */
   async listarSolicitacoes(): Promise<SolicitacaoAmizade[]> {
     try {
-      const res = await api.get<ApiSuccess<SolicitacaoAmizade[]>>(
+      const res = await api.get<ApiResponse<SolicitacaoAmizade[]>>(
         '/amizades/solicitacoes/pendentes'
       );
 
@@ -163,7 +163,7 @@ export const amizadeService = {
    */
   async verificarAmizade(usuarioId: string): Promise<string> {
     try {
-      const res = await api.get<ApiSuccess<{ status: string }>>(
+      const res = await api.get<ApiResponse<{ status: string }>>(
         `/amizades/status/${usuarioId}`
       );
 
@@ -180,7 +180,7 @@ export const amizadeService = {
   /**
    * Handler centralizado de erros
    */
-  private handleError(error: unknown): Error {
+  handleError(error: unknown): Error {
     if (error instanceof Error) {
       // Se for erro de rede/axios, extrair mensagem melhor
       if ('response' in error) {

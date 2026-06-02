@@ -33,9 +33,10 @@
     "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
-    "mocha": "^10.0.0",
     "chai": "^4.3.6",
-    "superagent": "^6.2.2"
+    "mocha": "^10.0.0",
+    "nodemon": "^3.1.14",
+    "superagent": "^8.1.2"
   },
   "engines": {
     "node": ">=14.0.0"
