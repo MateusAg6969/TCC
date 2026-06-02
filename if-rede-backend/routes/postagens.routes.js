@@ -136,40 +136,76 @@ router.post('/', authMiddleware, uploadPostArquivo.single('arquivo'), async (req
   }
 });
 
+// ============================================================================
+// GET: Feed Híbrido (Seguidos + Descoberta)
+// ============================================================================
+// O que faz: Entrega postagens personalizadas para o usuário logado.
+// Fluxo: 
+// 1. Busca IDs de quem o usuário segue.
+// 2. Busca posts desses seguidos (Timeline).
+// 3. Se o total for menor que o limite da página, busca posts populares (Discovery).
+// 4. Garante que rascunhos e posts bloqueados nunca apareçam.
 router.get('/feed', authMiddleware, async (req, res, next) => {
   try {
     const { page, limit, skip } = parsePageParams(req);
 
+    // 1. Identificar Grafo Social: Quem eu sigo?
     const seguindo = await Seguidor.find({ seguidor_id: req.usuario.id }).select('seguido_id');
     const seguindoIds = seguindo.map((s) => s.seguido_id);
 
-    const criterio = {
+    // 2. Critérios de Segurança e Visibilidade (Base)
+    const criterioBase = {
       'config.eh_rascunho': false,
       'denuncias.bloqueado': false,
       status_moderacao: { $in: ['aprovado', 'pendente'] },
-      $or: [
-        { 'config.visibilidade': 'todos' },
-        { autor_id: req.usuario.id },
-        { autor_id: { $in: seguindoIds }, 'config.visibilidade': 'seguidores' },
-      ],
     };
 
-    const [items, total] = await Promise.all([
-      Postagem.find(criterio)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.banner_url'),
-      Postagem.countDocuments(criterio),
-    ]);
+    // 3. Busca de Postagens de Seguidos (Fase 1: Timeline)
+    const criterioSeguidos = {
+      ...criterioBase,
+      autor_id: { $in: seguindoIds },
+      'config.visibilidade': { $in: ['todos', 'seguidores'] },
+    };
+
+    let items = await Postagem.find(criterioSeguidos)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.banner_url');
+
+    // 4. Modo de Descoberta (Fase 2: Fallback para Populares)
+    // Se o usuário não segue ninguém ou já viu o conteúdo dos seguidos na página atual.
+    if (items.length < limit) {
+      const idsJaCarregados = items.map(item => item._id);
+      const limiteRestante = limit - items.length;
+
+      const criterioPopulares = {
+        ...criterioBase,
+        _id: { $not: { $in: idsJaCarregados } }, // Evita duplicados na mesma página
+        'config.visibilidade': 'todos',
+        // Opcional: Não mostrar posts do próprio autor na descoberta se ele já os viu
+        autor_id: { $ne: req.usuario.id } 
+      };
+
+      const postsPopulares = await Postagem.find(criterioPopulares)
+        .sort({ 'stats.likes': -1, 'stats.visualizacoes': -1, createdAt: -1 })
+        .limit(limiteRestante)
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.banner_url');
+
+      items = [...items, ...postsPopulares];
+    }
+
+    const total = await Postagem.countDocuments(criterioBase);
 
     return res.success(items, 'Feed carregado com sucesso.', {
       page,
       limit,
       total,
       totalPages: Math.ceil(total / limit),
+      modo_descoberta: seguindoIds.length === 0 || items.length > 0
     });
   } catch (error) {
+    console.error('Erro ao processar Feed Híbrido:', error);
     return next(error);
   }
 });

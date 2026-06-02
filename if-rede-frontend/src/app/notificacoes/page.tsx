@@ -196,9 +196,18 @@ export default function NotificacoesPage() {
                     <div className="flex items-start justify-between gap-6">
                       <div className="flex-1">
                         <p className="text-if-text text-xl leading-snug">
-                          <span className="font-black text-if-purple hover:underline cursor-pointer">
+                          {/* 
+                              NAVEGAÇÃO DE PERFIL: 
+                              O que faz: Transforma o nome do ator em um link dinâmico.
+                              Justificativa: Permite que o usuário conheça quem interagiu com ele instantaneamente.
+                              Fluxo: Clique -> /profile/[username]
+                          */}
+                          <Link 
+                            href={`/profile/${notificacao.ator_id?.perfil?.nome || 'usuario'}`}
+                            className="font-black text-if-purple hover:underline cursor-pointer transition-all"
+                          >
                             {notificacao.ator_id?.perfil?.nome || 'Usuário'}
-                          </span>{' '}
+                          </Link>{' '}
                           <span className="font-medium text-if-text/80">{notificacao.mensagem}</span>
                         </p>
                         <div className="flex items-center gap-4 mt-3">
