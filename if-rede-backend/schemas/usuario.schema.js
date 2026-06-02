@@ -174,7 +174,7 @@ const configuracoesSchema = new mongoose.Schema(
     egresso_limitado: {
       type: Boolean,
       default: function () {
-        return this.perfil.status_vinculo === 'egresso';
+        return this.perfil?.status_vinculo === 'egresso';
       },
     },
   },

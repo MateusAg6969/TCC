@@ -8,7 +8,8 @@
 
 const express = require('express');
 const router = express.Router();
-const { verificaToken } = require('../middleware/auth.middleware');
+const { authMiddleware } = require('../middleware/auth.middleware');
+
 const {
   listarNotificacoes,
   contarNaoLidas,
@@ -21,7 +22,7 @@ const {
 // ============================================================================
 // Middleware: Verificar autenticação em todas as rotas
 // ============================================================================
-router.use(verificaToken);
+router.use(authMiddleware);
 
 // ============================================================================
 // GET: Listar notificações

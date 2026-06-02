@@ -67,28 +67,46 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setMostrarDropdown(!mostrarDropdown)}
-        className="relative p-2 text-if-text hover:bg-if-purple hover:bg-opacity-10 rounded-lg transition-all duration-200 active:scale-95"
+        className="relative p-2 text-if-text hover:bg-if-purple hover:bg-opacity-10 rounded-full transition-all duration-300 active:scale-90 group"
         title="Notificações"
       >
-        <Bell size={24} className={`${naoLidas > 0 ? 'text-if-purple animate-pulse' : 'text-gray-500'}`} />
+        <Bell 
+          size={24} 
+          className={`transition-colors duration-300 ${
+            naoLidas > 0 
+              ? 'text-if-purple fill-if-purple/10' 
+              : 'text-gray-500 group-hover:text-if-purple'
+          }`} 
+        />
 
-        {/* Badge de notificações não lidas */}
+        {/* Badge de notificações não lidas com animação de ping */}
         {naoLidas > 0 && (
-          <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-white">
-            {naoLidas > 9 ? '9+' : naoLidas}
-          </span>
+          <>
+            <span className="absolute top-1.5 right-1.5 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center border-2 border-white shadow-sm">
+              {naoLidas > 9 ? '9+' : naoLidas}
+            </span>
+          </>
         )}
       </button>
 
-      {/* Dropdown de notificações */}
+      {/* Dropdown de notificações - Estética Elevada */}
       {mostrarDropdown && (
-        <div className="absolute right-0 mt-3 w-96 bg-white border border-if-purple border-opacity-20 rounded-xl shadow-2xl z-50 max-h-[500px] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-          {/* Cabeçalho */}
-          <div className="bg-white border-b border-if-purple border-opacity-10 p-4 flex items-center justify-between">
+        <div className="absolute right-0 mt-3 w-96 bg-white border border-if-purple/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 max-h-[550px] flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-5 duration-300">
+          {/* Cabeçalho Refinado */}
+          <div className="bg-gradient-to-r from-if-purple/5 to-transparent border-b border-if-purple/10 p-5 flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-if-text text-lg">Notificações</h3>
-              {naoLidas > 0 && (
-                <p className="text-xs text-if-purple font-medium">{naoLidas} nova(s) notificação(ões)</p>
+              <h3 className="font-bold text-if-text text-xl tracking-tight">Notificações</h3>
+              {naoLidas > 0 ? (
+                <p className="text-xs text-if-purple font-semibold flex items-center gap-1.5 mt-0.5">
+                  <span className="flex h-1.5 w-1.5 rounded-full bg-if-purple animate-pulse"></span>
+                  {naoLidas} novas atualizações
+                </p>
+              ) : (
+                <p className="text-xs text-gray-400 mt-0.5 font-medium">Você leu tudo!</p>
               )}
             </div>
             {naoLidas > 0 && (
@@ -97,9 +115,9 @@ export default function NotificationBell() {
                   e.stopPropagation();
                   marcarTudasComoLidas();
                 }}
-                className="text-xs text-if-purple hover:text-if-purple-dark hover:underline font-bold transition-colors"
+                className="text-xs bg-if-purple/10 text-if-purple hover:bg-if-purple hover:text-white px-3 py-1.5 rounded-full font-bold transition-all duration-200"
               >
-                Marcar tudo lido
+                Limpar tudo
               </button>
             )}
           </div>

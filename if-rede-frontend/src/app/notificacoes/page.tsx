@@ -1,10 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Trash2, Check } from 'lucide-react';
+import { ArrowLeft, Trash2, Check, Bell } from 'lucide-react';
 import { useNotifications } from '@/context/NotificationContext';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+/**
+ * ============================================================================
+ * PÁGINA: NOTIFICAÇÕES (Versão v2.0 - Identidade IF REDE)
+ * ============================================================================
+ * O que faz: Lista todas as notificações do usuário com filtros e ações em massa.
+ * Justificativa: Centraliza a gestão de interações sociais para o usuário.
+ * Identidade: Uso de tons Roxo (IF) e Oliva para uma estética acadêmica moderna.
+ */
 
 export default function NotificacoesPage() {
   const router = useRouter();
@@ -22,14 +31,15 @@ export default function NotificacoesPage() {
   const [filtro, setFiltro] = useState('all');
   const [pagina, setPagina] = useState(1);
 
+  // Efeito: Recarrega as notificações sempre que o filtro ou página mudar.
   useEffect(() => {
     buscarNotificacoes(pagina, filtro);
-  }, [pagina, filtro]);
+  }, [pagina, filtro, buscarNotificacoes]);
 
-  const formatarData = (data) => {
+  const formatarData = (data: string) => {
     const agora = new Date();
     const notificacao = new Date(data);
-    const diff = Math.floor((agora - notificacao) / 1000);
+    const diff = Math.floor((agora.getTime() - notificacao.getTime()) / 1000);
 
     if (diff < 60) return 'agora';
     if (diff < 3600) return `${Math.floor(diff / 60)}m atrás`;
@@ -38,8 +48,8 @@ export default function NotificacoesPage() {
     return new Date(data).toLocaleDateString('pt-BR');
   };
 
-  const obterIconeTipo = (tipo) => {
-    const tipos = {
+  const obterIconeTipo = (tipo: string) => {
+    const tipos: Record<string, string> = {
       like: '❤️',
       comentario: '💬',
       seguidor: '👥',
@@ -56,34 +66,38 @@ export default function NotificacoesPage() {
   return (
     <main className="min-h-screen bg-if-bg text-if-text">
       <div className="mx-auto max-w-2xl p-4 md:p-8">
-        {/* Cabeçalho */}
-        <div className="mb-6">
+        {/* Cabeçalho de Navegação */}
+        <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-if-purple hover:underline mb-4"
+            className="flex items-center gap-2 text-if-purple hover:bg-if-purple/10 px-3 py-1.5 rounded-full transition-all mb-6 font-bold text-sm"
           >
-            <ArrowLeft size={18} /> Voltar
+            <ArrowLeft size={18} /> Voltar para o Feed
           </button>
-          <h1 className="text-3xl font-bold">Notificações</h1>
-          <p className="text-if-text/70 mt-1">
-            {naoLidas > 0
-              ? `Você tem ${naoLidas} notificação${naoLidas !== 1 ? 's' : ''} não lida${naoLidas !== 1 ? 's' : ''}`
-              : 'Você está em dia com as notificações'}
-          </p>
+          <div className="flex items-end justify-between">
+            <div>
+              <h1 className="text-4xl font-black tracking-tight text-if-text">Notificações</h1>
+              <p className="text-if-text/60 mt-2 font-medium">
+                {naoLidas > 0
+                  ? `Você tem ${naoLidas} atualização${naoLidas !== 1 ? 'ões' : 'ão'} pendente${naoLidas !== 1 ? 's' : ''}`
+                  : 'Sua caixa de entrada está organizada.'}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Controles */}
-        <div className="mb-6 flex flex-wrap items-center gap-3">
-          <div className="flex gap-2">
+        {/* Barra de Ferramentas e Filtros */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 bg-white p-2 rounded-[1.5rem] shadow-sm border border-if-purple/5">
+          <div className="flex gap-1">
             <button
               onClick={() => {
                 setFiltro('all');
                 setPagina(1);
               }}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all ${
                 filtro === 'all'
-                  ? 'bg-if-purple text-white'
-                  : 'bg-if-card text-if-text hover:bg-if-purple/20'
+                  ? 'bg-if-purple text-white shadow-lg shadow-if-purple/20'
+                  : 'bg-transparent text-if-text/60 hover:bg-if-purple/5'
               }`}
             >
               Todas
@@ -93,96 +107,130 @@ export default function NotificacoesPage() {
                 setFiltro('nao-lidas');
                 setPagina(1);
               }}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-6 py-2.5 rounded-2xl text-sm font-bold transition-all ${
                 filtro === 'nao-lidas'
-                  ? 'bg-if-purple text-white'
-                  : 'bg-if-card text-if-text hover:bg-if-purple/20'
+                  ? 'bg-if-purple text-white shadow-lg shadow-if-purple/20'
+                  : 'bg-transparent text-if-text/60 hover:bg-if-purple/5'
               }`}
             >
               Não lidas
             </button>
           </div>
 
-          {naoLidas > 0 && (
-            <button
-              onClick={() => marcarTudasComoLidas()}
-              className="ml-auto flex items-center gap-2 text-if-purple hover:underline text-sm font-medium"
-            >
-              <Check size={16} /> Marcar tudo lido
-            </button>
-          )}
+          <div className="flex items-center gap-4 px-2">
+            {naoLidas > 0 && (
+              <button
+                onClick={() => marcarTudasComoLidas()}
+                className="flex items-center gap-2 text-if-purple hover:text-if-purple-dark text-sm font-bold transition-colors"
+              >
+                <Check size={18} /> Marcar tudo lido
+              </button>
+            )}
 
-          {notificacoes.length > 0 && (
-            <button
-              onClick={() => {
-                if (window.confirm('Tem certeza? Todas as notificações serão deletadas.')) {
-                  deletarTodasNotificacoes();
-                }
-              }}
-              className="flex items-center gap-2 text-red-500 hover:underline text-sm font-medium"
-            >
-              <Trash2 size={16} /> Deletar tudo
-            </button>
-          )}
+            {notificacoes.length > 0 && (
+              <button
+                onClick={() => {
+                  if (window.confirm('Deseja limpar todo o histórico de notificações?')) {
+                    deletarTodasNotificacoes();
+                  }
+                }}
+                className="flex items-center gap-2 text-red-400 hover:text-red-600 text-sm font-bold transition-colors"
+              >
+                <Trash2 size={18} /> Limpar histórico
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Lista de notificações */}
-        <div className="rounded-main bg-if-card divide-y divide-if-purple divide-opacity-10 overflow-hidden">
+        {/* Lista de notificações - Estética IF REDE */}
+        <div className="rounded-[2.5rem] bg-if-card border border-if-purple/10 shadow-2xl divide-y divide-if-purple/5 overflow-hidden">
           {carregando ? (
-            <div className="p-8 text-center text-if-text/50">Carregando...</div>
+            <div className="p-20 text-center">
+              <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-if-purple border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+              <p className="mt-6 text-if-text/50 font-bold tracking-widest uppercase text-xs">Sincronizando...</p>
+            </div>
           ) : notificacoesFiltradas.length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-2xl mb-2">🎉</p>
-              <p className="text-if-text/70">
+            <div className="p-20 text-center">
+              <div className="bg-if-purple/5 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8">
+                <Bell size={48} className="text-if-purple/20" />
+              </div>
+              <h2 className="text-2xl font-black text-if-text mb-3">Silêncio acadêmico...</h2>
+              <p className="text-if-text/50 max-w-sm mx-auto font-medium">
                 {filtro === 'nao-lidas'
-                  ? 'Parabéns! Você leu todas as notificações'
-                  : 'Nenhuma notificação ainda'}
+                  ? 'Você já processou todas as suas notificações recentes. Ótimo trabalho!'
+                  : 'Nenhuma atividade registrada por enquanto. Explore o feed para interagir!'}
               </p>
+              <Link 
+                href="/home" 
+                className="inline-block mt-8 bg-if-olive text-white px-8 py-3 rounded-full font-bold hover:shadow-lg transition-all active:scale-95"
+              >
+                Explorar o Feed
+              </Link>
             </div>
           ) : (
             notificacoesFiltradas.map((notificacao) => (
               <div
                 key={notificacao._id}
-                className={`p-4 hover:bg-if-purple hover:bg-opacity-5 transition-colors ${
-                  !notificacao.lida ? 'bg-if-purple bg-opacity-5' : ''
+                className={`p-8 transition-all duration-500 relative group ${
+                  !notificacao.lida 
+                    ? 'bg-gradient-to-r from-if-purple/[0.04] to-transparent' 
+                    : 'hover:bg-gray-50/50'
                 }`}
               >
-                <div className="flex items-start gap-4">
-                  {/* Ícone */}
-                  <span className="text-2xl mt-1">{obterIconeTipo(notificacao.tipo)}</span>
+                {!notificacao.lida && (
+                  <div className="absolute left-0 top-4 bottom-4 w-1.5 bg-if-purple rounded-r-full shadow-[0_0_10px_rgba(110,68,255,0.4)]"></div>
+                )}
+                
+                <div className="flex items-start gap-6">
+                  {/* Ícone com Avatar Placeholder */}
+                  <div className={`shrink-0 w-16 h-16 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-sm border transition-transform group-hover:scale-105 duration-300 ${
+                    !notificacao.lida 
+                      ? 'bg-white border-if-purple/20 text-if-purple' 
+                      : 'bg-gray-100 border-transparent text-gray-400'
+                  }`}>
+                    {obterIconeTipo(notificacao.tipo)}
+                  </div>
 
-                  {/* Conteúdo */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
+                  {/* Conteúdo da Notificação */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-6">
                       <div className="flex-1">
-                        <p className="text-if-text">
-                          <span className="font-semibold">
+                        <p className="text-if-text text-xl leading-snug">
+                          <span className="font-black text-if-purple hover:underline cursor-pointer">
                             {notificacao.ator_id?.perfil?.nome || 'Usuário'}
                           </span>{' '}
-                          {notificacao.mensagem}
+                          <span className="font-medium text-if-text/80">{notificacao.mensagem}</span>
                         </p>
-                        <p className="text-sm text-if-text/70 mt-1">
-                          {formatarData(notificacao.criada_em)}
-                        </p>
+                        <div className="flex items-center gap-4 mt-3">
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                            {formatarData(notificacao.criada_em)}
+                          </p>
+                          {!notificacao.lida && (
+                            <span className="flex items-center gap-1.5 bg-if-purple/10 text-if-purple text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                              <span className="h-1.5 w-1.5 rounded-full bg-if-purple animate-ping"></span>
+                              Nova
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Botões de ação */}
-                      <div className="flex items-center gap-2 ml-4">
+                      {/* Ações Rápidas */}
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                         {!notificacao.lida && (
                           <button
                             onClick={() => marcarComoLida(notificacao._id)}
-                            className="p-2 text-if-purple hover:bg-if-purple/20 rounded transition-colors"
+                            className="p-3 text-if-purple hover:bg-if-purple hover:text-white rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-90"
                             title="Marcar como lida"
                           >
-                            <Check size={18} />
+                            <Check size={22} />
                           </button>
                         )}
                         <button
                           onClick={() => deletarNotificacao(notificacao._id)}
-                          className="p-2 text-red-500 hover:bg-red-500/20 rounded transition-colors"
-                          title="Deletar"
+                          className="p-3 text-red-400 hover:bg-red-500 hover:text-white rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-90"
+                          title="Excluir"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={22} />
                         </button>
                       </div>
                     </div>
@@ -193,10 +241,12 @@ export default function NotificacoesPage() {
           )}
         </div>
 
-        {/* Rodapé */}
+        {/* Paginação / Rodapé Informativo */}
         {notificacoes.length > 0 && (
-          <div className="mt-6 text-center text-if-text/70 text-sm">
-            Mostrando {notificacoesFiltradas.length} de {notificacoes.length} notificações
+          <div className="mt-8 text-center">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              Mostrando {notificacoesFiltradas.length} de {notificacoes.length} notificações registradas
+            </p>
           </div>
         )}
       </div>

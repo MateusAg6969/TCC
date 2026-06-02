@@ -18,7 +18,7 @@ const { Postagem } = require('../models');
 // ============================================================================
 
 // URL de conexão (use variável de ambiente em produção)
-const MONGODB_URI =
+let MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://localhost:27017/if-rede';
 
 // Opções de conexão recomendadas
@@ -42,24 +42,30 @@ const opcoes_conexao = {
 async function conectar() {
   try {
     console.log('▶ Conectando ao MongoDB...');
-    console.log(`   URI: ${MONGODB_URI}`);
-
-    // Conectar ao MongoDB
-    await mongoose.connect(MONGODB_URI, opcoes_conexao);
-
-    console.log('✓ Conectado ao MongoDB com sucesso!');
+    
+    // Tenta conectar ao Mongo local primeiro
+    try {
+      await mongoose.connect(MONGODB_URI, opcoes_conexao);
+      console.log('✓ Conectado ao MongoDB Local!');
+    } catch (err) {
+      console.warn('⚠️ Falha ao conectar ao MongoDB Local. Tentando In-Memory DB...');
+      
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      const mongod = await MongoMemoryServer.create();
+      const uri = mongod.getUri();
+      
+      console.log(`ℹ MongoDB In-Memory iniciado em: ${uri}`);
+      await mongoose.connect(uri, opcoes_conexao);
+      MONGODB_URI = uri;
+      console.log('✓ Conectado ao MongoDB In-Memory com sucesso!');
+    }
 
     // Criar índices
     await criar_indices();
 
-    // Listar informações da conexão
-    const admin = mongoose.connection.db.admin();
-    const stats = await admin.serverStatus();
-    console.log(`✓ Servidor MongoDB versão: ${stats.version}`);
-
     return true;
   } catch (erro) {
-    console.error('✗ Erro ao conectar ao MongoDB:');
+    console.error('✗ Erro fatal ao configurar banco de dados:');
     console.error(`  ${erro.message}`);
     process.exit(1);
   }

@@ -97,23 +97,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Lógica de Login: Realiza a autenticação e persiste a sessão.
+  // Entrada: email e senha digitados no formulário.
+  // Fluxo: Chamada API -> Extração de Tokens -> Gravação de Cookies -> Atualização de Estado -> Redirecionamento.
   const login = async (email: string, senha: string) => {
-    const response = await api.post('/auth/login', { email, senha });
-    const data = response.data?.data;
-    const accessToken = data?.tokens?.accessToken;
-    const refreshToken = data?.tokens?.refreshToken;
+    try {
+      const response = await api.post('/auth/login', { email, senha });
+      
+      // O que faz: Extrai os dados da resposta padronizada { ok: true, data: { ... } }
+      const { data } = response.data;
+      const accessToken = data?.tokens?.accessToken;
+      const refreshToken = data?.tokens?.refreshToken;
+      const usuarioLogado = data?.usuario;
 
-    if (!accessToken || !data?.usuario) {
-      throw new Error('Resposta de login inválida.');
+      if (!accessToken || !usuarioLogado) {
+        throw new Error('Resposta de login inválida: Tokens ou dados do usuário ausentes.');
+      }
+
+      // 1. Persistência Física: Grava os tokens nos Cookies para serem lidos pelo Middleware (SSR).
+      // Por que: Permite que o Next.js proteja rotas no lado do servidor.
+      Cookies.set(ACCESS_COOKIE, accessToken, { expires: 1, path: '/' }); // 1 dia
+      Cookies.set(REFRESH_COOKIE, refreshToken, { expires: 7, path: '/' }); // 7 dias
+
+      // 2. Configuração de Rede: Aplica o token nas requisições futuras do Axios.
+      setAuthHeader(accessToken);
+      
+      // 3. Persistência em Memória: Atualiza o estado global do React.
+      setToken(accessToken);
+      setUser(usuarioLogado);
+
+      // 4. Fluxo de Navegação: Leva o usuário para a área restrita.
+      router.push('/home');
+    } catch (error: any) {
+      console.error('Falha na autenticação via AuthContext:', error);
+      throw error;
     }
-
-    Cookies.set(ACCESS_COOKIE, accessToken, { expires: 1 });
-    Cookies.set(REFRESH_COOKIE, refreshToken, { expires: 7 });
-
-    setAuthHeader(accessToken);
-    setToken(accessToken);
-    setUser(data.usuario);
-    router.push('/home');
   };
 
   const register = async (payload: {

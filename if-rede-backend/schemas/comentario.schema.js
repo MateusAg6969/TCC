@@ -57,6 +57,8 @@ const comentarioSchema = new mongoose.Schema(
 
 comentarioSchema.index({ postagem_id: 1, status: 1, createdAt: -1 });
 comentarioSchema.index({ autor_id: 1, createdAt: -1 });
+// Índice para otimizar busca de comentários curtidos por um usuário específico
+comentarioSchema.index({ 'stats.usuarios_que_curtiram': 1 });
 
 comentarioSchema.methods.aplicarFiltroInicial = function () {
   const palavra = textoContemPalavraProibida(this.texto);
@@ -70,6 +72,34 @@ comentarioSchema.methods.aplicarFiltroInicial = function () {
   }
 
   return this;
+};
+
+/**
+ * Adiciona uma curtida ao comentário
+ * @param {ObjectId} usuarioId - ID do usuário que está curtindo
+ */
+comentarioSchema.methods.adicionarCurtida = function (usuarioId) {
+  // Verifica se o usuário já não está na lista para evitar duplicidade
+  if (!this.stats.usuarios_que_curtiram.includes(usuarioId)) {
+    this.stats.usuarios_que_curtiram.push(usuarioId);
+    this.stats.likes += 1;
+    return this.save();
+  }
+  return Promise.resolve(this);
+};
+
+/**
+ * Remove uma curtida do comentário
+ * @param {ObjectId} usuarioId - ID do usuário que está descurtindo
+ */
+comentarioSchema.methods.removerCurtida = function (usuarioId) {
+  const indice = this.stats.usuarios_que_curtiram.indexOf(usuarioId);
+  if (indice > -1) {
+    this.stats.usuarios_que_curtiram.splice(indice, 1);
+    this.stats.likes = Math.max(0, this.stats.likes - 1);
+    return this.save();
+  }
+  return Promise.resolve(this);
 };
 
 comentarioSchema.methods.aprovar = function (moderadorId, observacao = '') {

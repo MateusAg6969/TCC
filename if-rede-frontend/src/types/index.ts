@@ -44,6 +44,7 @@ export interface Post {
   };
   stats?: {
     likes?: number;
+    usuarios_que_curtiram?: string[];
     comentarios_count?: number;
     shares?: number;
   };
@@ -53,6 +54,8 @@ export interface Post {
       nome?: string;
     };
   };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ApiSuccess<T> {

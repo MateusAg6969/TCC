@@ -30,6 +30,29 @@ exports.notificarLike = async (usuario_id, ator_id, postagem_id) => {
 };
 
 // ============================================================================
+// Notificações de Like em Comentário
+// ============================================================================
+// O que faz: Notifica o autor de um comentário que alguém curtiu sua fala.
+// Por que: Aumenta o engajamento na seção de comentários.
+exports.notificarLikeComentario = async (usuario_id, ator_id, comentario_id) => {
+  try {
+    const notificacao = new Notificacao({
+      usuario_id,
+      ator_id,
+      tipo: 'like', // Reutiliza tipo like
+      mensagem: 'curtiu seu comentário',
+      objeto_id: comentario_id,
+      objeto_tipo: 'comentario',
+    });
+
+    await notificacao.save();
+    return notificacao;
+  } catch (erro) {
+    console.error('Erro ao criar notificação de like no comentário:', erro);
+  }
+};
+
+// ============================================================================
 // Notificações de Comentário
 // ============================================================================
 exports.notificarComentario = async (usuario_id, ator_id, postagem_id, comentario_id) => {

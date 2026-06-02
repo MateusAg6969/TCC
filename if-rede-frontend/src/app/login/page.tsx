@@ -11,14 +11,27 @@ export default function LoginPage() {
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Fluxo de Submissão: Captura os dados do formulário e aciona o contexto de autenticação.
+  // O que faz: Previne o comportamento padrão do HTML, limpa erros anteriores e gerencia o estado de loading.
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErro('');
     setLoading(true);
+
     try {
+      // Por que: Delegamos a lógica de autenticação (cookies/axios) para o AuthContext.
       await login(email, senha);
-    } catch {
-      setErro('Não foi possível entrar. Verifique suas credenciais.');
+    } catch (err: any) {
+      // Entrada: Erro capturado da API ou do AuthContext.
+      // Saida: Mensagem didática para o usuário final.
+      const status = err.response?.status;
+      if (status === 401) {
+        setErro('Email ou senha incorretos. Verifique suas credenciais acadêmicas.');
+      } else if (status === 403) {
+        setErro('Sua conta está inativa ou suspensa. Entre em contato com a coordenação.');
+      } else {
+        setErro('Não foi possível conectar ao servidor. Tente novamente em instantes.');
+      }
     } finally {
       setLoading(false);
     }

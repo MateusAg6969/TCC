@@ -405,6 +405,9 @@ postagemSchema.index({ categorias: 1 });
 // Status de moderação
 postagemSchema.index({ status_moderacao: 1 });
 
+// Índice para otimizar busca de posts curtidos por um usuário específico
+postagemSchema.index({ 'stats.usuarios_que_curtiram': 1 });
+
 // Denúncias
 postagemSchema.index({ 'denuncias.bloqueado': 1 });
 

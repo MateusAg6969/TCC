@@ -116,4 +116,4 @@ notificacaoSchema.statics.buscarComDetalhes = function (usuario_id, limite = 20,
     .exec();
 };
 
-module.exports = mongoose.model('Notificacao', notificacaoSchema);
+module.exports = notificacaoSchema;

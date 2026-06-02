@@ -2,9 +2,60 @@ const express = require('express');
 const { Comentario, Postagem, AtividadeModeracacao } = require('../models');
 const { authMiddleware, moderadorMiddleware } = require('../middleware/auth.middleware');
 const { detectarPalavraProibida } = require('../services/palavras-filtro.service');
-const { notificarComentario } = require('../services/notificacoes.service');
+const { notificarComentario, notificarLikeComentario } = require('../services/notificacoes.service');
 
 const router = express.Router();
+
+// ============================================================================
+// POST: Curtir um comentário
+// ============================================================================
+// O que faz: Adiciona o ID do usuário logado à lista de curtidas do comentário.
+// Justificativa: Permite interação social direta nos comentários.
+router.post('/:id/curtir', authMiddleware, async (req, res, next) => {
+  try {
+    const comentario = await Comentario.findById(req.params.id);
+    if (!comentario) {
+      return res.fail('Comentário não encontrado.', 404);
+    }
+
+    // Executa método do schema que gerencia a lógica de negócio da curtida
+    await comentario.adicionarCurtida(req.usuario.id);
+
+    // Disparar notificação apenas se o autor do comentário não for o próprio usuário
+    if (String(comentario.autor_id) !== String(req.usuario.id)) {
+      await notificarLikeComentario(comentario.autor_id, req.usuario.id, comentario._id);
+    }
+
+    return res.success(
+      { likes: comentario.stats.likes },
+      'Comentário curtido com sucesso.'
+    );
+  } catch (error) {
+    return next(error);
+  }
+});
+
+// ============================================================================
+// DELETE: Remover curtida de um comentário
+// ============================================================================
+// O que faz: Remove o ID do usuário logado da lista de curtidas.
+router.delete('/:id/curtir', authMiddleware, async (req, res, next) => {
+  try {
+    const comentario = await Comentario.findById(req.params.id);
+    if (!comentario) {
+      return res.fail('Comentário não encontrado.', 404);
+    }
+
+    await comentario.removerCurtida(req.usuario.id);
+
+    return res.success(
+      { likes: comentario.stats.likes },
+      'Curtida removida com sucesso.'
+    );
+  } catch (error) {
+    return next(error);
+  }
+});
 
 router.post('/', authMiddleware, async (req, res, next) => {
   try {

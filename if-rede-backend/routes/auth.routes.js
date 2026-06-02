@@ -60,31 +60,43 @@ router.post('/login', async (req, res, next) => {
   try {
     const { email, senha } = req.body;
 
+    // 1. Validação de Entrada: Verifica se os campos básicos foram enviados.
     if (!email || !senha) {
       return res.fail('Informe email e senha.', 400);
     }
 
+    // 2. Busca do Usuário: Localiza pelo email normalizado (lowercase).
+    // O que faz: Utilizamos .select('+senha') pois o campo senha é oculto por padrão no schema.
     const usuario = await Usuario.findOne({ 'perfil.email': String(email).toLowerCase() }).select(
       '+senha'
     );
 
+    // 3. Verificação de Existência: Se não encontrar, retorna erro genérico por segurança.
     if (!usuario) {
+      console.warn(`Tentativa de login falhou: usuário ${email} não encontrado.`);
       return res.fail('Credenciais inválidas.', 401);
     }
 
+    // 4. Validação de Senha: Compara o hash do banco com a senha enviada usando bcrypt.
     const senhaOk = await bcrypt.compare(String(senha), usuario.senha);
 
     if (!senhaOk) {
+      console.warn(`Tentativa de login falhou: senha incorreta para ${email}.`);
       return res.fail('Credenciais inválidas.', 401);
     }
 
+    // 5. Verificação de Status: Bloqueia acesso se a conta estiver inativa ou suspensa.
     if (!usuario.ativo || usuario.estaSuspenso()) {
       return res.fail('Conta inativa ou suspensa.', 403);
     }
 
+    // 6. Geração de Tokens: Cria Access Token (curta duração) e Refresh Token (longa duração).
+    // Fluxo: O Access Token carrega os claims (mod_voluntario, vinculo) para o middleware.
     const accessToken = gerarAccessToken(usuario);
     const refreshToken = gerarRefreshToken(usuario);
 
+    // 7. Resposta de Sucesso: Retorna dados do perfil e tokens.
+    // O que faz: Garante que mod_voluntario esteja presente para liberar a UI de moderação no front.
     return res.success(
       {
         usuario: {
@@ -92,13 +104,15 @@ router.post('/login', async (req, res, next) => {
           nome: usuario.perfil.nome,
           email: usuario.perfil.email,
           status_vinculo: usuario.perfil.status_vinculo,
-          mod_voluntario: usuario.configuracoes.mod_voluntario,
+          mod_voluntario: Boolean(usuario.configuracoes?.mod_voluntario),
         },
         tokens: { accessToken, refreshToken },
       },
       'Login realizado com sucesso.'
     );
   } catch (error) {
+    // Log de erro para diagnóstico no servidor
+    console.error('Erro crítico no processo de login:', error);
     return next(error);
   }
 });
