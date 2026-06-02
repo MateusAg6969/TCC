@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Heart, MessageCircle, Repeat2, Share2 } from 'lucide-react';
 import type { Post } from '@/types';
 import { useAuth } from '@/context/AuthContext';
@@ -9,11 +10,10 @@ import api from '@/lib/api';
 
 /**
  * ============================================================================
- * COMPONENTE: POSTCARD (Versão v2.0 - Interativa)
+ * COMPONENTE: POSTCARD (Versão v2.4 - Navegação Global)
  * ============================================================================
- * O que faz: Renderiza uma postagem e gerencia interações (Likes).
- * Justificativa: Centraliza a lógica de visualização e feedback imediato.
- * Fluxo: Props -> Estado Local -> Interação -> API -> Atualização.
+ * O que faz: Renderiza uma postagem com navegação profunda e curtidas sincronizadas.
+ * Mudança: O nome do autor agora é um Link para seu perfil.
  */
 
 function resolveAssetUrl(url?: string) {
@@ -87,7 +87,13 @@ export default function PostCard({ post }: { post: Post }) {
         <div>
           <h3 className="line-clamp-1 text-lg font-bold tracking-tight">{post.titulo}</h3>
           <p className="text-xs font-medium text-if-purple/60">
-            por <span className="text-if-purple">{post.autor_id?.perfil?.nome || 'Acadêmico'}</span>
+            por{' '}
+            <Link 
+              href={`/profile/${post.autor_id?.perfil?.nome || 'usuario'}`}
+              className="text-if-purple font-bold hover:underline transition-all"
+            >
+              {post.autor_id?.perfil?.nome || 'Acadêmico'}
+            </Link>
           </p>
         </div>
         <div className="flex flex-col items-end">

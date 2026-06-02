@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const app = require('./app');
 const db = require('./db/connection');
-const { Usuario } = require('./models');
+const { Usuario, Postagem } = require('./models');
 const bcrypt = require('bcryptjs');
 
 const PORT = Number(process.env.PORT || 3000);
@@ -38,6 +38,58 @@ async function bootstrap() {
       }
     });
     console.log('✓ Usuário "frontend@test.com" criado (senha: 12345678)');
+
+    // 2. Criar Usuário 'Lara Mendes' (Para testes sociais)
+    const lara = await Usuario.create({
+      senha: senhaHash,
+      perfil: {
+        nome: 'Lara Mendes',
+        email: 'lara@ifc.edu.br',
+        matricula: '20269999',
+        status_vinculo: 'estudante',
+        bio: 'Estudante de Informática apaixonada por Poesia e Algoritmos. 💻✨',
+        privacidade: 'publico'
+      },
+      customizacao: {
+        cor_botoes: '#9333ea',
+        cor_fundo: '#faf5ff'
+      }
+    });
+
+    // 3. Criar Postagens de Texto para Lara
+    await Postagem.create([
+      {
+        autor_id: lara._id,
+        titulo: 'O Manifesto do Código Poético',
+        descricao: 'Uma reflexão sobre como a lógica encontra a arte.',
+        tipo: 'texto',
+        subtipo: 'Poesia',
+        conteudo: {
+          texto_longo: 'No silêncio do terminal, as linhas dançam. Cada ponto e vírgula é uma pausa para respirar. O código não é apenas funcionalidade; é expressão pura da mente acadêmica.',
+          url: 'https://placeholder.com/text-post'
+        },
+        config: { visibilidade: 'todos', eh_rascunho: false },
+        status_moderacao: 'aprovado',
+        stats: { likes: 12, visualizacoes: 45 }
+      },
+      {
+        autor_id: lara._id,
+        titulo: 'Dica: Next.js no IFC',
+        descricao: 'Por que estamos usando App Router no nosso TCC?',
+        tipo: 'texto',
+        subtipo: 'Tutorial',
+        conteudo: {
+          texto_longo: 'O App Router facilita muito a gestão de layouts complexos. Para projetos acadêmicos como o IF REDE, a escalabilidade é essencial!',
+          url: 'https://placeholder.com/text-post-2'
+        },
+        config: { visibilidade: 'todos', eh_rascunho: false },
+        status_moderacao: 'aprovado',
+        stats: { likes: 8, visualizacoes: 20 }
+      }
+    ]);
+
+    await Usuario.updateOne({ _id: lara._id }, { 'stats.total_postagens': 2 });
+    console.log('✓ Usuária "Lara Mendes" e postagens criadas para teste.');
   }
 
   app.listen(PORT, () => {
