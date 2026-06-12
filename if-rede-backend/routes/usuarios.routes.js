@@ -44,6 +44,45 @@ router.get('/me', authMiddleware, async (req, res, next) => {
   }
 });
 
+router.patch('/me', authMiddleware, async (req, res, next) => {
+  try {
+    const { perfil, customizacao } = req.body;
+    const usuario = await Usuario.findById(req.usuario.id);
+
+    if (!usuario) {
+      return res.fail('Usuário não encontrado.', 404);
+    }
+
+    // Atualiza campos do perfil se fornecidos
+    if (perfil) {
+      if (perfil.nome) usuario.perfil.nome = perfil.nome;
+      if (perfil.bio !== undefined) usuario.perfil.bio = perfil.bio;
+      if (perfil.privacidade) usuario.perfil.privacidade = perfil.privacidade;
+    }
+
+    // Atualiza campos de customização se fornecidos
+    if (customizacao) {
+      if (customizacao.cor_fundo) usuario.customizacao.cor_fundo = customizacao.cor_fundo;
+      if (customizacao.cor_botoes) usuario.customizacao.cor_botoes = customizacao.cor_botoes;
+      if (customizacao.avatar_url !== undefined) usuario.customizacao.avatar_url = customizacao.avatar_url;
+      if (customizacao.banner_url !== undefined) usuario.customizacao.banner_url = customizacao.banner_url;
+    }
+
+    await usuario.save();
+
+    return res.success(
+      {
+        id: usuario._id,
+        perfil: usuario.perfil,
+        customizacao: usuario.customizacao,
+      },
+      'Perfil atualizado com sucesso.'
+    );
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {

@@ -4,10 +4,12 @@ const multer = require('multer');
 
 // Limites definidos por tipo para equilibrar UX e custo de infraestrutura.
 // - imagem: 10MB (suficiente para alta qualidade web)
+// - video: 50MB (pequenos clipes/projetos)
 // - audio: 25MB (faixas curtas/medias)
 // - texto: 5MB (txt/pdf/docx, evitando uploads excessivos)
 const LIMITES_POR_TIPO = {
   imagem: 10 * 1024 * 1024,
+  video: 50 * 1024 * 1024,
   audio: 25 * 1024 * 1024,
   texto: 5 * 1024 * 1024,
 };
@@ -17,6 +19,7 @@ const LIMITES_POR_TIPO = {
 // Saida: validacao coerente entre subtipo de post e arquivo real.
 const MIME_POR_TIPO = {
   imagem: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+  video: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska', 'video/webm'],
   audio: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/x-m4a'],
   texto: [
     'text/plain',

@@ -6,6 +6,7 @@ import { Award, House, PlusSquare, Search, Users } from 'lucide-react';
 import type { Post } from '@/types';
 import ProfileTabs from './ProfileTabs';
 import EditProfileModal from './EditProfileModal';
+import SocialSidePanel from './SocialSidePanel';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -19,11 +20,13 @@ type ProfilePayload = {
   customizacao?: {
     cor_fundo?: string;
     cor_botoes?: string;
+    avatar_url?: string;
     banner_url?: string;
     medalhas?: string[];
   };
   stats?: {
     total_seguidores?: number;
+    total_seguindo?: number;
     total_postagens?: number;
   };
   seguindo?: boolean;
@@ -31,11 +34,10 @@ type ProfilePayload = {
 
 /**
  * ============================================================================
- * COMPONENTE: PROFILE CLIENT (v2.3)
+ * COMPONENTE: PROFILE CLIENT (v2.5)
  * ============================================================================
  * O que faz: Gerencia a visualização e interação do perfil de um usuário.
  * Justificativa: Centraliza a lógica de seguimento, edição e exibição de stats.
- * Fluxo de Dados: Props (profile, posts) -> State local para interações sociais.
  */
 
 export default function ProfileClient({
@@ -51,11 +53,16 @@ export default function ProfileClient({
   const [profile, setProfile] = useState(initialProfile);
   const [openModal, setOpenModal] = useState(false);
   const [carregandoSeguir, setCarregandoSeguir] = useState(false);
+  const [activeSocialPanel, setActiveSocialPanel] = useState<'followers' | 'following' | null>(null);
 
-  // Verificação de Identidade: O perfil visualizado é do próprio usuário logado?
+  // Verificação de Identidade
   const ehProprioPerfil = useMemo(() => {
     return currentUser && profile && (String(currentUser.id) === String(profile.id) || String(currentUser.id) === String((profile as any)._id));
   }, [currentUser, profile]);
+
+  const handleUpdateProfile = (newData: any) => {
+    setProfile(prev => prev ? { ...prev, ...newData } : null);
+  };
 
   // Ação Social: Seguir ou Deixar de Seguir.
   const alternarSeguir = async () => {
@@ -64,7 +71,6 @@ export default function ProfileClient({
     setCarregandoSeguir(true);
     try {
       if (profile.seguindo) {
-        // Fluxo: DELETE -> Atualiza estado local (Optimistic UI)
         await api.delete(`/usuarios/${profile.id}/seguir`);
         setProfile(prev => prev ? {
           ...prev,
@@ -72,7 +78,6 @@ export default function ProfileClient({
           stats: { ...prev.stats, total_seguidores: Math.max(0, (prev.stats?.total_seguidores || 1) - 1) }
         } : null);
       } else {
-        // Fluxo: POST -> Atualiza estado local + Dispara Notificação no Backend
         await api.post(`/usuarios/${profile.id}/seguir`);
         setProfile(prev => prev ? {
           ...prev,
@@ -97,7 +102,7 @@ export default function ProfileClient({
   }, [profile]);
 
   return (
-    <main className="min-h-screen bg-if-bg text-if-text" style={styleVars}>
+    <main className="min-h-screen bg-if-bg text-if-text pb-20" style={styleVars}>
       <div className="mx-auto max-w-7xl p-4 md:p-8">
         {/* Navbar */}
         <header className="mb-6 flex flex-wrap items-center gap-3 rounded-main bg-if-card p-4 md:flex-nowrap md:px-6">
@@ -125,14 +130,14 @@ export default function ProfileClient({
             href="/home"
             className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-bg hover:brightness-110 transition-all"
           >
-            <House size={18} /> Pagina principal
+            <House size={18} /> Página principal
           </Link>
         </header>
 
         {/* Banner e Avatar */}
         <section className="mb-6 overflow-hidden rounded-main bg-if-card shadow-card">
           <div
-            className="h-48 bg-cover bg-center transition-all"
+            className="h-48 bg-cover bg-center transition-all bg-if-purple/20"
             style={{
               backgroundImage: profile?.customizacao?.banner_url
                 ? `url(${profile.customizacao.banner_url})`
@@ -142,14 +147,39 @@ export default function ProfileClient({
           <div className="p-6">
             <div className="-mt-16 flex flex-wrap items-end justify-between gap-6">
               <div className="flex items-end gap-6">
-                <div className="grid h-28 w-28 place-items-center rounded-3xl border-4 border-if-card bg-gradient-to-br from-if-purple to-if-olive text-4xl font-black text-white shadow-2xl">
-                  {(profile?.perfil?.nome || 'U').charAt(0).toUpperCase()}
+                <div className="relative group">
+                  <div className="grid h-32 w-32 place-items-center rounded-3xl border-4 border-if-card bg-gradient-to-br from-if-purple to-if-olive overflow-hidden shadow-2xl bg-cover bg-center"
+                       style={profile?.customizacao?.avatar_url ? { backgroundImage: `url(${profile.customizacao.avatar_url})` } : {}}>
+                    {!profile?.customizacao?.avatar_url && (
+                      <span className="text-5xl font-black text-white">
+                        {(profile?.perfil?.nome || 'U').charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="pb-2">
                   <h1 className="text-3xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
                   <p className="max-w-xl text-if-text/60 mt-1 font-medium italic">
                     {profile?.perfil?.bio || 'Sem bio por enquanto.'}
                   </p>
+                  
+                  {/* Botões de Seguidores/Seguindo - Painel Lateral */}
+                  <div className="mt-4 flex gap-4">
+                    <button 
+                      onClick={() => setActiveSocialPanel('followers')}
+                      className="text-sm hover:text-if-purple transition-colors flex items-center gap-2 group"
+                    >
+                      <span className="font-black text-lg group-hover:scale-110 transition-transform">{profile?.stats?.total_seguidores || 0}</span>
+                      <span className="font-bold text-if-text/50">seguidores</span>
+                    </button>
+                    <button 
+                      onClick={() => setActiveSocialPanel('following')}
+                      className="text-sm hover:text-if-purple transition-colors flex items-center gap-2 group"
+                    >
+                      <span className="font-black text-lg group-hover:scale-110 transition-transform">{profile?.stats?.total_seguindo || 0}</span>
+                      <span className="font-bold text-if-text/50">seguindo</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -189,7 +219,7 @@ export default function ProfileClient({
 
         {/* Conteúdo Principal */}
         <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
-          <ProfileTabs posts={posts} />
+          <ProfileTabs posts={posts} userId={profile?.id || ''} />
 
           <aside className="space-y-6">
             {/* Estatísticas */}
@@ -202,28 +232,14 @@ export default function ProfileClient({
                   </div>
                   {profile?.stats?.total_postagens || 0} posts publicados
                 </li>
-                <li className="flex items-center gap-3 font-bold text-if-text/80">
+                <li className="flex items-center gap-3 font-bold text-if-text/80 cursor-pointer hover:text-if-purple transition-colors"
+                    onClick={() => setActiveSocialPanel('followers')}>
                   <div className="bg-if-purple/10 p-2 rounded-xl text-if-purple">
                     <Users size={20} />
                   </div>
                   {profile?.stats?.total_seguidores || 0} seguidores
                 </li>
               </ul>
-            </div>
-
-            {/* Sugestões ou Amigos (Simulado) */}
-            <div className="rounded-main bg-if-card p-6 border border-white/5 shadow-card">
-              <h3 className="mb-4 text-lg font-bold">Conexões recentes</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition-all cursor-pointer">
-                  <div className="w-10 h-10 rounded-full bg-if-olive/20 flex items-center justify-center font-bold">L</div>
-                  <span className="font-bold text-sm">Lara Mendes</span>
-                </div>
-                <div className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition-all cursor-pointer">
-                  <div className="w-10 h-10 rounded-full bg-if-purple/20 flex items-center justify-center font-bold">B</div>
-                  <span className="font-bold text-sm">Bruno Almeida</span>
-                </div>
-              </div>
             </div>
           </aside>
         </section>
@@ -232,8 +248,22 @@ export default function ProfileClient({
       <EditProfileModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        defaultName={profile?.perfil?.nome || ''}
-        defaultUsername={username}
+        onSave={handleUpdateProfile}
+        defaultData={{
+          nome: profile?.perfil?.nome || '',
+          bio: profile?.perfil?.bio || '',
+          privacidade: profile?.perfil?.privacidade || 'publico',
+          avatar_url: profile?.customizacao?.avatar_url || '',
+          banner_url: profile?.customizacao?.banner_url || '',
+        }}
+      />
+
+      <SocialSidePanel 
+        isOpen={!!activeSocialPanel}
+        onClose={() => setActiveSocialPanel(null)}
+        userId={profile?.id || ''}
+        type={activeSocialPanel === 'following' ? 'following' : 'followers'}
+        userName={profile?.perfil?.nome || ''}
       />
     </main>
   );

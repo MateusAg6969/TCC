@@ -78,17 +78,12 @@ router.post('/', authMiddleware, uploadPostArquivo.single('arquivo'), async (req
       subtipoTag?.nome || subtipo,
     ]);
 
-    const configFinal = { ...(config || { eh_rascunho: true }) };
-    // Padrao de fluxo: toda postagem nova entra como pendente para manter
-    // consistencia com o metodo publicar() do schema e com a fila de moderacao.
-    // Entrada: dados enviados no body pelo autor autenticado.
-    // Saida: status inicial da postagem para o motor de visibilidade.
-    let statusModeracao = 'pendente';
-
     if (palavraDetectada) {
-      configFinal.eh_rascunho = true;
-      statusModeracao = 'em_revisao';
+      return res.fail(`Sua postagem contém um termo não permitido: "${palavraDetectada}". Remova-o para continuar.`, 400);
     }
+
+    const configFinal = { ...(config || { eh_rascunho: false }) };
+    let statusModeracao = 'pendente';
 
     const post = await Postagem.create({
       autor_id: req.usuario.id,
@@ -246,7 +241,7 @@ router.get('/usuario/:usuarioId', optionalAuthMiddleware, async (req, res, next)
       autor_id: req.params.usuarioId,
       'config.eh_rascunho': false,
       'denuncias.bloqueado': false,
-      status_moderacao: 'aprovado',
+      status_moderacao: ehProprio ? { $in: ['aprovado', 'pendente'] } : 'aprovado',
     };
 
     const [items, total] = await Promise.all([
@@ -260,6 +255,78 @@ router.get('/usuario/:usuarioId', optionalAuthMiddleware, async (req, res, next)
       total,
       totalPages: Math.ceil(total / limit),
     });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/search', optionalAuthMiddleware, async (req, res, next) => {
+  try {
+    const { q, tipo, page, limit, skip } = { ...parsePageParams(req), q: req.query.q, tipo: req.query.tipo };
+    
+    if (!q) {
+      return res.success({ usuarios: [], postagens: [] }, 'Busca vazia.');
+    }
+
+    const regex = new RegExp(q, 'i');
+
+    // 1. Buscar Usuários que coincidem com o termo (por nome ou email/username se disponível)
+    const usuariosEncontrados = await Usuario.find({
+      $or: [
+        { 'perfil.nome': regex },
+        { 'perfil.email': regex }
+      ]
+    })
+    .select('perfil.nome perfil.bio customizacao.avatar_url customizacao.banner_url')
+    .limit(10);
+
+    // Pegar IDs dos usuários encontrados para buscar postagens deles também
+    const idsUsuarios = usuariosEncontrados.map(u => u._id);
+
+    // 2. Construir Query de Postagens
+    const queryPostagens = {
+      'config.eh_rascunho': false,
+      'denuncias.bloqueado': false,
+      status_moderacao: 'aprovado'
+    };
+
+    if (q) {
+      queryPostagens.$or = [
+        { titulo: regex },
+        { descricao: regex },
+        { subtipo: regex },
+        { tags: regex },
+        { categorias: regex },
+        { autor_id: { $in: idsUsuarios } } // Inclui posts dos usuários encontrados
+      ];
+    }
+
+    if (tipo && tipo !== 'todos') {
+      queryPostagens.tipo = tipo;
+    }
+
+    const [postagens, totalPostagens] = await Promise.all([
+      Postagem.find(queryPostagens)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url'),
+      Postagem.countDocuments(queryPostagens)
+    ]);
+
+    return res.success(
+      { 
+        usuarios: usuariosEncontrados, 
+        postagens: postagens 
+      }, 
+      'Busca realizada com sucesso.', 
+      {
+        page,
+        limit,
+        total: totalPostagens,
+        totalPages: Math.ceil(totalPostagens / limit)
+      }
+    );
   } catch (error) {
     return next(error);
   }
@@ -337,13 +404,7 @@ router.patch('/:id', authMiddleware, async (req, res, next) => {
     ]);
 
     if (palavraDetectada) {
-      post.status_moderacao = 'em_revisao';
-      post.config.eh_rascunho = true;
-      post.denuncias.total = Math.max(1, Number(post.denuncias.total || 0) + 1);
-      post.denuncias.motivos.push({
-        usuario_id: req.usuario.id,
-        motivo: `Filtro automatico detectou o termo: ${palavraDetectada}`,
-      });
+      return res.fail(`Sua postagem contém um termo não permitido: "${palavraDetectada}". Remova-o para continuar.`, 400);
     }
 
     await post.save();

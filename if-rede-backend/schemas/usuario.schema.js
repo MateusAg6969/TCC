@@ -39,11 +39,15 @@ const perfilSchema = new mongoose.Schema(
     },
 
     // Vínculo institucional (IF REDE)
+    // O que faz: armazena o número de matrícula institucional do aluno/servidor.
+    // Por que: é o identificador acadêmico único obrigatório no IFC.
+    // Validação: aceita matrículas numéricas ou alfanuméricas com 4 a 20 caracteres.
     matricula: {
       type: String,
       required: [true, 'Matrícula é obrigatória'],
       unique: true,
-      match: [/^\d{6,10}$/, 'Matrícula inválida (use apenas números)'],
+      // Aceita dígitos, letras maiúsculas/minúsculas e hífens — cobre padrões reais do IFC
+      match: [/^[a-zA-Z0-9\-]{4,20}$/, 'Matrícula inválida (use entre 4 e 20 caracteres alfanuméricos)'],
     },
 
     // Informações do perfil
@@ -105,6 +109,15 @@ const customizacaoSchema = new mongoose.Schema(
     },
 
     // Personalização adicional
+    avatar_url: {
+      type: String,
+      match: [
+        /^https?:\/\/.+/,
+        'Avatar URL deve ser uma URL válida (http ou https)',
+      ],
+      default: '',
+    },
+
     banner_url: {
       type: String,
       match: [

@@ -1,108 +1,62 @@
 import Link from 'next/link';
-import { PlusSquare, Search, UserCircle2 } from 'lucide-react';
-import PostCard from '@/components/PostCard';
+import { PlusSquare, UserCircle2 } from 'lucide-react';
+import SearchClient from '@/components/SearchClient';
 import { serverGet } from '@/lib/server-api';
-import type { ApiSuccess, Post } from '@/types';
+import type { ApiSuccess } from '@/types';
 
 type MePayload = {
   id: string;
 };
-
-async function getFeed() {
-  const response = await serverGet<ApiSuccess<Post[]>>('/postagens/feed?page=1&limit=50');
-  return response?.data || [];
-}
 
 async function getMe() {
   const response = await serverGet<ApiSuccess<MePayload>>('/usuarios/me');
   return response?.data || null;
 }
 
-function filtrarPosts(feed: Post[], query: string) {
-  const term = query.trim().toLowerCase();
-
-  if (!term) {
-    return [];
-  }
-
-  return feed.filter((post) => {
-    const autor = post.autor_id?.perfil?.nome || '';
-    const searchable = [
-      post.titulo,
-      post.descricao || '',
-      post.subtipo || '',
-      post.tipo,
-      post.conteudo?.texto_longo || '',
-      autor,
-    ]
-      .join(' ')
-      .toLowerCase();
-
-    return searchable.includes(term);
-  });
-}
-
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; tipo?: string }>;
 }) {
   const params = await searchParams;
   const query = String(params?.q || '');
+  const tipo = String(params?.tipo || 'todos');
 
-  const [feed, me] = await Promise.all([getFeed(), getMe()]);
-  const resultados = filtrarPosts(feed, query);
+  const me = await getMe();
   const profileHref = me?.id ? `/profile/${me.id}` : '/home';
 
   return (
     <main className="min-h-screen bg-if-bg text-if-text">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
-        <header className="mb-6 flex flex-wrap items-center gap-3 rounded-main bg-if-card p-4 md:flex-nowrap md:px-6">
-          {/*
-            O botao de nova postagem tambem aparece na tela de busca.
-            O que faz: mantem o mesmo atalho de criacao presente na Home.
-            Por que assim: consistencia de navegacao reduz friccao entre telas.
-            Fluxo de dados: clique -> /post/new -> submissao do formulario -> retorno para Home.
-          */}
+        <header className="mb-8 flex flex-wrap items-center gap-3 rounded-main bg-if-card p-4 md:flex-nowrap md:px-6 shadow-card border border-white/5">
           <Link
             href="/post/new"
-            className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-bg"
+            className="inline-flex items-center gap-2 rounded-full bg-if-olive px-6 py-2.5 text-sm font-black text-if-bg hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-if-olive/20"
           >
             <PlusSquare size={18} /> Nova postagem
           </Link>
 
-          <form action="/search" method="get" className="flex flex-1 items-center gap-2 rounded-full bg-black/25 px-4 py-3">
-            <Search size={18} className="text-if-text/70" />
-            <input
-              name="q"
-              defaultValue={query}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-if-text/50"
-              placeholder="Busque projetos, poemas, artistas e orientadores..."
-            />
-          </form>
+          <div className="flex-1 text-center hidden md:block">
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-if-text/20">Centro de Pesquisa IF REDE</span>
+          </div>
+
           <Link
             href={profileHref}
-            className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-bg"
+            className="inline-flex items-center gap-2 rounded-full bg-if-olive px-6 py-2.5 text-sm font-black text-if-bg hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-if-olive/20"
           >
             <UserCircle2 size={18} /> Meu Perfil
           </Link>
         </header>
 
-        <section className="rounded-main bg-if-card p-6">
-          <h1 className="text-xl font-semibold">Resultados da busca</h1>
-          <p className="mt-1 text-sm text-if-text/70">
-            {query.trim() ? `Termo pesquisado: ${query}` : 'Digite um termo para pesquisar no feed.'}
-          </p>
+        <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="mb-10">
+            <h1 className="text-4xl md:text-6xl font-black text-if-purple tracking-tighter">O que você <br/> quer <span className="text-if-olive">descobrir</span> hoje?</h1>
+            <p className="text-if-text/40 mt-4 max-w-lg font-medium text-lg italic border-l-4 border-if-olive/30 pl-6">
+              Navegue pelo repositório acadêmico mais completo do IFC. Projetos, artes, áudios e conhecimento sem fronteiras.
+            </p>
+          </div>
 
-          {resultados.length > 0 ? (
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {resultados.map((post) => (
-                <PostCard key={post._id} post={post} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-5 rounded-main bg-black/20 p-6 text-if-text/70">Nao ha resultados.</div>
-          )}
+          <SearchClient initialQuery={query} initialTipo={tipo} />
         </section>
       </div>
     </main>

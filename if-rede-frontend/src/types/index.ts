@@ -11,6 +11,7 @@ export interface Perfil {
 export interface Customizacao {
   cor_fundo?: string;
   cor_botoes?: string;
+  avatar_url?: string;
   banner_url?: string;
   medalhas?: string[];
 }

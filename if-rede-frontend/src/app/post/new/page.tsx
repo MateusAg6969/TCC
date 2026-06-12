@@ -11,7 +11,7 @@ import type { ApiSuccess, TagSubtipo } from '@/types';
 type FormState = {
   titulo: string;
   descricao: string;
-  tipo: 'texto' | 'imagem' | 'audio';
+  tipo: 'texto' | 'imagem' | 'audio' | 'video';
   texto_longo: string;
   subtipo_tag_id: string;
 };
@@ -194,8 +194,9 @@ export default function NewPostPage() {
       // Navegacao apos sucesso: retorna ao feed para feedback imediato de publicacao.
       router.push('/home');
       router.refresh();
-    } catch {
-      setStatus({ ok: false, message: 'Nao foi possivel publicar agora. Tente novamente.' });
+    } catch (error: any) {
+      const msg = error.response?.data?.message || 'Nao foi possivel publicar agora. Tente novamente.';
+      setStatus({ ok: false, message: msg });
     } finally {
       setLoading(false);
     }
@@ -249,6 +250,7 @@ export default function NewPostPage() {
               <option value="texto">Texto</option>
               <option value="imagem">Imagem</option>
               <option value="audio">Audio</option>
+              <option value="video">Vídeo</option>
             </select>
           </label>
 
@@ -291,7 +293,9 @@ export default function NewPostPage() {
                   ? 'image/*'
                   : form.tipo === 'audio'
                     ? 'audio/*'
-                    : '.txt,.pdf,.doc,.docx,text/plain,application/pdf'
+                    : form.tipo === 'video'
+                      ? 'video/*'
+                      : '.txt,.pdf,.doc,.docx,text/plain,application/pdf'
               }
             />
           </label>

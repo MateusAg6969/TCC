@@ -229,8 +229,8 @@ const postagemSchema = new mongoose.Schema(
     tipo: {
       type: String,
       enum: {
-        values: ['audio', 'imagem', 'texto'],
-        message: 'Tipo deve ser: audio, imagem ou texto',
+        values: ['audio', 'imagem', 'texto', 'video'],
+        message: 'Tipo deve ser: audio, imagem, texto ou video',
       },
       required: [true, 'Tipo de conteúdo é obrigatório'],
     },

@@ -80,21 +80,34 @@ export default function PostCard({ post }: { post: Post }) {
 
   const tipo = post.tipo;
   const arquivoUrl = resolveAssetUrl(post.conteudo?.url);
+  const autorId = post.autor_id?._id || (post.autor_id as any);
+  const avatarUrl = (post.autor_id as any)?.customizacao?.avatar_url;
 
   return (
     <article className="group overflow-hidden rounded-main bg-if-card border border-if-purple/10 transition-all hover:border-if-purple/30 text-if-text shadow-card">
       <header className="p-4 flex items-center justify-between border-b border-if-purple/5">
-        <div>
-          <h3 className="line-clamp-1 text-lg font-bold tracking-tight">{post.titulo}</h3>
-          <p className="text-xs font-medium text-if-purple/60">
-            por{' '}
-            <Link 
-              href={`/profile/${post.autor_id?.perfil?.nome || 'usuario'}`}
-              className="text-if-purple font-bold hover:underline transition-all"
-            >
-              {post.autor_id?.perfil?.nome || 'Acadêmico'}
+        <div className="flex items-center gap-3">
+          <Link 
+            href={`/profile/${autorId}`}
+            className="h-10 w-10 rounded-xl bg-if-purple/20 flex items-center justify-center font-black border border-white/5 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-cover bg-center"
+            style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : {}}
+          >
+            {!avatarUrl && (post.autor_id?.perfil?.nome || 'U').charAt(0).toUpperCase()}
+          </Link>
+          <div>
+            <Link href={`/post/${post._id}`}>
+              <h3 className="line-clamp-1 text-lg font-bold tracking-tight hover:text-if-purple transition-colors">{post.titulo}</h3>
             </Link>
-          </p>
+            <p className="text-xs font-medium text-if-purple/60">
+              por{' '}
+              <Link 
+                href={`/profile/${autorId}`}
+                className="text-if-purple font-bold hover:underline transition-all"
+              >
+                {post.autor_id?.perfil?.nome || 'Acadêmico'}
+              </Link>
+            </p>
+          </div>
         </div>
         <div className="flex flex-col items-end">
           <span className="rounded-full bg-if-purple/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-if-purple border border-if-purple/20">
@@ -107,7 +120,7 @@ export default function PostCard({ post }: { post: Post }) {
       </header>
 
       {/* Área de Conteúdo */}
-      <div className="p-4">
+      <Link href={`/post/${post._id}`} className="block p-4 group-hover:bg-white/5 transition-colors">
         {tipo === 'texto' && (
           <div className="rounded-xl bg-if-bg/50 p-4 border border-if-purple/5">
             <p className="leading-relaxed text-if-text/90 italic">
@@ -122,7 +135,7 @@ export default function PostCard({ post }: { post: Post }) {
               src={arquivoUrl} 
               alt={post.titulo} 
               fill 
-              className="object-cover transition-transform duration-500 group-hover:scale-105" 
+              className="object-cover transition-transform duration-500 group-hover:scale-110" 
               unoptimized 
             />
           </div>
@@ -139,23 +152,18 @@ export default function PostCard({ post }: { post: Post }) {
                 <p className="text-[10px] text-gray-500">Streaming via Servidor IF REDE</p>
               </div>
             </div>
-            <audio className="h-10 w-full rounded-full bg-white/50" controls src={arquivoUrl}>
-              Seu navegador não suporta áudio.
-            </audio>
           </div>
         )}
 
-        {tipo === 'texto' && !post.conteudo?.texto_longo && arquivoUrl && (
-          <a
-            href={arquivoUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-if-olive bg-if-olive/5 py-3 text-sm font-bold text-if-olive transition hover:bg-if-olive hover:text-white"
-          >
-            <Share2 size={16} /> Abrir Documento Acadêmico
-          </a>
+        {tipo === 'video' && arquivoUrl && (
+          <div className="relative aspect-video overflow-hidden rounded-xl border border-if-purple/10 bg-black flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+            <div className="z-20 flex h-12 w-12 items-center justify-center rounded-full bg-if-olive text-if-bg shadow-xl group-hover:scale-110 transition-transform">
+              <Sparkles size={24} />
+            </div>
+          </div>
         )}
-      </div>
+      </Link>
 
       {/* Footer com Interações */}
       <footer className="bg-if-purple/5 p-3 px-4 flex items-center justify-between">

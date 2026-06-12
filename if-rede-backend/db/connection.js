@@ -51,7 +51,7 @@ async function conectar() {
       console.warn('⚠️ Falha ao conectar ao MongoDB Local. Tentando In-Memory DB...');
       
       const { MongoMemoryServer } = require('mongodb-memory-server');
-      const mongod = await MongoMemoryServer.create();
+      const mongod = await MongoMemoryServer.create({ instance: { timeout: 60000 } });
       const uri = mongod.getUri();
       
       console.log(`ℹ MongoDB In-Memory iniciado em: ${uri}`);
