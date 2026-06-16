@@ -18,6 +18,9 @@ const palavraFiltroSchema = require('../schemas/palavra-filtro.schema');
 const tagSubtipoSchema = require('../schemas/tag-subtipo.schema');
 const solicitacaoTagSchema = require('../schemas/solicitacao-tag.schema');
 const notificacaoSchema = require('../schemas/notificacao.schema');
+const medalhaSchema = require('../schemas/medalha.schema');
+const usuarioMedalhaSchema = require('../schemas/usuario-medalha.schema');
+const portfolioItemSchema = require('../schemas/portfolio-item.schema');
 
 // ============================================================================
 // CRIAR MODELOS
@@ -28,6 +31,24 @@ const notificacaoSchema = require('../schemas/notificacao.schema');
  * Representa usuários da rede social IF REDE
  */
 const Usuario = mongoose.model('Usuario', usuarioSchema);
+
+/**
+ * Modelo Medalha
+ * Conquistas acadêmicas
+ */
+const Medalha = mongoose.model('Medalha', medalhaSchema);
+
+/**
+ * Modelo UsuarioMedalha
+ * Relacionamento entre usuarios e medalhas
+ */
+const UsuarioMedalha = mongoose.model('UsuarioMedalha', usuarioMedalhaSchema);
+
+/**
+ * Modelo PortfolioItem
+ * Itens fixados no portfolio do usuario
+ */
+const PortfolioItem = mongoose.model('PortfolioItem', portfolioItemSchema);
 
 /**
  * Modelo Postagem
@@ -98,4 +119,7 @@ module.exports = {
   TagSubtipo,
   SolicitacaoTag,
   Notificacao,
+  Medalha,
+  UsuarioMedalha,
+  PortfolioItem,
 };

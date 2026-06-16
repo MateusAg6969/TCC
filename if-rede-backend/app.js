@@ -14,6 +14,9 @@ const postagensRoutes = require('./routes/postagens.routes');
 const filtroPalavrasRoutes = require('./routes/filtro-palavras.routes');
 const tagsRoutes = require('./routes/tags.routes');
 const notificacoesRoutes = require('./routes/notificacoes.routes');
+const medalhasRoutes = require('./routes/medalhas.routes');
+const portfolioRoutes = require('./routes/portfolio.routes');
+const moderacaoRoutes = require('./routes/moderacao.routes');
 const { responseMiddleware } = require('./middleware/response.middleware');
 const { notFoundMiddleware, errorMiddleware } = require('./middleware/error.middleware');
 
@@ -70,6 +73,9 @@ app.use('/comentarios', comentariosRoutes);
 app.use('/filtro-palavras', filtroPalavrasRoutes);
 app.use('/tags', tagsRoutes);
 app.use('/notificacoes', notificacoesRoutes);
+app.use('/medalhas', medalhasRoutes);
+app.use('/portfolio', portfolioRoutes);
+app.use('/admin/moderation', moderacaoRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

@@ -3,25 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, MessageCircle, Repeat2, Share2 } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown } from 'lucide-react';
 import type { Post } from '@/types';
 import { useAuth } from '@/context/AuthContext';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
+import ContadorAlcance from './ContadorAlcance';
 
 /**
  * ============================================================================
- * COMPONENTE: POSTCARD (Versão v2.4 - Navegação Global)
+ * COMPONENTE: POSTCARD (Versão v2.5 - Portfólio & Alcance)
  * ============================================================================
- * O que faz: Renderiza uma postagem com navegação profunda e curtidas sincronizadas.
- * Mudança: O nome do autor agora é um Link para seu perfil.
+ * O que faz: Renderiza uma postagem com suporte a fixação no portfólio e contador de alcance.
  */
-
-function resolveAssetUrl(url?: string) {
-  if (!url) return '';
-  if (/^https?:\/\//i.test(url)) return url;
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  return `${apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-}
 
 function textPreview(text?: string) {
   if (!text) return '';
@@ -29,11 +22,19 @@ function textPreview(text?: string) {
   return `${text.slice(0, 180)}...`;
 }
 
-export default function PostCard({ post }: { post: Post }) {
+interface PostCardProps {
+  post: Post;
+  isOwner?: boolean;
+  isPinned?: boolean;
+  onPin?: (position: number) => void;
+}
+
+export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardProps) {
   const { user } = useAuth();
   const [curtido, setCurtido] = useState(false);
   const [totalLikes, setTotalLikes] = useState(post.stats?.likes || 0);
   const [carregando, setCarregando] = useState(false);
+  const [showPinOptions, setShowPinOptions] = useState(false);
 
   // Efeito: Inicializa o estado de 'curtido' com base nos dados do usuário logado.
   useEffect(() => {
@@ -109,11 +110,58 @@ export default function PostCard({ post }: { post: Post }) {
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-end">
-          <span className="rounded-full bg-if-purple/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-if-purple border border-if-purple/20">
-            {tipo}
-          </span>
-          <p className="mt-1 text-[9px] text-gray-400 font-mono">
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
+            {isOwner && onPin && (
+              <div className="relative">
+                <button 
+                  onClick={() => setShowPinOptions(!showPinOptions)}
+                  className={`flex h-8 items-center gap-1 rounded-lg px-2 text-[10px] font-black uppercase transition-all ${
+                    isPinned 
+                      ? 'bg-if-purple text-white' 
+                      : 'bg-white/5 text-if-text/40 hover:bg-if-purple/20 hover:text-if-purple'
+                  }`}
+                >
+                  <Pin size={12} fill={isPinned ? 'currentColor' : 'none'} />
+                  {isPinned ? 'Fixado' : 'Fixar'}
+                  <ChevronDown size={12} />
+                </button>
+
+                {showPinOptions && (
+                  <div className="absolute right-0 mt-1 w-32 rounded-xl bg-if-card border border-white/10 shadow-2xl z-30 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <p className="p-2 text-[9px] font-black text-if-text/30 uppercase border-b border-white/5 bg-black/20">Escolher Posição</p>
+                    {[1, 2, 3].map(pos => (
+                      <button
+                        key={pos}
+                        onClick={() => {
+                          onPin(pos);
+                          setShowPinOptions(false);
+                        }}
+                        className="w-full p-2 text-left text-[10px] font-bold hover:bg-if-purple hover:text-white transition-colors"
+                      >
+                        Posição #{pos}
+                      </button>
+                    ))}
+                    {isPinned && (
+                      <button
+                        onClick={() => {
+                          onPin(0); // Tratado no pai como desfixar se necessário ou apenas chama a rota
+                          setShowPinOptions(false);
+                        }}
+                        className="w-full p-2 text-left text-[10px] font-bold text-red-500 hover:bg-red-500 hover:text-white transition-colors border-t border-white/5"
+                      >
+                        Desafixar
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            <span className="rounded-full bg-if-purple/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-if-purple border border-if-purple/20">
+              {tipo}
+            </span>
+          </div>
+          <p className="text-[9px] text-gray-400 font-mono">
             ID: {post._id.slice(-6).toUpperCase()}
           </p>
         </div>
@@ -191,8 +239,15 @@ export default function PostCard({ post }: { post: Post }) {
           </button>
         </div>
 
-        <div className="text-[10px] font-medium text-gray-400">
-          Publicado em {new Date(post.createdAt || '').toLocaleDateString('pt-BR')}
+        <div className="flex items-center gap-4">
+          <ContadorAlcance 
+            postId={post._id} 
+            alcanceInicial={post.stats?.alcance || 0} 
+            isAutor={user?.id === autorId} 
+          />
+          <div className="text-[10px] font-medium text-gray-400">
+            {new Date(post.createdAt || '').toLocaleDateString('pt-BR')}
+          </div>
         </div>
       </footer>
     </article>

@@ -8,12 +8,27 @@ export interface Perfil {
   privacidade?: 'publico' | 'privado';
 }
 
+export interface Medalha {
+  _id: string;
+  nome: string;
+  descricao: string;
+  icone_url: string;
+  awarded_at?: string;
+}
+
+export interface PortfolioItem extends Post {
+  posicao: number;
+  fixado_em: string;
+}
+
 export interface Customizacao {
   cor_fundo?: string;
   cor_botoes?: string;
   avatar_url?: string;
   banner_url?: string;
-  medalhas?: string[];
+  medalhas?: Medalha[];
+  portfolio?: PortfolioItem[];
+  tema?: 'light' | 'dark';
 }
 
 export interface Usuario {
@@ -48,12 +63,23 @@ export interface Post {
     usuarios_que_curtiram?: string[];
     comentarios_count?: number;
     shares?: number;
+    alcance?: number;
   };
   autor_id?: {
     _id?: string;
     perfil?: {
       nome?: string;
     };
+  };
+  denuncias?: {
+    total: number;
+    motivos: Array<{
+      usuario_id: string;
+      motivo: string;
+      data: string;
+    }>;
+    bloqueado: boolean;
+    motivo_bloqueio?: string;
   };
   createdAt?: string;
   updatedAt?: string;
@@ -116,4 +142,30 @@ export interface Notificacao {
   lida: boolean;
   data_leitura?: string;
   criada_em: string;
+}
+
+export type HighlightType = 'NORMAL' | 'OFFICIAL_ANSWER' | 'PEDAGOGICAL_HIGHLIGHT';
+
+export interface Comentario {
+  _id: string;
+  postagem_id: string;
+  autor_id: {
+    _id: string;
+    perfil: {
+      nome: string;
+      status_vinculo?: 'estudante' | 'egresso' | 'servidor';
+    };
+    customizacao?: {
+      avatar_url?: string;
+    };
+  };
+  texto: string;
+  parent_id?: string | null;
+  highlight_type: HighlightType;
+  stats: {
+    likes: number;
+    usuarios_que_curtiram: string[];
+  };
+  respostas?: Comentario[];
+  createdAt: string;
 }

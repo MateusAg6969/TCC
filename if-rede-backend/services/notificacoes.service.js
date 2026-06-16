@@ -6,7 +6,8 @@
  * (likes, comentários, novos seguidores, etc).
  */
 
-const Notificacao = require('../schemas/notificacao.schema');
+const { Notificacao } = require('../models');
+const socket = require('../socket');
 
 // ============================================================================
 // Notificações de Like
@@ -23,6 +24,7 @@ exports.notificarLike = async (usuario_id, ator_id, postagem_id) => {
     });
 
     await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação de like:', erro);
@@ -46,6 +48,7 @@ exports.notificarLikeComentario = async (usuario_id, ator_id, comentario_id) => 
     });
 
     await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação de like no comentário:', erro);
@@ -67,6 +70,7 @@ exports.notificarComentario = async (usuario_id, ator_id, postagem_id, comentari
     });
 
     await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação de comentário:', erro);
@@ -88,6 +92,7 @@ exports.notificarNovoSeguidor = async (usuario_id, ator_id) => {
     });
 
     await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação de seguidor:', erro);
@@ -109,6 +114,7 @@ exports.notificarRepost = async (usuario_id, ator_id, postagem_id) => {
     });
 
     await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação de repost:', erro);
@@ -130,6 +136,7 @@ exports.notificarTag = async (usuario_id, ator_id, postagem_id) => {
     });
 
     await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação de tag:', erro);
@@ -151,6 +158,7 @@ exports.notificarRespostaComentario = async (usuario_id, ator_id, comentario_id)
     });
 
     await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação de resposta:', erro);
@@ -172,6 +180,7 @@ exports.criarNotificacaoCustomizada = async (dados) => {
     });
 
     await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação customizada:', erro);

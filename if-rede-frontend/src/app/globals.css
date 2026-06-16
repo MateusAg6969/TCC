@@ -19,6 +19,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@keyframes bell-shake {
+  0% { transform: rotate(0); }
+  15% { transform: rotate(15deg); }
+  30% { transform: rotate(-15deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-10deg); }
+  75% { transform: rotate(5deg); }
+  85% { transform: rotate(-5deg); }
+  100% { transform: rotate(0); }
+}
+
+.animate-bell-shake {
+  animation: bell-shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
 * {
   box-sizing: border-box;
 }

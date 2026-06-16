@@ -186,7 +186,21 @@ const statsSchema = new mongoose.Schema(
       min: 0,
     },
 
-    // Contagem de visualizações
+    // Contagem de visualizações únicas (alcance)
+    alcance: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    // IDs dos usuários que já visualizaram (para evitar duplicidade)
+    visualizadores: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'Usuario',
+      default: [],
+    },
+
+    // Contagem de visualizações brutas (já existente no projeto)
     visualizacoes: {
       type: Number,
       default: 0,
@@ -410,6 +424,9 @@ postagemSchema.index({ 'stats.usuarios_que_curtiram': 1 });
 
 // Denúncias
 postagemSchema.index({ 'denuncias.bloqueado': 1 });
+
+// Índice para otimizar a verificação de visualizadores únicos
+postagemSchema.index({ 'stats.visualizadores': 1 });
 
 // ============================================================================
 // MÉTODOS ÚTEIS

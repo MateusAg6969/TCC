@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { Usuario, Seguidor } = require('../models');
+const { Usuario, Seguidor, UsuarioMedalha, PortfolioItem } = require('../models');
 const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
 const { notificarNovoSeguidor } = require('../services/notificacoes.service');
 
@@ -24,12 +24,33 @@ router.get('/me', authMiddleware, async (req, res, next) => {
     }
 
     const rel = await contarRelacionamentos(usuario._id);
+    
+    // Buscar medalhas conquistadas
+    const medalhas = await UsuarioMedalha.find({ usuario_id: usuario._id })
+      .populate('medalha_id')
+      .sort({ awarded_at: -1 });
+
+    // Buscar itens do portfólio
+    const portfolio = await PortfolioItem.find({ usuario_id: usuario._id })
+      .populate('postagem_id')
+      .sort({ posicao: 1 });
 
     return res.success(
       {
         id: usuario._id,
         perfil: usuario.perfil,
-        customizacao: usuario.customizacao,
+        customizacao: {
+          ...usuario.customizacao.toObject?.(),
+          medalhas: medalhas.map(m => ({
+            ...m.medalha_id.toObject(),
+            awarded_at: m.awarded_at
+          })),
+          portfolio: portfolio.map(p => ({
+            ...p.postagem_id.toObject(),
+            posicao: p.posicao,
+            fixado_em: p.fixado_em
+          }))
+        },
         configuracoes: usuario.configuracoes,
         stats: {
           ...usuario.stats.toObject?.(),
@@ -121,11 +142,32 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
 
     const rel = await contarRelacionamentos(alvo._id);
 
+    // Buscar medalhas conquistadas
+    const medalhas = await UsuarioMedalha.find({ usuario_id: alvo._id })
+      .populate('medalha_id')
+      .sort({ awarded_at: -1 });
+
+    // Buscar itens do portfólio
+    const portfolio = await PortfolioItem.find({ usuario_id: alvo._id })
+      .populate('postagem_id')
+      .sort({ posicao: 1 });
+
     return res.success(
       {
         id: alvo._id,
         perfil: alvo.perfil,
-        customizacao: alvo.customizacao,
+        customizacao: {
+          ...alvo.customizacao.toObject?.(),
+          medalhas: medalhas.map(m => ({
+            ...m.medalha_id.toObject(),
+            awarded_at: m.awarded_at
+          })),
+          portfolio: portfolio.map(p => ({
+            ...p.postagem_id.toObject(),
+            posicao: p.posicao,
+            fixado_em: p.fixado_em
+          }))
+        },
         stats: {
           ...alvo.stats.toObject?.(),
           total_seguidores: rel.seguidores,

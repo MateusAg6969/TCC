@@ -20,6 +20,7 @@ export default function NotificationBell() {
   const { 
     notificacoes, 
     naoLidas, 
+    ultimasNotificacaoRecebida,
     marcarComoLida, 
     deletarNotificacao, 
     marcarTudasComoLidas,
@@ -84,7 +85,7 @@ export default function NotificationBell() {
             naoLidas > 0 
               ? 'text-if-purple fill-if-purple/10' 
               : 'text-gray-400 group-hover:text-white'
-          }`} 
+          } ${ultimasNotificacaoRecebida ? 'animate-bell-shake' : ''}`} 
         />
 
         {naoLidas > 0 && (
