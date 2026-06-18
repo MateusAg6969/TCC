@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const protectedPaths = ['/home', '/profile', '/search', '/post'];
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('ifrede_token')?.value;
 

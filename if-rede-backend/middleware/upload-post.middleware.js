@@ -8,10 +8,10 @@ const multer = require('multer');
 // - audio: 25MB (faixas curtas/medias)
 // - texto: 5MB (txt/pdf/docx, evitando uploads excessivos)
 const LIMITES_POR_TIPO = {
-  imagem: 10 * 1024 * 1024,
-  video: 50 * 1024 * 1024,
+  imagem: 25 * 1024 * 1024,
+  video: 25 * 1024 * 1024,
   audio: 25 * 1024 * 1024,
-  texto: 5 * 1024 * 1024,
+  texto: 25 * 1024 * 1024,
 };
 
 // Tipos MIME aceitos por categoria de postagem.
@@ -54,22 +54,17 @@ const storage = multer.diskStorage({
 const uploadPostArquivo = multer({
   storage,
   fileFilter: function validarMime(req, file, cb) {
-    const tipo = String(req.body.tipo || '').toLowerCase();
-    const permitidos = MIME_POR_TIPO[tipo] || [];
+    const todosPermitidos = Object.values(MIME_POR_TIPO).flat();
 
-    if (!tipo || !permitidos.length) {
-      return cb(new Error('Tipo de postagem invalido para upload.'));
-    }
-
-    if (!permitidos.includes(file.mimetype)) {
-      return cb(new Error('Tipo de arquivo nao permitido para o tipo de postagem informado.'));
+    if (!todosPermitidos.includes(file.mimetype)) {
+      return cb(new Error('Tipo de arquivo nao permitido para upload. Formato não seguro.'));
     }
 
     return cb(null, true);
   },
   limits: {
     // Limite global de seguranca; limite especifico e revalidado na rota por tipo.
-    fileSize: Math.max(...Object.values(LIMITES_POR_TIPO)),
+    fileSize: 25 * 1024 * 1024,
   },
 });
 

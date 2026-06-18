@@ -2,21 +2,24 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Heart, MessageCircle, Repeat2, Share2, Calendar, User, Tag } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Repeat2, Share2, Calendar, User, Tag, MoreHorizontal, Trash2, Link as LinkIcon } from 'lucide-react';
 import { serverGet } from '@/lib/server-api';
 import type { ApiSuccess, Post } from '@/types';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import DiscussionSection from '@/components/DiscussionSection';
 import ContadorAlcance from '@/components/ContadorAlcance';
 import api, { resolveAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, use } from 'react';
 
-export default function PostDetailsPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function PostDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { user } = useAuth();
+  const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showOptions, setShowOptions] = useState(false);
+  const [deletando, setDeletando] = useState(false);
   const hasRegistered = useRef(false);
 
   useEffect(() => {
@@ -51,8 +54,34 @@ export default function PostDetailsPage({ params }: { params: { id: string } }) 
   if (!post) return notFound();
 
   const arquivoUrl = resolveAssetUrl(post.conteudo?.url);
+  const mime = post.conteudo?.arquivo?.mimetype;
+  const renderTipo = mime?.startsWith('image/') ? 'imagem' 
+                   : mime?.startsWith('video/') ? 'video'
+                   : mime?.startsWith('audio/') ? 'audio'
+                   : 'texto';
+
   const autorId = post.autor_id?._id || (post.autor_id as any);
   const avatarUrl = (post.autor_id as any)?.customizacao?.avatar_url;
+
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/post/${post._id}`;
+    navigator.clipboard.writeText(url);
+    alert('Link copiado!');
+    setShowOptions(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Tem certeza que deseja excluir esta postagem? Esta ação não pode ser desfeita.')) return;
+    setDeletando(true);
+    try {
+      await api.delete(`/postagens/${post._id}`);
+      router.push('/home');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao excluir postagem.');
+      setDeletando(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-if-bg text-if-text pb-20">
@@ -99,6 +128,39 @@ export default function PostDetailsPage({ params }: { params: { id: string } }) 
                   </div>
                 </div>
               </div>
+
+              {/* Botão de Opções */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowOptions(!showOptions)}
+                  className="p-2 text-if-text/40 hover:text-if-purple hover:bg-if-purple/10 rounded-xl transition-colors"
+                  aria-label="Opções da postagem"
+                >
+                  <MoreHorizontal size={24} />
+                </button>
+                {showOptions && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-if-card border border-white/10 shadow-2xl z-30 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                    <p className="p-2 text-[9px] font-black text-if-text/30 uppercase border-b border-white/5 bg-black/20">Opções</p>
+                    
+                    <button
+                      onClick={handleCopyLink}
+                      className="w-full flex items-center gap-3 p-3 text-left text-xs font-bold hover:bg-white/5 transition-colors"
+                    >
+                      <LinkIcon size={14} /> Copiar Link
+                    </button>
+                    
+                    {user?.id === autorId && (
+                      <button
+                        onClick={handleDelete}
+                        disabled={deletando}
+                        className="w-full flex items-center gap-3 p-3 text-left text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors border-t border-white/5"
+                      >
+                        <Trash2 size={14} /> {deletando ? 'Excluindo...' : 'Excluir Postagem'}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
@@ -114,7 +176,7 @@ export default function PostDetailsPage({ params }: { params: { id: string } }) 
 
           {/* Área de Conteúdo Central */}
           <div className="p-6 md:p-10">
-            {post.tipo === 'imagem' && arquivoUrl && (
+            {renderTipo === 'imagem' && arquivoUrl && (
               <div className="relative aspect-video w-full overflow-hidden rounded-2xl shadow-xl border border-white/5">
                 <Image 
                   src={arquivoUrl} 
@@ -126,13 +188,14 @@ export default function PostDetailsPage({ params }: { params: { id: string } }) 
               </div>
             )}
 
-            {post.tipo === 'video' && arquivoUrl && (
+            {renderTipo === 'video' && arquivoUrl && (
               <div className="relative aspect-video w-full overflow-hidden rounded-2xl shadow-xl border border-white/5 bg-black">
                 <video 
-                  src={arquivoUrl} 
                   controls 
                   className="w-full h-full"
+                  playsInline
                 >
+                  <source src={arquivoUrl} type="video/mp4" />
                   Seu navegador não suporta vídeos.
                 </video>
               </div>
@@ -146,7 +209,7 @@ export default function PostDetailsPage({ params }: { params: { id: string } }) 
               </div>
             )}
 
-            {(post.tipo === 'audio' || post.tipo === 'msc') && arquivoUrl && (
+            {renderTipo === 'audio' && arquivoUrl && (
               <div className="rounded-2xl bg-gradient-to-br from-if-purple/10 to-if-olive/10 p-10 border border-white/10 text-center">
                 <div className="mx-auto w-24 h-24 rounded-full bg-if-purple flex items-center justify-center text-white mb-6 shadow-lg shadow-if-purple/40 animate-pulse">
                   <Tag size={40} />
@@ -159,8 +222,8 @@ export default function PostDetailsPage({ params }: { params: { id: string } }) 
               </div>
             )}
 
-            {post.tipo === 'texto' && !post.conteudo?.texto_longo && arquivoUrl && (
-              <div className="rounded-2xl bg-if-olive/5 p-10 border-2 border-dashed border-if-olive/20 text-center">
+            {renderTipo === 'texto' && arquivoUrl && (
+              <div className="rounded-2xl bg-if-olive/5 p-10 border-2 border-dashed border-if-olive/20 text-center mt-6">
                 <h3 className="text-xl font-bold text-if-olive mb-4">Documento Acadêmico Disponível</h3>
                 <a
                   href={arquivoUrl}

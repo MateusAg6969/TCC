@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LogOut, PlusSquare, Search, Sparkles, UserCircle2 } from 'lucide-react';
+import { House, Settings, PlusSquare, Sparkles, UserCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import PostCard from '@/components/PostCard';
 import NotificationBell from '@/components/NotificationBell';
@@ -51,19 +51,26 @@ export default function HomeFeedClient({ feed, profileHref }: HomeFeedClientProp
           <NotificationBell />
           
           <Link
+            href="/home"
+            className="inline-flex items-center gap-2 rounded-full bg-if-olive/10 px-4 py-2 text-sm font-semibold text-if-olive hover:bg-if-olive hover:text-if-bg transition-all ml-auto md:ml-0"
+          >
+            <House size={18} /> Início
+          </Link>
+
+          <Link
             href={profileHref}
             className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-bg hover:brightness-110 transition-all"
           >
             <UserCircle2 size={18} /> Meu Perfil
           </Link>
 
-          <button
-            onClick={logout}
-            className="inline-flex items-center gap-2 rounded-full border border-red-500/50 text-red-500 bg-red-500/10 px-4 py-2 text-sm font-semibold hover:bg-red-500 hover:text-white transition-all ml-auto md:ml-0"
-            title="Sair da conta"
+          <Link
+            href="/configuracoes"
+            className="inline-flex items-center gap-2 rounded-full bg-if-purple/10 px-4 py-2 text-sm font-semibold text-if-purple hover:bg-if-purple hover:text-white transition-all"
+            title="Configurações"
           >
-            <LogOut size={18} /> Sair
-          </button>
+            <Settings size={18} /> Configurações
+          </Link>
         </header>
 
         <section className="mb-6 rounded-main bg-gradient-to-r from-if-card via-if-card to-if-olive/25 p-5 shadow-card">

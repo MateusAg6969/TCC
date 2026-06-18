@@ -1,6 +1,6 @@
 import ProfileClient from '@/components/ProfileClient';
 import { serverGet } from '@/lib/server-api';
-import type { ApiSuccess, Post } from '@/types';
+import type { ApiSuccess, Post, Medalha, PortfolioItem } from '@/types';
 
 type ProfilePayload = {
   id: string;
@@ -12,8 +12,10 @@ type ProfilePayload = {
   customizacao?: {
     cor_fundo?: string;
     cor_botoes?: string;
+    avatar_url?: string;
     banner_url?: string;
-    medalhas?: string[];
+    medalhas?: Medalha[];
+    portfolio?: PortfolioItem[];
   };
   stats?: {
     total_seguidores?: number;

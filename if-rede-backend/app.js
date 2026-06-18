@@ -30,7 +30,7 @@ const apiLimiter = rateLimit({
   message: { error: 'Muitas requisições. Tente novamente em instantes.' },
 });
 
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false }));
 
 const defaultCorsOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'];
 const corsOrigins = (process.env.CORS_ORIGINS || '')

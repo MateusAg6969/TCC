@@ -1,4 +1,4 @@
-export type PostType = 'texto' | 'imagem' | 'audio' | 'msc';
+export type PostType = 'texto' | 'imagem' | 'audio' | 'msc' | 'video';
 
 export interface Perfil {
   nome: string;
@@ -58,6 +58,7 @@ export interface Post {
       tamanho_bytes?: number;
     };
   };
+  tags?: string[];
   stats?: {
     likes?: number;
     usuarios_que_curtiram?: string[];

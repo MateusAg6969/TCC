@@ -2,13 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-<<<<<<< HEAD
-import { Award, House, LogOut, PlusSquare, Search, Users } from 'lucide-react';
-=======
-import { Award, House, PlusSquare, Search, Users } from 'lucide-react';
+import { Award, House, Settings, PlusSquare, Search, Users } from 'lucide-react';
 import { toast } from 'sonner';
->>>>>>> 1195be29257b4796f80e437d5d0e43c86fa384f5
-import type { Post } from '@/types';
+import type { Post, PortfolioItem, Medalha } from '@/types';
 import ProfileTabs from './ProfileTabs';
 import EditProfileModal from './EditProfileModal';
 import SocialSidePanel from './SocialSidePanel';
@@ -28,7 +24,8 @@ type ProfilePayload = {
     cor_botoes?: string;
     avatar_url?: string;
     banner_url?: string;
-    medalhas?: string[];
+    medalhas?: Medalha[];
+    portfolio?: PortfolioItem[];
   };
   stats?: {
     total_seguidores?: number;
@@ -141,19 +138,19 @@ export default function ProfileClient({
 
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-bg hover:brightness-110 transition-all"
+            className="inline-flex items-center gap-2 rounded-full bg-if-olive/10 px-4 py-2 text-sm font-semibold text-if-olive hover:bg-if-olive hover:text-if-bg transition-all ml-auto md:ml-0"
           >
-            <House size={18} /> Página principal
+            <House size={18} /> Início
           </Link>
 
           {ehProprioPerfil && (
-            <button
-              onClick={logout}
-              className="inline-flex items-center gap-2 rounded-full border border-red-500/50 text-red-500 bg-red-500/10 px-4 py-2 text-sm font-semibold hover:bg-red-500 hover:text-white transition-all ml-auto md:ml-0"
-              title="Sair da conta"
+            <Link
+              href="/configuracoes"
+              className="inline-flex items-center gap-2 rounded-full bg-if-purple/10 px-4 py-2 text-sm font-semibold text-if-purple hover:bg-if-purple hover:text-white transition-all"
+              title="Configurações"
             >
-              <LogOut size={18} /> Sair
-            </button>
+              <Settings size={18} /> Configurações
+            </Link>
           )}
         </header>
 

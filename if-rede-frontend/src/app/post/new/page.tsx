@@ -49,11 +49,6 @@ export default function NewPostPage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
 
-  const limitePorTipoMb = useMemo(() => {
-    if (form.tipo === 'imagem') return 10;
-    if (form.tipo === 'audio') return 25;
-    return 5;
-  }, [form.tipo]);
 
   // Atualiza qualquer campo textual mantendo o estado imutavel.
   // Entrada: nome do campo + valor digitado.
@@ -163,8 +158,8 @@ export default function NewPostPage() {
       return;
     }
 
-    if (arquivo.size > limitePorTipoMb * 1024 * 1024) {
-      setStatus({ ok: false, message: `Arquivo excede o limite de ${limitePorTipoMb}MB para ${form.tipo}.` });
+    if (arquivo.size > 25 * 1024 * 1024) {
+      setStatus({ ok: false, message: `Arquivo excede o limite unificado de 25MB.` });
       return;
     }
 
@@ -278,20 +273,14 @@ export default function NewPostPage() {
           )}
 
           <label className="block text-sm">
-            Arquivo da postagem (limite: {limitePorTipoMb}MB)
+            Arquivo da postagem (limite: 25MB)
             <input
               type="file"
-              onChange={(event) => setArquivo(event.target.files?.[0] || null)}
+              onChange={(event) => {
+                const file = event.target.files?.[0] || null;
+                setArquivo(file);
+              }}
               className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-              accept={
-                form.tipo === 'imagem'
-                  ? 'image/*'
-                  : form.tipo === 'audio'
-                    ? 'audio/*'
-                    : form.tipo === 'video'
-                      ? 'video/*'
-                      : '.txt,.pdf,.doc,.docx,text/plain,application/pdf'
-              }
             />
           </label>
 

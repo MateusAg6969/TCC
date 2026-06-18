@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown, MoreHorizontal, Trash2, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Post } from '@/types';
 import { useAuth } from '@/context/AuthContext';
@@ -37,6 +37,8 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
   const [totalLikes, setTotalLikes] = useState(post.stats?.likes || 0);
   const [carregando, setCarregando] = useState(false);
   const [showPinOptions, setShowPinOptions] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [deletando, setDeletando] = useState(false);
 
   // Efeito: Inicializa o estado de 'curtido' com base nos dados do usuário logado.
   useEffect(() => {
@@ -89,27 +91,55 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm('Tem certeza que deseja excluir esta postagem? Esta ação não pode ser desfeita.')) return;
+    setDeletando(true);
+    try {
+      await api.delete(`/postagens/${post._id}`);
+      toast.success('Postagem excluída com sucesso!');
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao excluir postagem.');
+      setDeletando(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/post/${post._id}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Link copiado!');
+    setShowOptions(false);
+  };
+
   const tipo = post.tipo;
+  const mime = post.conteudo?.arquivo?.mimetype;
+  const renderTipo = mime?.startsWith('image/') ? 'imagem' 
+                   : mime?.startsWith('video/') ? 'video'
+                   : mime?.startsWith('audio/') ? 'audio'
+                   : 'texto';
   const arquivoUrl = resolveAssetUrl(post.conteudo?.url);
   const autorId = post.autor_id?._id || (post.autor_id as any);
   const avatarUrl = (post.autor_id as any)?.customizacao?.avatar_url;
 
   return (
     <article className="group overflow-hidden rounded-main bg-if-card border border-if-purple/10 transition-all hover:border-if-purple/30 text-if-text shadow-card">
-      <header className="p-4 flex items-center justify-between border-b border-if-purple/5">
-        <div className="flex items-center gap-3">
+      <header className="p-4 flex items-center justify-between border-b border-if-purple/5 gap-4">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <Link 
             href={`/profile/${autorId}`}
-            className="h-10 w-10 rounded-xl bg-if-purple/20 flex items-center justify-center font-black border border-white/5 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-cover bg-center"
+            className="h-10 w-10 shrink-0 rounded-xl bg-if-purple/20 flex items-center justify-center font-black border border-white/5 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-cover bg-center"
             style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : {}}
           >
             {!avatarUrl && (post.autor_id?.perfil?.nome || 'U').charAt(0).toUpperCase()}
           </Link>
-          <div>
-            <Link href={`/post/${post._id}`}>
-              <h3 className="line-clamp-1 text-lg font-bold tracking-tight hover:text-if-purple transition-colors">{post.titulo}</h3>
+          <div className="min-w-0 flex-1">
+            <Link href={`/post/${post._id}`} className="block">
+              <h3 className="truncate text-lg font-bold tracking-tight hover:text-if-purple transition-colors" title={post.titulo}>
+                {post.titulo}
+              </h3>
             </Link>
-            <p className="text-xs font-medium text-if-purple/60">
+            <p className="truncate text-xs font-medium text-if-purple/60">
               por{' '}
               <Link 
                 href={`/profile/${autorId}`}
@@ -120,7 +150,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
             </p>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-col items-end gap-2 shrink-0">
           <div className="flex items-center gap-2">
             {isOwner && onPin && (
               <div className="relative">
@@ -170,6 +200,37 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
             <span className="rounded-full bg-if-purple/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-if-purple border border-if-purple/20">
               {tipo}
             </span>
+            <div className="relative">
+              <button 
+                onClick={(e) => { e.preventDefault(); setShowOptions(!showOptions); }}
+                className="p-1 text-if-text/40 hover:text-if-purple hover:bg-if-purple/10 rounded-lg transition-colors ml-1"
+                aria-label="Opções da postagem"
+              >
+                <MoreHorizontal size={16} />
+              </button>
+              {showOptions && (
+                <div className="absolute right-0 mt-2 w-48 rounded-xl bg-if-card border border-white/10 shadow-2xl z-30 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                  <p className="p-2 text-[9px] font-black text-if-text/30 uppercase border-b border-white/5 bg-black/20">Opções</p>
+                  
+                  <button
+                    onClick={(e) => { e.preventDefault(); handleCopyLink(); }}
+                    className="w-full flex items-center gap-3 p-3 text-left text-xs font-bold hover:bg-white/5 transition-colors"
+                  >
+                    <LinkIcon size={14} /> Copiar Link
+                  </button>
+                  
+                  {user?.id === autorId && (
+                    <button
+                      onClick={(e) => { e.preventDefault(); handleDelete(); }}
+                      disabled={deletando}
+                      className="w-full flex items-center gap-3 p-3 text-left text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors border-t border-white/5"
+                    >
+                      <Trash2 size={14} /> {deletando ? 'Excluindo...' : 'Excluir Postagem'}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <p className="text-[9px] text-gray-400 font-mono">
             ID: {post._id.slice(-6).toUpperCase()}
@@ -179,7 +240,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
 
       {/* Área de Conteúdo */}
       <Link href={`/post/${post._id}`} className="block p-4 group-hover:bg-white/5 transition-colors">
-        {tipo === 'texto' && (
+        {renderTipo === 'texto' && (
           <div className="rounded-xl bg-if-bg/50 p-4 border border-if-purple/5">
             <p className="leading-relaxed text-if-text/90 italic">
               "{textPreview(post.conteudo?.texto_longo)}"
@@ -187,7 +248,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
           </div>
         )}
 
-        {tipo === 'imagem' && arquivoUrl && (
+        {renderTipo === 'imagem' && arquivoUrl && (
           <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-if-purple/10">
             <Image 
               src={arquivoUrl} 
@@ -199,7 +260,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
           </div>
         )}
 
-        {(tipo === 'audio' || tipo === 'msc') && (
+        {renderTipo === 'audio' && arquivoUrl && (
           <div className="rounded-xl bg-if-purple/5 p-4 border border-if-purple/10">
             <div className="mb-3 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-if-purple text-white animate-pulse">
@@ -210,13 +271,40 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
                 <p className="text-[10px] text-gray-500">Streaming via Servidor IF REDE</p>
               </div>
             </div>
+            <audio 
+              className="w-full h-10 mt-2" 
+              controls 
+              src={arquivoUrl} 
+              onClick={(e) => e.preventDefault()} // impede clique de ir para a página do post
+            >
+              Seu navegador não suporta áudio.
+            </audio>
           </div>
         )}
 
-        {tipo === 'video' && arquivoUrl && (
-          <div className="relative aspect-video overflow-hidden rounded-xl border border-if-purple/10 bg-black flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-            <div className="z-20 flex h-12 w-12 items-center justify-center rounded-full bg-if-olive text-if-bg shadow-xl group-hover:scale-110 transition-transform">
+        {renderTipo === 'video' && arquivoUrl && (
+          <div className="relative aspect-video overflow-hidden rounded-xl border border-if-purple/10 bg-black flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+            <video 
+              src={arquivoUrl} 
+              className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+              muted 
+              loop 
+              playsInline 
+              onMouseEnter={(e) => {
+                const v = e.target as HTMLVideoElement;
+                const promise = v.play();
+                if (promise !== undefined) {
+                  promise.catch(err => console.warn('Autoplay prevented or unsupported:', err));
+                }
+              }}
+              onMouseLeave={(e) => {
+                const v = e.target as HTMLVideoElement;
+                v.pause();
+                v.currentTime = 0;
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
+            <div className="z-20 flex h-12 w-12 items-center justify-center rounded-full bg-if-olive text-if-bg shadow-xl group-hover:scale-110 transition-transform pointer-events-none">
               <Sparkles size={24} />
             </div>
           </div>

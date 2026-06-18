@@ -263,11 +263,3 @@ export default function NotificacoesPage() {
     </main>
   );
 }
-adas
-            </p>
-          </div>
-        )}
-      </div>
-    </main>
-  );
-}
