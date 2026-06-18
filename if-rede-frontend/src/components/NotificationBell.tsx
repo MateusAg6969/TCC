@@ -75,6 +75,7 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setMostrarDropdown(!mostrarDropdown)}
+        aria-label={naoLidas > 0 ? `Notificações, ${naoLidas} novas` : 'Notificações'}
         className="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-if-text transition-all hover:bg-if-purple hover:text-white active:scale-90 group"
         title="Notificações"
       >
@@ -115,6 +116,7 @@ export default function NotificationBell() {
                   e.stopPropagation();
                   marcarTudasComoLidas();
                 }}
+                aria-label="Limpar todas as notificações"
                 className="text-[10px] font-black text-if-olive hover:underline uppercase tracking-tighter"
               >
                 Limpar tudo
@@ -176,6 +178,7 @@ export default function NotificationBell() {
                         e.stopPropagation();
                         deletarNotificacao(notificacao._id);
                       }}
+                      aria-label="Excluir notificação"
                       className="p-2 rounded-lg bg-red-500/10 text-red-500/40 hover:text-red-500 hover:bg-red-500/20 transition-all"
                     >
                       <X size={14} />

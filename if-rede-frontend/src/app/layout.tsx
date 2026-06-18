@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 
 import { House } from "lucide-react";
 import Link from "next/link";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -32,6 +33,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-if-bg text-if-text">
+        <Toaster position="top-right" richColors />
         <Providers>
           {/* 
             Botão Global de Início

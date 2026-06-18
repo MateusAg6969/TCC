@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Award, House, PlusSquare, Search, Users } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Post } from '@/types';
 import ProfileTabs from './ProfileTabs';
 import EditProfileModal from './EditProfileModal';
@@ -87,6 +88,13 @@ export default function ProfileClient({
       }
     } catch (error) {
       console.error('Erro na ação social:', error);
+      
+      // Mostrar toast amigável ao usuário
+      if (profile.seguindo) {
+        toast.error('Não foi possível deixar de seguir. Tente novamente.');
+      } else {
+        toast.error('Erro ao seguir. Tente novamente mais tarde.');
+      }
     } finally {
       setCarregandoSeguir(false);
     }

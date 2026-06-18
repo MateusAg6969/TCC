@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Notificacao } from '@/types';
+import { toast } from 'sonner';
 
 interface NotificationContextType {
   notificacoes: Notificacao[];
@@ -65,7 +66,9 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       }
     } catch (err: any) {
       console.error('Erro ao buscar notificações:', err);
-      setErro(err.response?.data?.mensagem || 'Erro ao buscar notificações');
+      const mensagem = err.response?.data?.mensagem || 'Erro ao buscar notificações';
+      setErro(mensagem);
+      // Opcional: toast.error(mensagem); // Removido para evitar spam em polling
     } finally {
       setCarregando(false);
     }
@@ -94,6 +97,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         }
       } catch (err) {
         console.error('Erro ao marcar notificação como lida:', err);
+        toast.error('Erro ao atualizar notificação.');
       }
     },
     [token]
@@ -118,6 +122,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       }
     } catch (err) {
       console.error('Erro ao marcar todas as notificações como lidas:', err);
+      toast.error('Erro ao limpar notificações.');
     }
   }, [token]);
 
@@ -137,6 +142,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         }
       } catch (err) {
         console.error('Erro ao deletar notificação:', err);
+        toast.error('Não foi possível excluir a notificação.');
       }
     },
     [token]
@@ -158,6 +164,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       }
     } catch (err) {
       console.error('Erro ao deletar todas as notificações:', err);
+      toast.error('Erro ao excluir todas as notificações.');
     }
   }, [token]);
 

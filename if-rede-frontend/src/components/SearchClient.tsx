@@ -3,10 +3,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Filter, Users, ArrowRight } from 'lucide-react';
 import PostCard from '@/components/PostCard';
+import PostSkeleton from '@/components/PostSkeleton';
+import UserSkeleton from '@/components/UserSkeleton';
 import api from '@/lib/api';
 import type { Post } from '@/types';
 import Link from 'next/link';
 import SearchInput from './SearchInput';
+import { toast } from 'sonner';
 
 type SearchResults = {
   usuarios: any[];
@@ -44,6 +47,7 @@ export default function SearchClient({ initialQuery, initialTipo }: { initialQue
         });
       } catch (err) {
         console.error('Erro na busca:', err);
+        toast.error('Erro ao realizar busca. Verifique sua conexão.');
       } finally {
         setLoading(false);
       }
@@ -99,48 +103,56 @@ export default function SearchClient({ initialQuery, initialTipo }: { initialQue
       </div>
 
       {/* Seção de Usuários Encontrados */}
-      {resultados.usuarios.length > 0 && (
+      {(loading || resultados.usuarios.length > 0) && (
         <div className="animate-in fade-in slide-in-from-left-4 duration-500">
           <h3 className="text-sm font-black uppercase tracking-widest text-if-olive mb-4 flex items-center gap-2">
             <Users size={16} /> Acadêmicos Encontrados
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {resultados.usuarios.map((user) => (
-              <Link
-                key={user._id}
-                href={`/profile/${user._id}`}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-if-card border border-white/5 hover:border-if-purple/40 transition-all group shadow-sm"
-              >
-                <div 
-                  className="h-12 w-12 rounded-xl bg-if-purple/20 flex items-center justify-center font-black text-lg bg-cover bg-center border border-transparent group-hover:border-if-purple/30 transition-all"
-                  style={user.customizacao?.avatar_url ? { backgroundImage: `url(${user.customizacao.avatar_url})` } : {}}
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => <UserSkeleton key={i} />)
+            ) : (
+              resultados.usuarios.map((user) => (
+                <Link
+                  key={user._id}
+                  href={`/profile/${user._id}`}
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-if-card border border-white/5 hover:border-if-purple/40 transition-all group shadow-sm"
                 >
-                  {!user.customizacao?.avatar_url && (user.perfil?.nome || 'U').charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-if-text group-hover:text-if-purple transition-colors truncate">
-                    {user.perfil?.nome}
-                  </h4>
-                  <p className="text-[10px] text-if-text/40 font-bold uppercase tracking-tighter">Ver perfil acadêmico</p>
-                </div>
-                <ArrowRight size={16} className="text-if-text/20 group-hover:text-if-purple group-hover:translate-x-1 transition-all" />
-              </Link>
-            ))}
+                  <div 
+                    className="h-12 w-12 rounded-xl bg-if-purple/20 flex items-center justify-center font-black text-lg bg-cover bg-center border border-transparent group-hover:border-if-purple/30 transition-all"
+                    style={user.customizacao?.avatar_url ? { backgroundImage: `url(${user.customizacao.avatar_url})` } : {}}
+                  >
+                    {!user.customizacao?.avatar_url && (user.perfil?.nome || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-if-text group-hover:text-if-purple transition-colors truncate">
+                      {user.perfil?.nome}
+                    </h4>
+                    <p className="text-[10px] text-if-text/40 font-bold uppercase tracking-tighter">Ver perfil acadêmico</p>
+                  </div>
+                  <ArrowRight size={16} className="text-if-text/20 group-hover:text-if-purple group-hover:translate-x-1 transition-all" />
+                </Link>
+              ))
+            )}
           </div>
         </div>
       )}
 
       {/* Resultados de Postagens */}
       <div className="pt-4">
-        {resultados.postagens.length > 0 ? (
+        {(loading || resultados.postagens.length > 0) ? (
           <>
             <h3 className="text-sm font-black uppercase tracking-widest text-if-purple mb-6 flex items-center gap-2">
               <Users size={16} /> Postagens Relacionadas
             </h3>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 animate-in fade-in duration-500">
-              {resultados.postagens.map((post) => (
-                <PostCard key={post._id} post={post} />
-              ))}
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => <PostSkeleton key={i} />)
+              ) : (
+                resultados.postagens.map((post) => (
+                  <PostCard key={post._id} post={post} />
+                ))
+              )}
             </div>
           </>
         ) : (

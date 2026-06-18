@@ -2,6 +2,7 @@
 
 import { X, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import api from '@/lib/api';
 
 type Props = {
@@ -37,10 +38,13 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
         customizacao: { avatar_url: avatarUrl, banner_url: bannerUrl },
       };
       const res = await api.patch('/usuarios/me', payload);
+      toast.success('Perfil atualizado com sucesso!');
       onSave(res.data.data);
       onClose();
     } catch (err: any) {
-      setErro(err.response?.data?.error?.message || 'Erro ao atualizar perfil.');
+      const msg = err.response?.data?.error?.message || 'Erro ao atualizar perfil.';
+      setErro(msg);
+      toast.error(msg);
     } finally {
       setCarregando(false);
     }
@@ -51,7 +55,11 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
       <div className="w-full max-w-lg rounded-main bg-if-card p-6 text-if-text shadow-card my-auto">
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-xl font-semibold">Editar perfil</h3>
-          <button onClick={onClose} className="rounded-full bg-black/20 p-2 hover:bg-black/30">
+          <button 
+            onClick={onClose} 
+            aria-label="Fechar modal"
+            className="rounded-full bg-black/20 p-2 hover:bg-black/30"
+          >
             <X size={16} />
           </button>
         </div>

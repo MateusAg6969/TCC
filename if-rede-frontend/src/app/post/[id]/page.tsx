@@ -8,8 +8,17 @@ import { notFound } from 'next/navigation';
 function resolveAssetUrl(url?: string) {
   if (!url) return '';
   if (/^https?:\/\//i.test(url)) return url;
+  
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  return `${apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  
+  // Se a URL já começar com /uploads, não duplicamos
+  if (url.startsWith('/uploads') || url.startsWith('uploads')) {
+    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+    return `${apiUrl}${cleanUrl}`;
+  }
+
+  // Caso padrão: adiciona /uploads/postagens/
+  return `${apiUrl}/uploads/postagens/${url.startsWith('/') ? url.slice(1) : url}`;
 }
 
 async function getPost(id: string) {
@@ -147,17 +156,26 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ id
           {/* Footer de Interação */}
           <footer className="bg-white/5 p-6 md:px-10 flex flex-wrap items-center justify-between gap-6 border-t border-white/5">
             <div className="flex items-center gap-8">
-              <button className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-red-500 transition-all group">
+              <button 
+                aria-label={`Curtir, ${post.stats?.likes || 0} curtidas`}
+                className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-red-500 transition-all group"
+              >
                 <Heart size={28} className="group-hover:scale-110 transition-transform" />
                 {post.stats?.likes || 0}
               </button>
               
-              <button className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-if-purple transition-all group">
+              <button 
+                aria-label={`Comentar, ${post.stats?.comentarios_count || 0} comentários`}
+                className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-if-purple transition-all group"
+              >
                 <MessageCircle size={28} className="group-hover:scale-110 transition-transform" />
                 {post.stats?.comentarios_count || 0}
               </button>
               
-              <button className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-if-purple transition-all group">
+              <button 
+                aria-label={`Republicar, ${post.stats?.shares || 0} republicações`}
+                className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-if-purple transition-all group"
+              >
                 <Repeat2 size={28} className="group-hover:scale-110 transition-transform" />
                 {post.stats?.shares || 0}
               </button>
