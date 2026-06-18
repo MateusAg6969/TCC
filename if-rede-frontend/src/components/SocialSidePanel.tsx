@@ -27,6 +27,7 @@ export default function SocialSidePanel({ isOpen, onClose, userId, type, userNam
           setList(res.data.data || []);
         } catch (err) {
           console.error('Erro ao carregar lista social:', err);
+          toast.error('Não foi possível carregar a lista. Tente novamente.');
         } finally {
           setLoading(false);
         }
@@ -59,6 +60,7 @@ export default function SocialSidePanel({ isOpen, onClose, userId, type, userNam
           </div>
           <button 
             onClick={onClose}
+            aria-label="Fechar painel"
             className="p-2 rounded-full bg-white/5 hover:bg-if-purple hover:text-white transition-all active:scale-90"
           >
             <X size={20} />

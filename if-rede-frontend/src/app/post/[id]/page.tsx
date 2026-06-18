@@ -177,17 +177,26 @@ export default function PostDetailsPage({ params }: { params: { id: string } }) 
           {/* Footer de Interação */}
           <footer className="bg-white/5 p-6 md:px-10 flex flex-wrap items-center justify-between gap-6 border-t border-white/5">
             <div className="flex items-center gap-8">
-              <button className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-red-500 transition-all group">
+              <button 
+                aria-label={`Curtir, ${post.stats?.likes || 0} curtidas`}
+                className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-red-500 transition-all group"
+              >
                 <Heart size={28} className="group-hover:scale-110 transition-transform" />
                 {post.stats?.likes || 0}
               </button>
               
-              <button className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-if-purple transition-all group">
+              <button 
+                aria-label={`Comentar, ${post.stats?.comentarios_count || 0} comentários`}
+                className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-if-purple transition-all group"
+              >
                 <MessageCircle size={28} className="group-hover:scale-110 transition-transform" />
                 {post.stats?.comentarios_count || 0}
               </button>
               
-              <button className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-if-purple transition-all group">
+              <button 
+                aria-label={`Republicar, ${post.stats?.shares || 0} republicações`}
+                className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-if-purple transition-all group"
+              >
                 <Repeat2 size={28} className="group-hover:scale-110 transition-transform" />
                 {post.stats?.shares || 0}
               </button>

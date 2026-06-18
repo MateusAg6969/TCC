@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Notificacao } from '@/types';
+import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { io, Socket } from 'socket.io-client';
 
@@ -170,6 +171,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         }
       } catch (err) {
         console.error('Erro ao marcar notificação como lida:', err);
+        toast.error('Erro ao atualizar notificação.');
       }
     },
     [token, API_URL]
@@ -186,10 +188,12 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         setNaoLidas(0);
       }
     } catch (err) {
-      console.error('Erro ao marcar todas como lidas:', err);
+      console.error('Erro ao marcar todas as notificações como lidas:', err);
+      toast.error('Erro ao limpar notificações.');
     }
   }, [token, API_URL]);
 
+  // Deletar notificação
   const deletarNotificacao = useCallback(async (id: string) => {
     if (!token) return;
     try {
@@ -201,6 +205,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       }
     } catch (err) {
       console.error('Erro ao deletar notificação:', err);
+      toast.error('Não foi possível excluir a notificação.');
     }
   }, [token, API_URL]);
 
@@ -215,7 +220,8 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         setNaoLidas(0);
       }
     } catch (err) {
-      console.error('Erro ao deletar todas:', err);
+      console.error('Erro ao deletar todas as notificações:', err);
+      toast.error('Erro ao excluir todas as notificações.');
     }
   }, [token, API_URL]);
 

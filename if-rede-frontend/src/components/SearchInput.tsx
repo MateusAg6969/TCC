@@ -115,6 +115,7 @@ export default function SearchInput({
       {query && (
         <button 
           onClick={() => { setQuery(''); onSearch?.(''); }}
+          aria-label="Limpar busca"
           className="absolute inset-y-0 right-4 flex items-center text-if-text/20 hover:text-if-text/60 transition-colors z-20"
         >
           <X size={18} />
@@ -133,6 +134,7 @@ export default function SearchInput({
                 <div className="flex items-center justify-between hover:bg-if-purple/10 transition-colors">
                   <button
                     onClick={() => handleSelectSugestao(item)}
+                    aria-label={`Buscar por ${item}`}
                     className="flex-1 flex items-center gap-3 px-4 py-3 text-left"
                   >
                     <Search size={12} className="text-if-text/20" />
@@ -140,6 +142,7 @@ export default function SearchInput({
                   </button>
                   <button
                     onClick={(e) => removerDoHistorico(e, item)}
+                    aria-label={`Remover ${item} do histórico`}
                     className="mr-2 p-1.5 rounded-lg hover:bg-red-500/20 text-if-text/20 hover:text-red-500 transition-all opacity-0 group-hover/item:opacity-100"
                   >
                     <X size={12} />

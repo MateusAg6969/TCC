@@ -70,6 +70,7 @@ export default function NotificacoesPage() {
         <div className="mb-8">
           <button
             onClick={() => router.back()}
+            aria-label="Voltar para o Feed"
             className="flex items-center gap-2 text-if-purple hover:bg-if-purple/10 px-3 py-1.5 rounded-full transition-all mb-6 font-bold text-sm"
           >
             <ArrowLeft size={18} /> Voltar para o Feed
@@ -255,6 +256,14 @@ export default function NotificacoesPage() {
           <div className="mt-8 text-center">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Mostrando {notificacoesFiltradas.length} de {notificacoes.length} notificações registradas
+            </p>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+adas
             </p>
           </div>
         )}

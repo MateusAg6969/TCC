@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Post } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import api, { resolveAssetUrl } from '@/lib/api';
@@ -15,6 +16,7 @@ import ContadorAlcance from './ContadorAlcance';
  * ============================================================================
  * O que faz: Renderiza uma postagem com suporte a fixação no portfólio e contador de alcance.
  */
+
 
 function textPreview(text?: string) {
   if (!text) return '';
@@ -71,6 +73,14 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
       }
     } catch (error) {
       console.error('Erro ao processar curtida:', error);
+      
+      // Mostrar toast amigável ao usuário
+      if (novoEstado) {
+        toast.error('Não foi possível curtir. Verifique sua conexão e tente novamente.');
+      } else {
+        toast.error('Não foi possível remover a curtida. Tente novamente.');
+      }
+
       // Reverter estado em caso de falha na rede/servidor
       setCurtido(!novoEstado);
       setTotalLikes(totalLikes);
@@ -219,6 +229,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
           <button 
             onClick={handleLike}
             disabled={!user || carregando}
+            aria-label={curtido ? 'Descurtir' : `Curtir, ${totalLikes} curtidas`}
             className={`flex items-center gap-2 text-sm font-bold transition-all duration-300 ${
               curtido ? 'text-red-500 scale-110' : 'text-gray-500 hover:text-if-purple'
             }`}
@@ -230,11 +241,17 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
             {totalLikes}
           </button>
           
-          <button className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-if-purple transition-colors">
+          <button 
+            aria-label={`Comentar, ${post.stats?.comentarios_count || 0} comentários`}
+            className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-if-purple transition-colors"
+          >
             <MessageCircle size={20} /> {post.stats?.comentarios_count || 0}
           </button>
           
-          <button className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-if-purple transition-colors">
+          <button 
+            aria-label={`Republicar, ${post.stats?.shares || 0} republicações`}
+            className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-if-purple transition-colors"
+          >
             <Repeat2 size={20} /> {post.stats?.shares || 0}
           </button>
         </div>
