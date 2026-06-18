@@ -13,8 +13,8 @@ const server = http.createServer(app);
 async function bootstrap() {
   await db.conectar();
   
-  // Limpar banco para novo ciclo de testes (Garante estado limpo solicitado pelo usuário)
-  if (process.env.NODE_ENV !== 'production') {
+  // Limpar banco para novo ciclo de testes se explicitamente configurado
+  if (process.env.CLEAR_DB_ON_START === 'true' && process.env.NODE_ENV !== 'production') {
     await db.limpar_banco();
   }
 
@@ -50,44 +50,50 @@ async function bootstrap() {
     console.log('✓ Medalhas iniciais criadas.');
   }
 
-  // Criar Usuários de Teste solicitados
+  // Criar Usuários de Teste solicitados (se não existirem)
   const senhaHash = await bcrypt.hash('12345678', 10);
 
   // 1. Usuário Estudante de Teste
-  await Usuario.create({
-    senha: senhaHash,
-    perfil: {
-      nome: 'Estudante de Teste',
-      email: 'estudante@test.com',
-      matricula: '20260001',
-      status_vinculo: 'estudante',
-      privacidade: 'publico',
-    },
-    configuracoes: {
-      mod_voluntario: false,
-      permitir_mensagens: true,
-      notificacoes: { likes: true, comentarios: true, seguidores: true, reposts: true }
-    }
-  });
-  console.log('✓ Usuário Estudante criado: estudante@test.com');
+  const estudanteExists = await Usuario.findOne({ 'perfil.email': 'estudante@test.com' });
+  if (!estudanteExists) {
+    await Usuario.create({
+      senha: senhaHash,
+      perfil: {
+        nome: 'Estudante de Teste',
+        email: 'estudante@test.com',
+        matricula: '20260001',
+        status_vinculo: 'estudante',
+        privacidade: 'publico',
+      },
+      configuracoes: {
+        mod_voluntario: false,
+        permitir_mensagens: true,
+        notificacoes: { likes: true, comentarios: true, seguidores: true, reposts: true }
+      }
+    });
+    console.log('✓ Usuário Estudante criado: estudante@test.com');
+  }
 
   // 2. Usuário Administrador / Servidor
-  await Usuario.create({
-    senha: senhaHash,
-    perfil: {
-      nome: 'Administrador IF REDE',
-      email: 'admin@ifc.edu.br',
-      matricula: 'ADMIN001',
-      status_vinculo: 'servidor', // Role de Professor/Orientador
-      privacidade: 'publico',
-    },
-    configuracoes: {
-      mod_voluntario: true, // Role de Moderador
-      permitir_mensagens: true,
-      notificacoes: { likes: true, comentarios: true, seguidores: true, reposts: true }
-    }
-  });
-  console.log('✓ Usuário Administrador criado: admin@ifc.edu.br');
+  const adminExists = await Usuario.findOne({ 'perfil.email': 'admin@ifc.edu.br' });
+  if (!adminExists) {
+    await Usuario.create({
+      senha: senhaHash,
+      perfil: {
+        nome: 'Administrador IF REDE',
+        email: 'admin@ifc.edu.br',
+        matricula: 'ADMIN001',
+        status_vinculo: 'servidor', // Role de Professor/Orientador
+        privacidade: 'publico',
+      },
+      configuracoes: {
+        mod_voluntario: true, // Role de Moderador
+        permitir_mensagens: true,
+        notificacoes: { likes: true, comentarios: true, seguidores: true, reposts: true }
+      }
+    });
+    console.log('✓ Usuário Administrador criado: admin@ifc.edu.br');
+  }
 
   server.listen(PORT, () => {
     console.log(`Servidor IF REDE rodando na porta ${PORT}`);

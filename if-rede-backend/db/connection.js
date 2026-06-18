@@ -29,6 +29,7 @@ const opcoes_conexao = {
   w: 'majority',
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
+  family: 4,
 };
 
 // ============================================================================
