@@ -1,38 +1,53 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Heart, MessageCircle, Repeat2, Share2, Calendar, User, Tag } from 'lucide-react';
 import { serverGet } from '@/lib/server-api';
 import type { ApiSuccess, Post } from '@/types';
 import { notFound } from 'next/navigation';
+import DiscussionSection from '@/components/DiscussionSection';
+import ContadorAlcance from '@/components/ContadorAlcance';
+import api, { resolveAssetUrl } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import { useEffect, useRef, useState } from 'react';
 
-function resolveAssetUrl(url?: string) {
-  if (!url) return '';
-  if (/^https?:\/\//i.test(url)) return url;
-  
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  
-  // Se a URL já começar com /uploads, não duplicamos
-  if (url.startsWith('/uploads') || url.startsWith('uploads')) {
-    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-    return `${apiUrl}${cleanUrl}`;
-  }
+export default function PostDetailsPage({ params }: { params: { id: string } }) {
+  const { id } = params;
+  const { user } = useAuth();
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+  const hasRegistered = useRef(false);
 
-  // Caso padrão: adiciona /uploads/postagens/
-  return `${apiUrl}/uploads/postagens/${url.startsWith('/') ? url.slice(1) : url}`;
-}
+  useEffect(() => {
+    async function fetchPost() {
+      try {
+        const res = await api.get<ApiSuccess<Post>>(`/postagens/${id}`);
+        setPost(res.data.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPost();
+  }, [id]);
 
-async function getPost(id: string) {
-  const res = await serverGet<ApiSuccess<Post>>(`/postagens/${id}`);
-  return res?.data || null;
-}
+  useEffect(() => {
+    if (!user || !post || hasRegistered.current) return;
+    
+    const autorId = post.autor_id?._id || (post.autor_id as any);
+    if (user.id === autorId) return;
+    
+    hasRegistered.current = true;
+    api.post(`/postagens/${id}/visualizar`).catch(() => {
+      // Em caso de erro real, permitimos tentar registrar em um futuro render/re-mount
+      hasRegistered.current = false;
+    });
+  }, [id, user, post]);
 
-export default async function PostDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const post = await getPost(id);
-
-  if (!post) {
-    notFound();
-  }
+  if (loading) return <div className="min-h-screen bg-if-bg flex items-center justify-center font-bold text-if-purple animate-pulse">Carregando...</div>;
+  if (!post) return notFound();
 
   const arquivoUrl = resolveAssetUrl(post.conteudo?.url);
   const autorId = post.autor_id?._id || (post.autor_id as any);
@@ -73,6 +88,11 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ id
                   </Link>
                   <div className="flex items-center gap-3 text-sm text-if-text/50 font-medium mt-1">
                     <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(post.createdAt || '').toLocaleDateString('pt-BR')}</span>
+                    <ContadorAlcance 
+                      postId={post._id} 
+                      alcanceInicial={post.stats?.alcance || 0} 
+                      isAutor={user?.id === autorId} 
+                    />
                     <span className="h-1 w-1 rounded-full bg-if-text/20" />
                     <span className="flex items-center gap-1 uppercase tracking-wider text-[10px] bg-if-purple/10 px-2 py-0.5 rounded text-if-purple border border-if-purple/20">{post.tipo}</span>
                   </div>
@@ -191,16 +211,8 @@ export default async function PostDetailsPage({ params }: { params: Promise<{ id
           </footer>
         </article>
 
-        {/* Comentários (Espaço reservado para futura implementação) */}
-        <section className="mt-8 rounded-3xl bg-if-card p-8 border border-white/5">
-          <h3 className="text-xl font-black mb-6 flex items-center gap-2">
-            <MessageCircle size={24} className="text-if-purple" />
-            Discussão Acadêmica
-          </h3>
-          <div className="text-center py-10 text-if-text/40 italic font-medium border-2 border-dashed border-white/5 rounded-2xl">
-            A seção de comentários será ativada em breve.
-          </div>
-        </section>
+        {/* Discussão Acadêmica Real */}
+        <DiscussionSection postId={post._id} />
       </div>
     </main>
   );

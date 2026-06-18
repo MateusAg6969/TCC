@@ -48,6 +48,22 @@ const comentarioSchema = new mongoose.Schema(
       data_moderacao: { type: Date, default: null },
       observacao: { type: String, default: '' },
     },
+    parent_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comentario',
+      default: null,
+      index: true,
+    },
+    highlight_type: {
+      type: String,
+      enum: ['NORMAL', 'OFFICIAL_ANSWER', 'PEDAGOGICAL_HIGHLIGHT'],
+      default: 'NORMAL',
+      index: true,
+    },
+    stats: {
+      likes: { type: Number, default: 0 },
+      usuarios_que_curtiram: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' }],
+    },
   },
   {
     timestamps: true,

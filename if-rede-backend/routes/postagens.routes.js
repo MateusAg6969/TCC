@@ -5,6 +5,7 @@ const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.m
 const { detectarPalavraEmPartes } = require('../services/palavras-filtro.service');
 const { uploadPostArquivo, LIMITES_POR_TIPO } = require('../middleware/upload-post.middleware');
 const { notificarLike } = require('../services/notificacoes.service');
+const postagensController = require('../controllers/postagens.controller');
 
 const router = express.Router();
 

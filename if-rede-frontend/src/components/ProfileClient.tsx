@@ -8,6 +8,7 @@ import type { Post } from '@/types';
 import ProfileTabs from './ProfileTabs';
 import EditProfileModal from './EditProfileModal';
 import SocialSidePanel from './SocialSidePanel';
+import BadgeGallery from './BadgeGallery';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -227,12 +228,20 @@ export default function ProfileClient({
 
         {/* Conteúdo Principal */}
         <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
-          <ProfileTabs posts={posts} userId={profile?.id || ''} />
+          <ProfileTabs 
+            posts={posts} 
+            userId={profile?.id || ''} 
+            isOwner={ehProprioPerfil || false}
+            initialPortfolio={profile?.customizacao?.portfolio}
+          />
 
           <aside className="space-y-6">
-            {/* Estatísticas */}
+            {/* Gamificação: Galeria de Selos */}
+            <BadgeGallery medalhas={profile?.customizacao?.medalhas} />
+
+            {/* Estatísticas Adicionais */}
             <div className="rounded-main bg-if-card p-6 border border-white/5 shadow-card">
-              <h3 className="mb-4 text-xl font-black text-if-purple">Insignias e Stats</h3>
+              <h3 className="mb-4 text-xl font-black text-if-purple uppercase tracking-tighter">Atividade</h3>
               <ul className="space-y-4">
                 <li className="flex items-center gap-3 font-bold text-if-text/80">
                   <div className="bg-if-olive/10 p-2 rounded-xl text-if-olive">

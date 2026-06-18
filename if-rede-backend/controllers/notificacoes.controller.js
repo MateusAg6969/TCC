@@ -5,7 +5,7 @@
  * Controladores para gerenciar notificações dos usuários.
  */
 
-const Notificacao = require('../schemas/notificacao.schema');
+const { Notificacao } = require('../models');
 
 // ============================================================================
 // GET: Listar notificações do usuário autenticado
@@ -15,7 +15,7 @@ const Notificacao = require('../schemas/notificacao.schema');
 exports.listarNotificacoes = async (req, res) => {
   try {
     const { pagina = 1, limite = 20, filtro = 'all' } = req.query;
-    const usuario_id = req.user._id;
+    const usuario_id = req.usuario.id;
 
     // Validar paginação
     const pag = Math.max(1, parseInt(pagina));
@@ -66,7 +66,7 @@ exports.listarNotificacoes = async (req, res) => {
 // GET /api/notificacoes/nao-lidas/contador
 exports.contarNaoLidas = async (req, res) => {
   try {
-    const usuario_id = req.user._id;
+    const usuario_id = req.usuario.id;
 
     const nao_lidas = await Notificacao.countDocuments({
       usuario_id,
@@ -94,7 +94,7 @@ exports.contarNaoLidas = async (req, res) => {
 exports.marcarComoLida = async (req, res) => {
   try {
     const { id } = req.params;
-    const usuario_id = req.user._id;
+    const usuario_id = req.usuario.id;
 
     const notificacao = await Notificacao.findOne({
       _id: id,
@@ -131,7 +131,7 @@ exports.marcarComoLida = async (req, res) => {
 // PATCH /api/notificacoes/marcar-tudo-lido
 exports.marcarTudasComoLidas = async (req, res) => {
   try {
-    const usuario_id = req.user._id;
+    const usuario_id = req.usuario.id;
 
     const resultado = await Notificacao.updateMany(
       {
@@ -168,7 +168,7 @@ exports.marcarTudasComoLidas = async (req, res) => {
 exports.deletarNotificacao = async (req, res) => {
   try {
     const { id } = req.params;
-    const usuario_id = req.user._id;
+    const usuario_id = req.usuario.id;
 
     const notificacao = await Notificacao.findOneAndDelete({
       _id: id,
@@ -202,7 +202,7 @@ exports.deletarNotificacao = async (req, res) => {
 // DELETE /api/notificacoes
 exports.deletarTodasNotificacoes = async (req, res) => {
   try {
-    const usuario_id = req.user._id;
+    const usuario_id = req.usuario.id;
 
     const resultado = await Notificacao.deleteMany({
       usuario_id,

@@ -11,6 +11,17 @@ export const api = axios.create({
   timeout: 12000,
 });
 
+/**
+ * Resolve a URL de um asset (imagem, áudio, etc) do backend.
+ * O que faz: Converte caminhos relativos em URLs absolutas usando a base da API.
+ */
+export function resolveAssetUrl(url?: string) {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
 export function setAuthHeader(token?: string) {
   if (!token) {
     delete api.defaults.headers.common.Authorization;
