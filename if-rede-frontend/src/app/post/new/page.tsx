@@ -72,9 +72,7 @@ export default function NewPostPage() {
       if (!token) return;
 
       try {
-        const response = await api.get<ApiSuccess<TagSubtipo[]>>(`/tags/subtipos?tipo=${form.tipo}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.get<ApiSuccess<TagSubtipo[]>>(`/tags/subtipos?tipo=${form.tipo}`);
 
         if (!ativo) return;
 
@@ -130,8 +128,7 @@ export default function NewPostPage() {
           nome_sugerido: novaTagNome.trim(),
           tipo: form.tipo,
           justificativa: novaTagJustificativa.trim(),
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
 
       setNovaTagNome('');
@@ -185,9 +182,7 @@ export default function NewPostPage() {
       payload.append('subtipo_tag_id', form.subtipo_tag_id || '');
       payload.append('arquivo', arquivo);
 
-      await api.post('/postagens', payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post('/postagens', payload);
 
       setStatus({ ok: true, message: 'Postagem publicada com sucesso.' });
 

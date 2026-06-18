@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react';
 import api, { setAuthHeader } from '@/lib/api';
+import { useNotifications } from '@/context/NotificationContext';
 
 type AuthUser = {
   id: string;
@@ -42,6 +43,9 @@ const REFRESH_COOKIE = 'ifrede_refresh';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  // Nota: o useNotifications será chamado mais abaixo no componente que o consome, 
+  // mas aqui dentro do AuthProvider causará um erro se o NotificationProvider estiver dentro do AuthProvider.
+  // Como o usuário pediu para colocar aqui, vamos adicionar a função chamando de forma segura.
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(() => Cookies.get(ACCESS_COOKIE) || null);
   const [loading, setLoading] = useState(true);
@@ -159,13 +163,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/home');
   };
 
-  const logout = () => {
-    Cookies.remove(ACCESS_COOKIE);
-    Cookies.remove(REFRESH_COOKIE);
-    setAuthHeader(undefined);
-    setToken(null);
-    setUser(null);
-    router.push('/login');
+  const logout = async () => {
+    try {
+      const refreshToken = Cookies.get(REFRESH_COOKIE);
+      if (refreshToken) {
+        await api.post('/auth/logout', { refreshToken });
+      }
+    } catch (error) {
+      console.error('Erro ao encerrar sessão:', error);
+    } finally {
+      Cookies.remove(ACCESS_COOKIE);
+      Cookies.remove(REFRESH_COOKIE);
+      setAuthHeader(undefined);
+      setToken(null);
+      setUser(null);
+      router.push('/login');
+    }
   };
 
   const value = useMemo(

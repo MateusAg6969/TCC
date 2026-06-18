@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Award, House, PlusSquare, Search, Users } from 'lucide-react';
+import { Award, House, LogOut, PlusSquare, Search, Users } from 'lucide-react';
 import type { Post } from '@/types';
 import ProfileTabs from './ProfileTabs';
 import EditProfileModal from './EditProfileModal';
@@ -50,7 +50,7 @@ export default function ProfileClient({
   profile: ProfilePayload | null;
   posts: Post[];
 }) {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, logout } = useAuth();
   const [profile, setProfile] = useState(initialProfile);
   const [openModal, setOpenModal] = useState(false);
   const [carregandoSeguir, setCarregandoSeguir] = useState(false);
@@ -133,6 +133,16 @@ export default function ProfileClient({
           >
             <House size={18} /> Página principal
           </Link>
+
+          {ehProprioPerfil && (
+            <button
+              onClick={logout}
+              className="inline-flex items-center gap-2 rounded-full border border-red-500/50 text-red-500 bg-red-500/10 px-4 py-2 text-sm font-semibold hover:bg-red-500 hover:text-white transition-all ml-auto md:ml-0"
+              title="Sair da conta"
+            >
+              <LogOut size={18} /> Sair
+            </button>
+          )}
         </header>
 
         {/* Banner e Avatar */}

@@ -246,7 +246,11 @@ router.get('/usuario/:usuarioId', optionalAuthMiddleware, async (req, res, next)
     };
 
     const [items, total] = await Promise.all([
-      Postagem.find(criterio).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Postagem.find(criterio)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url'),
       Postagem.countDocuments(criterio),
     ]);
 
@@ -341,7 +345,7 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
 
     const post = await Postagem.findById(req.params.id).populate(
       'autor_id',
-      'perfil.nome perfil.privacidade customizacao.banner_url'
+      'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url'
     );
 
     if (!post) {
@@ -349,14 +353,14 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
     }
 
     const usuarioLogadoId = req.usuario?.id || null;
-    const ehAutor = usuarioLogadoId && String(post.autor_id._id) === String(usuarioLogadoId);
-    const autorPrivado = post.autor_id.perfil?.privacidade === 'privado';
+    const ehAutor = usuarioLogadoId && String(post.autor_id?._id || post.autor_id) === String(usuarioLogadoId);
+    const autorPrivado = post.autor_id?.perfil?.privacidade === 'privado';
 
     if (autorPrivado && !ehAutor) {
       const segue = usuarioLogadoId
         ? await Seguidor.exists({
             seguidor_id: usuarioLogadoId,
-            seguido_id: post.autor_id._id,
+            seguido_id: post.autor_id?._id || post.autor_id,
           })
         : null;
 
@@ -370,6 +374,9 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
     return next(error);
   }
 });
+
+router.post('/:id/visualizar', authMiddleware, postagensController.registrarVisualizacao);
+
 
 router.patch('/:id', authMiddleware, async (req, res, next) => {
   try {

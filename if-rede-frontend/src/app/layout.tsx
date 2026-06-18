@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: "Rede social acadêmica do IFC",
 };
 
-import { House } from "lucide-react";
+import { House, Settings } from "lucide-react";
 import Link from "next/link";
 
 export default function RootLayout({
@@ -44,6 +44,14 @@ export default function RootLayout({
             title="Página Inicial"
           >
             <House size={28} />
+          </Link>
+          <Link 
+            href="/configuracoes" 
+            className="fixed bottom-6 left-24 z-[100] flex h-14 w-14 items-center justify-center rounded-full bg-if-purple text-white shadow-2xl hover:scale-110 active:scale-95 transition-all md:top-6 md:bottom-auto"
+            title="Configurações"
+            aria-label="Configurações"
+          >
+            <Settings size={28} />
           </Link>
           {children}
         </Providers>

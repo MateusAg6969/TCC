@@ -21,6 +21,7 @@ const notificacaoSchema = require('../schemas/notificacao.schema');
 const medalhaSchema = require('../schemas/medalha.schema');
 const usuarioMedalhaSchema = require('../schemas/usuario-medalha.schema');
 const portfolioItemSchema = require('../schemas/portfolio-item.schema');
+const tokenBlacklistSchema = require('../schemas/token-blacklist.schema');
 
 // ============================================================================
 // CRIAR MODELOS
@@ -49,6 +50,12 @@ const UsuarioMedalha = mongoose.model('UsuarioMedalha', usuarioMedalhaSchema);
  * Itens fixados no portfolio do usuario
  */
 const PortfolioItem = mongoose.model('PortfolioItem', portfolioItemSchema);
+
+/**
+ * Modelo TokenBlacklist
+ * Tokens invalidados no logout para garantir que não sejam reusados
+ */
+const TokenBlacklist = mongoose.model('TokenBlacklist', tokenBlacklistSchema);
 
 /**
  * Modelo Postagem
@@ -122,4 +129,5 @@ module.exports = {
   Medalha,
   UsuarioMedalha,
   PortfolioItem,
+  TokenBlacklist,
 };

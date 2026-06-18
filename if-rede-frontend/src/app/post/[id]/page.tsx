@@ -36,11 +36,12 @@ export default function PostDetailsPage({ params }: { params: { id: string } }) 
   useEffect(() => {
     if (!user || !post || hasRegistered.current) return;
     
-    const autorId = post.autor_id?._id || (post.autor_id as any);
+    const autorId = String(post.autor_id?._id || post.autor_id);
     if (user.id === autorId) return;
     
     hasRegistered.current = true;
-    api.post(`/postagens/${id}/visualizar`).catch(() => {
+    api.post(`/postagens/${id}/visualizar`).catch((err) => {
+      console.error('Erro ao registrar visualização:', err);
       // Em caso de erro real, permitimos tentar registrar em um futuro render/re-mount
       hasRegistered.current = false;
     });

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 // O que faz: define endpoint base da API para todas as chamadas no client.
 // Por que: no fluxo local atual o frontend roda na 3000 e o backend na 3001;
@@ -10,6 +11,60 @@ export const api = axios.create({
   baseURL: API_URL,
   timeout: 12000,
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/')
+    ) {
+      originalRequest._retry = true;
+      const refreshToken = Cookies.get('ifrede_refresh');
+
+      if (refreshToken) {
+        try {
+          const response = await axios.post(`${API_URL}/auth/refresh`, {
+            refreshToken,
+          });
+
+          const { accessToken: newAccess, refreshToken: newRefresh } = response.data?.data?.tokens || {};
+
+          if (newAccess) {
+            Cookies.set('ifrede_token', newAccess, { expires: 1, path: '/' });
+            if (newRefresh) {
+              Cookies.set('ifrede_refresh', newRefresh, { expires: 7, path: '/' });
+            }
+
+            setAuthHeader(newAccess);
+            originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+            
+            return api(originalRequest);
+          }
+        } catch (refreshError) {
+          Cookies.remove('ifrede_token');
+          Cookies.remove('ifrede_refresh');
+          setAuthHeader(undefined);
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+        }
+      } else {
+        Cookies.remove('ifrede_token');
+        Cookies.remove('ifrede_refresh');
+        setAuthHeader(undefined);
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
 /**
  * Resolve a URL de um asset (imagem, áudio, etc) do backend.

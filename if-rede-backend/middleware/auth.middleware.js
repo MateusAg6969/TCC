@@ -1,4 +1,5 @@
 const { validarAccessToken } = require('../services/token.service');
+const { TokenBlacklist } = require('../models');
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -11,13 +12,23 @@ function authMiddleware(req, res, next) {
 
   try {
     const payload = validarAccessToken(token);
-    req.usuario = {
-      id: payload.sub,
-      email: payload.email,
-      vinculo: payload.vinculo,
-      mod_voluntario: payload.mod_voluntario,
-    };
-    return next();
+    
+    // Verifica se o token foi revogado manualmente no logout
+    TokenBlacklist.findOne({ token }).then((tokenRevogado) => {
+      if (tokenRevogado) {
+        return res.fail('Token revogado. Faça login novamente.', 401);
+      }
+      
+      req.usuario = {
+        id: payload.sub,
+        email: payload.email,
+        vinculo: payload.vinculo,
+        mod_voluntario: payload.mod_voluntario,
+      };
+      return next();
+    }).catch(err => {
+      return next(err);
+    });
   } catch (error) {
     return res.fail('Token expirado ou inválido.', 401);
   }
@@ -41,17 +52,24 @@ function optionalAuthMiddleware(req, res, next) {
 
   try {
     const payload = validarAccessToken(token);
-    req.usuario = {
-      id: payload.sub,
-      email: payload.email,
-      vinculo: payload.vinculo,
-      mod_voluntario: payload.mod_voluntario,
-    };
+    
+    TokenBlacklist.findOne({ token }).then((tokenRevogado) => {
+      if (!tokenRevogado) {
+        req.usuario = {
+          id: payload.sub,
+          email: payload.email,
+          vinculo: payload.vinculo,
+          mod_voluntario: payload.mod_voluntario,
+        };
+      }
+      return next();
+    }).catch(() => {
+      return next();
+    });
   } catch (error) {
     // Ignora token inválido em rotas públicas
+    return next();
   }
-
-  return next();
 }
 
 module.exports = {

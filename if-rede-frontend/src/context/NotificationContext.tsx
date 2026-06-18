@@ -21,6 +21,7 @@ interface NotificationContextType {
   deletarTodasNotificacoes: () => Promise<void>;
   contarNaoLidas: () => Promise<void>;
   lidarComCliqueNotificacao: (notificacao: Notificacao) => void;
+  disconnectSocket: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -41,7 +42,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   const [erro, setErro] = useState<string | null>(null);
   const [ultimasNotificacaoRecebida, setUltimasNotificacaoRecebida] = useState<Notificacao | null>(null);
   
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -94,30 +95,31 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   // Gerenciamento de Socket.io em Tempo Real
   useEffect(() => {
     if (!token || !user) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
       }
       return;
     }
 
     // Inicialização da Conexão Persistente
     // O que faz: Conecta ao backend passando o token para o handshake de segurança.
-    const socket = io(API_URL, {
+    const novaInstanciaSocket = io(API_URL, {
       auth: { token },
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      transports: ['websocket', 'polling'],
     });
 
-    socketRef.current = socket;
+    setSocket(novaInstanciaSocket);
 
-    socket.on('connect', () => {
+    novaInstanciaSocket.on('connect', () => {
       console.log('⚡ Conectado ao servidor de notificações (Socket.io)');
     });
 
     // Ouvinte de Eventos: Nova Notificação
     // O que faz: Recebe o payload e atualiza o estado local imediatamente.
-    socket.on('notificacao:nova', (novaNotificacao: Notificacao) => {
+    novaInstanciaSocket.on('notificacao:nova', (novaNotificacao: Notificacao) => {
       console.log('🔔 Nova notificação recebida em tempo real:', novaNotificacao);
       
       setNotificacoes(prev => [novaNotificacao, ...prev]);
@@ -128,16 +130,23 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       setTimeout(() => setUltimasNotificacaoRecebida(null), 3000);
     });
 
-    socket.on('connect_error', (err) => {
+    novaInstanciaSocket.on('connect_error', (err) => {
       console.error('❌ Erro na conexão do Socket:', err.message);
     });
 
     // Cleanup: Encerra a conexão ao desmontar ou fazer logout
     return () => {
-      socket.disconnect();
-      socketRef.current = null;
+      novaInstanciaSocket.disconnect();
+      setSocket(null);
     };
   }, [token, user, API_URL]);
+
+  const disconnectSocket = useCallback(() => {
+    if (socket) {
+      socket.disconnect();
+      setSocket(null);
+    }
+  }, [socket]);
 
   // Marcar como lida
   const marcarComoLida = useCallback(
@@ -247,7 +256,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     carregando,
     erro,
     ultimasNotificacaoRecebida,
-    socket: socketRef.current,
+    socket,
     buscarNotificacoes,
     marcarComoLida,
     marcarTudasComoLidas,
@@ -255,6 +264,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     deletarTodasNotificacoes,
     contarNaoLidas,
     lidarComCliqueNotificacao,
+    disconnectSocket,
   };
 
   return (

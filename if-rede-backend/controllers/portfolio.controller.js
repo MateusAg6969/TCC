@@ -77,7 +77,16 @@ const portfolioController = {
         .populate('postagem_id')
         .sort({ posicao: 1 });
 
-      return res.success(items, 'Portfólio carregado com sucesso.');
+      const mappedItems = items.map(p => {
+        if (!p.postagem_id) return null;
+        return {
+          ...p.postagem_id.toObject(),
+          posicao: p.posicao,
+          fixado_em: p.fixado_em
+        };
+      }).filter(Boolean);
+
+      return res.success(mappedItems, 'Portfólio carregado com sucesso.');
     } catch (error) {
       next(error);
     }

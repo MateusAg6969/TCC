@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { Usuario } = require('../models');
+const { Usuario, TokenBlacklist } = require('../models');
 const {
   gerarAccessToken,
   gerarRefreshToken,
@@ -126,6 +126,13 @@ router.post('/refresh', async (req, res) => {
 
   try {
     const payload = validarRefreshToken(refreshToken);
+    
+    // Verifica se o refreshToken foi revogado
+    const tokenRevogado = await TokenBlacklist.findOne({ token: refreshToken });
+    if (tokenRevogado) {
+      return res.fail('Refresh token revogado. Faça login novamente.', 401);
+    }
+
     const usuario = await Usuario.findById(payload.sub);
 
     if (!usuario || !usuario.ativo || usuario.estaSuspenso()) {
@@ -144,8 +151,51 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
-router.post('/logout', async (req, res) => {
-  return res.success(null, 'Logout realizado com sucesso.');
+router.post('/logout', async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const { refreshToken } = req.body;
+    
+    // Revoga o access token atual se ele for enviado
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const accessToken = authHeader.replace('Bearer ', '').trim();
+      try {
+        const decodedAccess = require('jsonwebtoken').decode(accessToken);
+        if (decodedAccess && decodedAccess.exp) {
+          const expDate = new Date(decodedAccess.exp * 1000);
+          // Adiciona à blacklist usando updateOne com upsert para evitar erro de duplicidade se já existir
+          await TokenBlacklist.updateOne(
+            { token: accessToken },
+            { $set: { expiraEm: expDate } },
+            { upsert: true }
+          );
+        }
+      } catch (e) {
+        console.error('Erro ao revogar access token:', e);
+      }
+    }
+
+    // Revoga o refresh token se ele for enviado
+    if (refreshToken) {
+      try {
+        const decodedRefresh = require('jsonwebtoken').decode(refreshToken);
+        if (decodedRefresh && decodedRefresh.exp) {
+          const expDate = new Date(decodedRefresh.exp * 1000);
+          await TokenBlacklist.updateOne(
+            { token: refreshToken },
+            { $set: { expiraEm: expDate } },
+            { upsert: true }
+          );
+        }
+      } catch (e) {
+        console.error('Erro ao revogar refresh token:', e);
+      }
+    }
+
+    return res.success(null, 'Logout realizado com sucesso.');
+  } catch (error) {
+    return next(error);
+  }
 });
 
 module.exports = router;
