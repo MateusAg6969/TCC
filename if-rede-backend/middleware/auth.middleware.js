@@ -24,6 +24,7 @@ function authMiddleware(req, res, next) {
         email: payload.email,
         vinculo: payload.vinculo,
         mod_voluntario: payload.mod_voluntario,
+        admin: payload.admin,
       };
       return next();
     }).catch(err => {
@@ -35,8 +36,15 @@ function authMiddleware(req, res, next) {
 }
 
 function moderadorMiddleware(req, res, next) {
-  if (!req.usuario?.mod_voluntario) {
-    return res.fail('Acesso permitido apenas para moderadores.', 403);
+  if (!req.usuario?.mod_voluntario && !req.usuario?.admin) {
+    return res.fail('Acesso permitido apenas para moderadores ou administradores.', 403);
+  }
+  return next();
+}
+
+function adminMiddleware(req, res, next) {
+  if (!req.usuario?.admin) {
+    return res.fail('Acesso permitido apenas para administradores.', 403);
   }
   return next();
 }
@@ -60,6 +68,7 @@ function optionalAuthMiddleware(req, res, next) {
           email: payload.email,
           vinculo: payload.vinculo,
           mod_voluntario: payload.mod_voluntario,
+          admin: payload.admin,
         };
       }
       return next();
@@ -75,5 +84,6 @@ function optionalAuthMiddleware(req, res, next) {
 module.exports = {
   authMiddleware,
   moderadorMiddleware,
+  adminMiddleware,
   optionalAuthMiddleware,
 };

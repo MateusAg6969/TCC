@@ -11,6 +11,7 @@ function gerarAccessToken(usuario) {
       email: usuario.perfil.email,
       vinculo: usuario.perfil.status_vinculo,
       mod_voluntario: Boolean(usuario.configuracoes?.mod_voluntario),
+      admin: Boolean(usuario.configuracoes?.admin),
     },
     JWT_SECRET,
     { expiresIn: '15m' }

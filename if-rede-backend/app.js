@@ -17,6 +17,7 @@ const notificacoesRoutes = require('./routes/notificacoes.routes');
 const medalhasRoutes = require('./routes/medalhas.routes');
 const portfolioRoutes = require('./routes/portfolio.routes');
 const moderacaoRoutes = require('./routes/moderacao.routes');
+const adminRoutes = require('./routes/admin.routes');
 const { responseMiddleware } = require('./middleware/response.middleware');
 const { notFoundMiddleware, errorMiddleware } = require('./middleware/error.middleware');
 
@@ -76,6 +77,7 @@ app.use('/notificacoes', notificacoesRoutes);
 app.use('/medalhas', medalhasRoutes);
 app.use('/portfolio', portfolioRoutes);
 app.use('/admin/moderation', moderacaoRoutes);
+app.use('/admin', adminRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

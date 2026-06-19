@@ -19,6 +19,7 @@ type AuthUser = {
   email: string;
   status_vinculo: string;
   mod_voluntario?: boolean;
+  admin?: boolean;
 };
 
 type AuthContextValue = {
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Entrada: resposta de /usuarios/me contendo configuracoes do usuario.
           // Saida: estado de sessao no contexto de autenticacao.
           mod_voluntario: Boolean(data.configuracoes?.mod_voluntario),
+          admin: Boolean(data.configuracoes?.admin),
         });
       } catch {
         if (!active) return;

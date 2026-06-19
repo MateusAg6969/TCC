@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { House, Settings, PlusSquare, Sparkles, UserCircle2 } from 'lucide-react';
+import { House, Settings, PlusSquare, Sparkles, UserCircle2, Shield, ShieldAlert } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import PostCard from '@/components/PostCard';
 import NotificationBell from '@/components/NotificationBell';
@@ -14,7 +14,7 @@ type HomeFeedClientProps = {
 };
 
 export default function HomeFeedClient({ feed, profileHref }: HomeFeedClientProps) {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   // A Home sempre exibe o feed inicial; a busca agora redireciona para /search.
   const principais = feed.slice(0, 8);
@@ -71,6 +71,26 @@ export default function HomeFeedClient({ feed, profileHref }: HomeFeedClientProp
           >
             <Settings size={18} /> Configurações
           </Link>
+          
+          {user?.admin && (
+            <Link
+              href="/admin/users"
+              className="inline-flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-500 hover:text-white transition-all"
+              title="Painel Admin"
+            >
+              <Shield size={18} /> Admin
+            </Link>
+          )}
+
+          {(user?.admin || user?.mod_voluntario) && (
+             <Link
+              href="/admin/moderation"
+              className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-500 hover:bg-blue-500 hover:text-white transition-all"
+              title="Painel Moderação"
+            >
+              <ShieldAlert size={18} /> Moderação
+            </Link>
+          )}
         </header>
 
         <section className="mb-6 rounded-main bg-gradient-to-r from-if-card via-if-card to-if-olive/25 p-5 shadow-card">

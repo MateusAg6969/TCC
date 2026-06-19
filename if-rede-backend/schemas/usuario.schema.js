@@ -153,6 +153,12 @@ const configuracoesSchema = new mongoose.Schema(
       default: false,
     },
 
+    // Administrador Geral do Sistema
+    admin: {
+      type: Boolean,
+      default: false,
+    },
+
     // Lista de "melhores amigos" para compartilhamento restrito
     melhores_amigos: {
       type: [mongoose.Schema.Types.ObjectId],
@@ -303,11 +309,19 @@ usuarioSchema.methods.estaSuspenso = function () {
 };
 
 /**
- * Verifica se o usuário é moderador voluntário
+ * Verifica se o usuário é moderador voluntário (ou admin, que tem todos os poderes)
  * @returns {Boolean}
  */
 usuarioSchema.methods.ehModerador = function () {
-  return this.configuracoes.mod_voluntario === true;
+  return this.configuracoes.mod_voluntario === true || this.configuracoes.admin === true;
+};
+
+/**
+ * Verifica se o usuário é Administrador
+ * @returns {Boolean}
+ */
+usuarioSchema.methods.ehAdmin = function () {
+  return this.configuracoes.admin === true;
 };
 
 /**

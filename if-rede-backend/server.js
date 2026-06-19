@@ -87,6 +87,7 @@ async function bootstrap() {
         privacidade: 'publico',
       },
       configuracoes: {
+        admin: true,
         mod_voluntario: true, // Role de Moderador
         permitir_mensagens: true,
         notificacoes: { likes: true, comentarios: true, seguidores: true, reposts: true }
