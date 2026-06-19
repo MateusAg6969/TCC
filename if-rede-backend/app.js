@@ -44,7 +44,7 @@ const allowedCorsOrigins = corsOrigins.length ? corsOrigins : defaultCorsOrigins
 app.use(
   cors(
     {
-      origin: allowedCorsOrigins,
+      origin: true,
       credentials: true,
     }
   )
