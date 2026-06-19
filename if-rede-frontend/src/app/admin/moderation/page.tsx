@@ -26,7 +26,7 @@ export default function ModerationPage() {
   // Verificação de Segurança (Frontend)
   // O que faz: Redireciona usuários não autorizados.
   useEffect(() => {
-    if (!loading && (!user || !user.configuracoes?.mod_voluntario)) {
+    if (!loading && (!user || !user.mod_voluntario)) {
        // O backend já barra, mas o frontend melhora a UX
        // router.push('/home'); 
     }
