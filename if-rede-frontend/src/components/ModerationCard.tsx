@@ -63,7 +63,7 @@ export default function ModerationCard({ post, onApprove, onReject, isProcessing
           ) : (
             <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/40 group">
                {post.tipo === 'imagem' ? (
-                 <Image src={post.conteudo.url} alt={post.titulo} fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" unoptimized />
+                 <Image src={post.conteudo?.url || ''} alt={post.titulo} fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" unoptimized />
                ) : (
                  <div className="flex h-full items-center justify-center text-if-text/20">
                     <span className="text-xs font-black uppercase">{post.tipo}</span>
