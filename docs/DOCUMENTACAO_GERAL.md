@@ -7,8 +7,9 @@ Este documento consolida toda a arquitetura, visão técnica, relatórios e guia
 # 1. DOCUMENTAÇÃO BACK-END
 
 # Documentação Back-End.md
-*IF REDE – Rede Social Acadêmica (Backend MongoDB)*
-*Versão: 1.0.0 – 17 abr 2026*
+
+_IF REDE – Rede Social Acadêmica (Backend MongoDB)_
+_Versão: 1.0.0 – 17 abr 2026_
 
 ---
 
@@ -16,12 +17,12 @@ Este documento consolida toda a arquitetura, visão técnica, relatórios e guia
 
 IF REDE é uma rede social acadêmica construída com **Node.js** + **Express**, persiste dados em **MongoDB** usando **Mongoose** e adota quatro padrões de design MongoDB:
 
-| Padrão | Onde é usado | Benefício |
-|--------|--------------|-----------|
-| **Attribute Pattern** | `customizacao` (Usuario) • `metadados` (Postagem) | Campos opcionais/dinâmicos sem necessidade de migrações. |
-| **Bucket Pattern** | `stats` (Usuario & Postagem) • `atividade_moderacao` (agregação de horas) | Dados frequentemente consultados são denormalizados → consultas rápidas. |
-| **TTL Index** | `excluir_em` (Postagem) | Rascunhos expiram automaticamente após **14 dias**. |
-| **Polimorfismo** | `tipo + conteudo` (Postagem) | Um único schema suporta **áudio**, **imagem** ou **texto**. |
+| Padrão                | Onde é usado                                                              | Benefício                                                                |
+| --------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Attribute Pattern** | `customizacao` (Usuario) • `metadados` (Postagem)                         | Campos opcionais/dinâmicos sem necessidade de migrações.                 |
+| **Bucket Pattern**    | `stats` (Usuario & Postagem) • `atividade_moderacao` (agregação de horas) | Dados frequentemente consultados são denormalizados → consultas rápidas. |
+| **TTL Index**         | `excluir_em` (Postagem)                                                   | Rascunhos expiram automaticamente após **14 dias**.                      |
+| **Polimorfismo**      | `tipo + conteudo` (Postagem)                                              | Um único schema suporta **áudio**, **imagem** ou **texto**.              |
 
 > **Objetivo da consolidação** – eliminar a fragmentação de documentação (README, DOCUMENTACAO, GUIA‑TECNICO, INDICE, FRONTEND‑START, Postman) e oferecer um ponto único de referência para desenvolvedores, revisores e alunos de TCC.
 
@@ -56,37 +57,37 @@ if-rede-backend/
 
 ### 3.1 Usuario (`schemas/usuario.schema.js`)
 
-| Campo | Tipo | Descrição | Validação | Índice |
-|-------|------|-----------|-----------|--------|
-| **senha** | `String` (select = false) | Hash bcrypt; nunca retornada. | ≥ 8 caracteres. | – |
-| **perfil** | Sub‑documento | Dados pessoais e acadêmicos. | `nome`: 3‑100 caract., trim.<br>`email`: único, regex, lowercase.<br>`matricula`: única, 6‑10 dígitos.<br>`bio`: ≤ 500 caract.<br>`status_vinculo`: enum (`estudante`, `egresso`, `servidor`).<br>`privacidade`: enum (`publico`, `privado`). | `perfil.email` (único)<br>`perfil.matricula` (único) |
-| **customizacao** | Sub‑documento (Attribute Pattern) | Personalização visual. | `cor_fundo`, `cor_botoes`: HEX (`^#[0-9A-Fa-f]{6}$`).<br>`banner_url`: URL válida.<br>`tema`: `light` / `dark`. | – |
-| **configuracoes** | Sub‑documento | Controle de conta e moderação. | `mod_voluntario`: Boolean.<br>`melhores_amigos`: ≤ 20 IDs.<br>`permitir_mensagens`: Boolean.<br>`notificacoes.{likes,comentarios,seguidores,reposts}`: Boolean.<br>`egresso_limitado`: Boolean (auto = true quando `status_vinculo === 'egresso'`). | `configuracoes.mod_voluntario` |
-| **stats** (Bucket Pattern) | Sub‑documento | Contadores denormalizados para desempenho. | `total_seguidores`, `total_seguindo`, `total_postagens`, `total_moderacoes`: `Number ≥ 0`. | – |
-| **ativo** | `Boolean` | Controle de ativação da conta. | default = true. | – |
-| **ultima_atividade** | `Date` | Timestamp da última ação relevante. | default = `Date.now`. | – |
-| **suspenso_ate** | `Date` | Data até a qual o usuário está suspenso. | null = não suspenso. | – |
-| **suspensao_motivo** | `String` | Motivo da suspensão (texto livre). | default = '' | – |
-| **timestamps** | – | Campos `createdAt` / `updatedAt` automáticos. | – | – |
+| Campo                      | Tipo                              | Descrição                                     | Validação                                                                                                                                                                                                                                           | Índice                                               |
+| -------------------------- | --------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| **senha**                  | `String` (select = false)         | Hash bcrypt; nunca retornada.                 | ≥ 8 caracteres.                                                                                                                                                                                                                                     | –                                                    |
+| **perfil**                 | Sub‑documento                     | Dados pessoais e acadêmicos.                  | `nome`: 3‑100 caract., trim.<br>`email`: único, regex, lowercase.<br>`matricula`: única, 6‑10 dígitos.<br>`bio`: ≤ 500 caract.<br>`status_vinculo`: enum (`estudante`, `egresso`, `servidor`).<br>`privacidade`: enum (`publico`, `privado`).       | `perfil.email` (único)<br>`perfil.matricula` (único) |
+| **customizacao**           | Sub‑documento (Attribute Pattern) | Personalização visual.                        | `cor_fundo`, `cor_botoes`: HEX (`^#[0-9A-Fa-f]{6}$`).<br>`banner_url`: URL válida.<br>`tema`: `light` / `dark`.                                                                                                                                     | –                                                    |
+| **configuracoes**          | Sub‑documento                     | Controle de conta e moderação.                | `mod_voluntario`: Boolean.<br>`melhores_amigos`: ≤ 20 IDs.<br>`permitir_mensagens`: Boolean.<br>`notificacoes.{likes,comentarios,seguidores,reposts}`: Boolean.<br>`egresso_limitado`: Boolean (auto = true quando `status_vinculo === 'egresso'`). | `configuracoes.mod_voluntario`                       |
+| **stats** (Bucket Pattern) | Sub‑documento                     | Contadores denormalizados para desempenho.    | `total_seguidores`, `total_seguindo`, `total_postagens`, `total_moderacoes`: `Number ≥ 0`.                                                                                                                                                          | –                                                    |
+| **ativo**                  | `Boolean`                         | Controle de ativação da conta.                | default = true.                                                                                                                                                                                                                                     | –                                                    |
+| **ultima_atividade**       | `Date`                            | Timestamp da última ação relevante.           | default = `Date.now`.                                                                                                                                                                                                                               | –                                                    |
+| **suspenso_ate**           | `Date`                            | Data até a qual o usuário está suspenso.      | null = não suspenso.                                                                                                                                                                                                                                | –                                                    |
+| **suspensao_motivo**       | `String`                          | Motivo da suspensão (texto livre).            | default = ''                                                                                                                                                                                                                                        | –                                                    |
+| **timestamps**             | –                                 | Campos `createdAt` / `updatedAt` automáticos. | –                                                                                                                                                                                                                                                   | –                                                    |
 
 #### Métodos de Instância
 
-| Método | Descrição | Retorno |
-|--------|-----------|---------|
-| `estaSuspenso()` | Verifica se a data atual < `suspenso_ate`. | `Boolean` |
-| `ehModerador()` | Retorna `configuracoes.mod_voluntario`. | `Boolean` |
-| `ehEgresso()` | Retorna `perfil.status_vinculo === 'egresso'`. | `Boolean` |
-| `suspender(dataFim, motivo?)` | Define `suspenso_ate` e `suspensao_motivo`; salva. | `Promise<Usuario>` |
-| `removerSuspensao()` | Zera `suspenso_ate` e `suspensao_motivo`; salva. | `Promise<Usuario>` |
-| `registrarAtividade()` | Atualiza `ultima_atividade` para `Date.now`; salva. | `Promise<Usuario>` |
+| Método                        | Descrição                                           | Retorno            |
+| ----------------------------- | --------------------------------------------------- | ------------------ |
+| `estaSuspenso()`              | Verifica se a data atual < `suspenso_ate`.          | `Boolean`          |
+| `ehModerador()`               | Retorna `configuracoes.mod_voluntario`.             | `Boolean`          |
+| `ehEgresso()`                 | Retorna `perfil.status_vinculo === 'egresso'`.      | `Boolean`          |
+| `suspender(dataFim, motivo?)` | Define `suspenso_ate` e `suspensao_motivo`; salva.  | `Promise<Usuario>` |
+| `removerSuspensao()`          | Zera `suspenso_ate` e `suspensao_motivo`; salva.    | `Promise<Usuario>` |
+| `registrarAtividade()`        | Atualiza `ultima_atividade` para `Date.now`; salva. | `Promise<Usuario>` |
 
 #### Métodos estáticos (`statics`)
 
-| Método | Descrição |
-|--------|-----------|
-| `encontrarModeradores()` | Lista usuários ativos com `mod_voluntario: true`. |
-| `encontrarEgressos()` | Lista usuários cujo `perfil.status_vinculo === 'egresso'`. |
-| `buscarPorTexto(termo)` | Busca full‑text em `perfil.nome` / `perfil.bio` usando índice `text`. |
+| Método                   | Descrição                                                             |
+| ------------------------ | --------------------------------------------------------------------- |
+| `encontrarModeradores()` | Lista usuários ativos com `mod_voluntario: true`.                     |
+| `encontrarEgressos()`    | Lista usuários cujo `perfil.status_vinculo === 'egresso'`.            |
+| `buscarPorTexto(termo)`  | Busca full‑text em `perfil.nome` / `perfil.bio` usando índice `text`. |
 
 #### Observações de Segurança
 
@@ -99,63 +100,63 @@ if-rede-backend/
 
 ### 3.2 Postagem (`schemas/postagem.schema.js`)
 
-| Campo | Tipo | Descrição | Validação |
-|-------|------|-----------|-----------|
-| **autor_id** | `ObjectId` → `Usuario` | Referência ao autor; **imutável**. | required. |
-| **titulo** | `String` | Título da postagem. | 3‑200 caract., trim. |
-| **descricao** | `String` | Breve descrição. | ≤ 500 caract. |
-| **tipo** | `String` (enum) | `audio`, `imagem`, `texto`. | required. |
-| **subtipo** | `String` | Classificação livre (ex.: "Poema"). | ≤ 50 caract. |
-| **subtipo_tag_id** | `ObjectId` → `TagSubtipo` | Tag taxonômica opcional. | index. |
-| **conteudo** | Sub‑documento (polimorfismo) | `url` (obrigatório), `arquivo` (nome_original, nome_servidor, mimetype, tamanho_bytes), `texto_longo`, `sensivel`, `dimensoes`, `duracao_segundos`, `metadados` (campo flexível). |
-| **config** | Sub‑documento | `eh_rascunho` (default true), `visibilidade` (enum: `todos`, `seguidores`, `melhores_amigos`), `comentarios_ativos`, `comentarios_moderados`, `requer_permissao`, `permissao_de`. |
-| **repost_info** | Sub‑documento | `original_id`, `comentario_repost`, `repost_count`. |
-| **stats** (Bucket) | Sub‑documento | `likes`, `usuarios_que_curtiram` (array de IDs), `comentarios_count`, `shares`, `visualizacoes`. |
-| **tags** | `[String]` | ≤ 20 tags livres. |
-| **categorias** | `[String]` (enum) | `projetos`, `eventos`, `artes`, `tecnologia`, `acesso-inclusivo`, `geral`. |
-| **excluir_em** | `Date` | **TTL**: data de expiração quando `config.eh_rascunho === true`. |
-| **denuncias** | Sub‑documento | `total`, `motivos[]` (usuario_id, motivo, data), `bloqueado`, `motivo_bloqueio`. |
-| **status_moderacao** | `String` (enum) | `pendente`, `aprovado`, `rejeitado`, `em_revisao`. |
-| **moderado_por** | `ObjectId` → `Usuario` | Moderador que aprovou/rejeitou. |
-| **timestamps** | – | `createdAt`, `updatedAt`. |
+| Campo                | Tipo                         | Descrição                                                                                                                                                                         | Validação            |
+| -------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| **autor_id**         | `ObjectId` → `Usuario`       | Referência ao autor; **imutável**.                                                                                                                                                | required.            |
+| **titulo**           | `String`                     | Título da postagem.                                                                                                                                                               | 3‑200 caract., trim. |
+| **descricao**        | `String`                     | Breve descrição.                                                                                                                                                                  | ≤ 500 caract.        |
+| **tipo**             | `String` (enum)              | `audio`, `imagem`, `texto`.                                                                                                                                                       | required.            |
+| **subtipo**          | `String`                     | Classificação livre (ex.: "Poema").                                                                                                                                               | ≤ 50 caract.         |
+| **subtipo_tag_id**   | `ObjectId` → `TagSubtipo`    | Tag taxonômica opcional.                                                                                                                                                          | index.               |
+| **conteudo**         | Sub‑documento (polimorfismo) | `url` (obrigatório), `arquivo` (nome_original, nome_servidor, mimetype, tamanho_bytes), `texto_longo`, `sensivel`, `dimensoes`, `duracao_segundos`, `metadados` (campo flexível). |
+| **config**           | Sub‑documento                | `eh_rascunho` (default true), `visibilidade` (enum: `todos`, `seguidores`, `melhores_amigos`), `comentarios_ativos`, `comentarios_moderados`, `requer_permissao`, `permissao_de`. |
+| **repost_info**      | Sub‑documento                | `original_id`, `comentario_repost`, `repost_count`.                                                                                                                               |
+| **stats** (Bucket)   | Sub‑documento                | `likes`, `usuarios_que_curtiram` (array de IDs), `comentarios_count`, `shares`, `visualizacoes`.                                                                                  |
+| **tags**             | `[String]`                   | ≤ 20 tags livres.                                                                                                                                                                 |
+| **categorias**       | `[String]` (enum)            | `projetos`, `eventos`, `artes`, `tecnologia`, `acesso-inclusivo`, `geral`.                                                                                                        |
+| **excluir_em**       | `Date`                       | **TTL**: data de expiração quando `config.eh_rascunho === true`.                                                                                                                  |
+| **denuncias**        | Sub‑documento                | `total`, `motivos[]` (usuario_id, motivo, data), `bloqueado`, `motivo_bloqueio`.                                                                                                  |
+| **status_moderacao** | `String` (enum)              | `pendente`, `aprovado`, `rejeitado`, `em_revisao`.                                                                                                                                |
+| **moderado_por**     | `ObjectId` → `Usuario`       | Moderador que aprovou/rejeitou.                                                                                                                                                   |
+| **timestamps**       | –                            | `createdAt`, `updatedAt`.                                                                                                                                                         |
 
 #### Índices críticos (criados em `db/connection.js`)
 
-| Índice | Propósito |
-|--------|-----------|
-| `excluir_em` (TTL) | Deleta rascunhos imediatamente ao atingir a data (partial filter `{ 'config.eh_rascunho': true }`). |
-| `{ autor_id: 1, 'config.eh_rascunho': -1 }` | Busca postagens por autor, excluindo rascunhos. |
-| `{ tipo: 1, 'config.eh_rascunho': -1 }` | Busca por tipo de conteúdo. |
-| `{ createdAt: -1, 'config.eh_rascunho': -1 }` | Timeline (feed). |
-| `{ 'config.visibilidade': 1, 'config.eh_rascunho': -1, createdAt: -1 }` | Feed filtrado por visibilidade. |
-| `{ titulo: 'text', descricao: 'text' }` | Busca full‑text. |
-| `{ tags: 1 }` | Busca rápida por hashtags. |
-| `{ categorias: 1 }` | Filtro por categoria institucional. |
-| `{ status_moderacao: 1 }` | Listar postagens pendentes de moderação. |
-| `{ 'denuncias.bloqueado': 1 }` | Encontrar posts bloqueados. |
+| Índice                                                                  | Propósito                                                                                           |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `excluir_em` (TTL)                                                      | Deleta rascunhos imediatamente ao atingir a data (partial filter `{ 'config.eh_rascunho': true }`). |
+| `{ autor_id: 1, 'config.eh_rascunho': -1 }`                             | Busca postagens por autor, excluindo rascunhos.                                                     |
+| `{ tipo: 1, 'config.eh_rascunho': -1 }`                                 | Busca por tipo de conteúdo.                                                                         |
+| `{ createdAt: -1, 'config.eh_rascunho': -1 }`                           | Timeline (feed).                                                                                    |
+| `{ 'config.visibilidade': 1, 'config.eh_rascunho': -1, createdAt: -1 }` | Feed filtrado por visibilidade.                                                                     |
+| `{ titulo: 'text', descricao: 'text' }`                                 | Busca full‑text.                                                                                    |
+| `{ tags: 1 }`                                                           | Busca rápida por hashtags.                                                                          |
+| `{ categorias: 1 }`                                                     | Filtro por categoria institucional.                                                                 |
+| `{ status_moderacao: 1 }`                                               | Listar postagens pendentes de moderação.                                                            |
+| `{ 'denuncias.bloqueado': 1 }`                                          | Encontrar posts bloqueados.                                                                         |
 
 #### Métodos de Instância
 
-| Método | Descrição | Retorno |
-|--------|-----------|---------|
-| `publicar()` | Remove flag `eh_rascunho`, limpa `excluir_em`, define `status_moderacao = 'pendente'`. | `Promise<Postagem>` |
-| `voltarParaRascunho()` | Reativa rascunho, define novo TTL (14 dias). | `Promise<Postagem>` |
-| `adicionarCurtida(usuarioId)` | Caso ainda não curtiu, adiciona ao array e incrementa `likes`. | `Promise<Postagem>` |
-| `removerCurtida(usuarioId)` | Remove do array e decrementa `likes`. | `Promise<Postagem>` |
-| `incrementarComentarios()` / `decrementarComentarios()` | Atualiza `comentarios_count`. | `Promise<Postagem>` |
-| `incrementarVisualizacoes()` | Incrementa `visualizacoes`. | `Promise<Postagem>` |
-| `bloquear(motivo?)` | Marca `denuncias.bloqueado = true`, define `motivo_bloqueio`, `status_moderacao = 'rejeitado'`. | `Promise<Postagem>` |
-| `desbloquear()` | Reverte bloqueio. | `Promise<Postagem>` |
+| Método                                                  | Descrição                                                                                       | Retorno             |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------- |
+| `publicar()`                                            | Remove flag `eh_rascunho`, limpa `excluir_em`, define `status_moderacao = 'pendente'`.          | `Promise<Postagem>` |
+| `voltarParaRascunho()`                                  | Reativa rascunho, define novo TTL (14 dias).                                                    | `Promise<Postagem>` |
+| `adicionarCurtida(usuarioId)`                           | Caso ainda não curtiu, adiciona ao array e incrementa `likes`.                                  | `Promise<Postagem>` |
+| `removerCurtida(usuarioId)`                             | Remove do array e decrementa `likes`.                                                           | `Promise<Postagem>` |
+| `incrementarComentarios()` / `decrementarComentarios()` | Atualiza `comentarios_count`.                                                                   | `Promise<Postagem>` |
+| `incrementarVisualizacoes()`                            | Incrementa `visualizacoes`.                                                                     | `Promise<Postagem>` |
+| `bloquear(motivo?)`                                     | Marca `denuncias.bloqueado = true`, define `motivo_bloqueio`, `status_moderacao = 'rejeitado'`. | `Promise<Postagem>` |
+| `desbloquear()`                                         | Reverte bloqueio.                                                                               | `Promise<Postagem>` |
 
 #### Métodos estáticos
 
-| Método | Descrição |
-|--------|-----------|
-| `postagem_publica_por_autor(autorId)` | Busca postagens **não‑rascunho** e **não bloqueadas** de um autor. |
-| `rascunhos_do_usuario(usuarioId)` | Lista rascunhos (TTL ativo). |
-| `postagens_bloqueadas()` | Retorna todas as postagens com `denuncias.bloqueado = true`. |
-| `postagens_pendentes_moderacao()` | Retorna postagens `status_moderacao = 'pendente'`. |
-| `por_tipo(tipo)` | Busca postagens públicas de um determinado tipo (`audio`, `imagem`, `texto`). |
+| Método                                | Descrição                                                                     |
+| ------------------------------------- | ----------------------------------------------------------------------------- |
+| `postagem_publica_por_autor(autorId)` | Busca postagens **não‑rascunho** e **não bloqueadas** de um autor.            |
+| `rascunhos_do_usuario(usuarioId)`     | Lista rascunhos (TTL ativo).                                                  |
+| `postagens_bloqueadas()`              | Retorna todas as postagens com `denuncias.bloqueado = true`.                  |
+| `postagens_pendentes_moderacao()`     | Retorna postagens `status_moderacao = 'pendente'`.                            |
+| `por_tipo(tipo)`                      | Busca postagens públicas de um determinado tipo (`audio`, `imagem`, `texto`). |
 
 #### Observações de Segurança
 
@@ -168,56 +169,56 @@ if-rede-backend/
 
 ### 3.3 Atividade Moderacao (`schemas/atividade-moderacao.schema.js`)
 
-| Campo | Tipo | Descrição | Validação |
-|-------|------|-----------|-----------|
-| **moderador_id** | `ObjectId` → `Usuario` | Identificador do moderador (imutável). | required. |
-| **moderador_nome** | `String` | Snapshot do nome (imutável). | required. |
-| **moderador_matricula** | `String` | Snapshot da matrícula (imutável). | required. |
-| **tipo_acao** | `String` (enum) | Tipo de ação (ex.: `comentario_aprovado`, `postagem_bloqueada`, `usuario_suspenso`). | required, imutável. |
-| **descricao** | `String` | Texto livre (≤ 500 caract., imutável). |
-| **objeto_tipo** | `String` (enum: `postagem`, `comentario`, `usuario`) | Tipo do objeto afetado. |
-| **objeto_id** | `ObjectId` | ID do objeto afetado. |
-| **objeto_snapshot** | `Mixed` | Dados do objeto no momento da ação (imutável). |
-| **tempo_estimado_minutos** | `Number` | Tempo previsto (1‑120 min). Valor default automático por `tipo_acao`. |
-| **horas** | `Number` (getter) | `tempo_estimado_minutos / 60` (2 decimais). |
-| **resultado** | `String` (enum: `sucesso`, `parcial`, `erro`, `sem_acao`) | Resultado da ação. |
-| **motivo_rejeicao** | `String` | Motivo da rejeição/bloqueio (≤ 300 caract.). |
-| **tags** | `[String]` (enum) | Categorias (spam, discurso-odio, direitos-autorais, etc.). |
-| **data_acao** | `Date` | Data/hora da ação (default = now). |
-| **ip_origem**, **user_agent** | `String` | Dados opcionais de auditoria. |
-| **revisado** | `Boolean` | Flag de revisão. |
-| **revisado_por** | `ObjectId` → `Usuario` | Moderador que revisou. |
-| **resultado_revisao** | `String` (enum: `confirmado`, `revertido`, `escalado`) | Resultado da revisão. |
-| **comentario_revisao** | `String` | Texto da revisão (≤ 500 caract.). |
+| Campo                         | Tipo                                                      | Descrição                                                                            | Validação           |
+| ----------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------- |
+| **moderador_id**              | `ObjectId` → `Usuario`                                    | Identificador do moderador (imutável).                                               | required.           |
+| **moderador_nome**            | `String`                                                  | Snapshot do nome (imutável).                                                         | required.           |
+| **moderador_matricula**       | `String`                                                  | Snapshot da matrícula (imutável).                                                    | required.           |
+| **tipo_acao**                 | `String` (enum)                                           | Tipo de ação (ex.: `comentario_aprovado`, `postagem_bloqueada`, `usuario_suspenso`). | required, imutável. |
+| **descricao**                 | `String`                                                  | Texto livre (≤ 500 caract., imutável).                                               |
+| **objeto_tipo**               | `String` (enum: `postagem`, `comentario`, `usuario`)      | Tipo do objeto afetado.                                                              |
+| **objeto_id**                 | `ObjectId`                                                | ID do objeto afetado.                                                                |
+| **objeto_snapshot**           | `Mixed`                                                   | Dados do objeto no momento da ação (imutável).                                       |
+| **tempo_estimado_minutos**    | `Number`                                                  | Tempo previsto (1‑120 min). Valor default automático por `tipo_acao`.                |
+| **horas**                     | `Number` (getter)                                         | `tempo_estimado_minutos / 60` (2 decimais).                                          |
+| **resultado**                 | `String` (enum: `sucesso`, `parcial`, `erro`, `sem_acao`) | Resultado da ação.                                                                   |
+| **motivo_rejeicao**           | `String`                                                  | Motivo da rejeição/bloqueio (≤ 300 caract.).                                         |
+| **tags**                      | `[String]` (enum)                                         | Categorias (spam, discurso-odio, direitos-autorais, etc.).                           |
+| **data_acao**                 | `Date`                                                    | Data/hora da ação (default = now).                                                   |
+| **ip_origem**, **user_agent** | `String`                                                  | Dados opcionais de auditoria.                                                        |
+| **revisado**                  | `Boolean`                                                 | Flag de revisão.                                                                     |
+| **revisado_por**              | `ObjectId` → `Usuario`                                    | Moderador que revisou.                                                               |
+| **resultado_revisao**         | `String` (enum: `confirmado`, `revertido`, `escalado`)    | Resultado da revisão.                                                                |
+| **comentario_revisao**        | `String`                                                  | Texto da revisão (≤ 500 caract.).                                                    |
 
 #### Índices (performance de relatórios)
 
-| Índice | Uso |
-|--------|-----|
-| `{ moderador_id: 1, data_acao: -1 }` | Relatório de horas por moderador. |
-| `{ data_acao: -1 }` | Cálculo de horas em intervalo. |
-| `{ tipo_acao: 1 }` | Agrupamento por tipo de ação. |
-| `{ objeto_id: 1, objeto_tipo: 1 }` | Histórico de um objeto específico. |
-| `{ revisado: 1, resultado_revisao: 1 }` | Ações que precisam revisão. |
-| `{ resultado: 1 }` | Filtrar por sucesso/erro. |
-| `{ tags: 1 }` | Análise de categorias de infração. |
+| Índice                                  | Uso                                |
+| --------------------------------------- | ---------------------------------- |
+| `{ moderador_id: 1, data_acao: -1 }`    | Relatório de horas por moderador.  |
+| `{ data_acao: -1 }`                     | Cálculo de horas em intervalo.     |
+| `{ tipo_acao: 1 }`                      | Agrupamento por tipo de ação.      |
+| `{ objeto_id: 1, objeto_tipo: 1 }`      | Histórico de um objeto específico. |
+| `{ revisado: 1, resultado_revisao: 1 }` | Ações que precisam revisão.        |
+| `{ resultado: 1 }`                      | Filtrar por sucesso/erro.          |
+| `{ tags: 1 }`                           | Análise de categorias de infração. |
 
 #### Métodos de Instância
 
-| Método | Descrição |
-|--------|-----------|
+| Método                                                      | Descrição                                                                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | `marcar_como_revisada(revisadoPor, resultado, comentario?)` | Define `revisado = true`, grava `revisado_por`, `resultado_revisao`, `comentario_revisao`. |
-| `tempo_formatado()` | Converte `tempo_estimado_minutos` para `"XhYm"`. |
+| `tempo_formatado()`                                         | Converte `tempo_estimado_minutos` para `"XhYm"`.                                           |
 
 #### Métodos estáticos
 
-| Método | Descrição |
-|--------|-----------|
-| `calcular_horas_moderador(moderadorId, dataInicio, dataFim)` | Agrega `tempo_estimado_minutos` → total de horas no período. |
-| `relatorio_horas_mes()` | Total de minutos e ações por moderador no último mês. |
-| `pendentes_revisao()` | Lista ações ainda não revisadas. |
-| `historico_objeto(objetoId, objetoTipo)` | Histórico completo de um post/comentário/usuário. |
-| `estatisticas_gerais()` | Total de ações, minutos, distribuição por tipo, moderadores ativos. |
+| Método                                                       | Descrição                                                           |
+| ------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `calcular_horas_moderador(moderadorId, dataInicio, dataFim)` | Agrega `tempo_estimado_minutos` → total de horas no período.        |
+| `relatorio_horas_mes()`                                      | Total de minutos e ações por moderador no último mês.               |
+| `pendentes_revisao()`                                        | Lista ações ainda não revisadas.                                    |
+| `historico_objeto(objetoId, objetoTipo)`                     | Histórico completo de um post/comentário/usuário.                   |
+| `estatisticas_gerais()`                                      | Total de ações, minutos, distribuição por tipo, moderadores ativos. |
 
 #### Observações de Segurança
 
@@ -229,40 +230,40 @@ if-rede-backend/
 
 ## 4️ API REST (rotas)
 
-| Rota | Método | Auth? | Descrição | Middleware(s) |
-|------|--------|-------|-----------|---------------|
-| **/health** | `GET` | ❌ | Health‑check (retorna `service` e `now`). | `responseMiddleware` |
-| **/auth/register** | `POST` | ❌ | Cria usuário; valida `email`, `matricula`, `senha`. | `validation`, `bcrypt` |
-| **/auth/login** | `POST` | ❌ | Gera **JWT** (`accessToken` 15 min) + **Refresh** (`refreshToken` 7 dias). | `bcrypt` |
-| **/auth/refresh** | `POST` | ❌ | Renova `accessToken` usando `refreshToken`. | — |
-| **/usuarios/me** | `GET` | ✅ | Dados do usuário autenticado. | `authMiddleware` |
-| **/usuarios/:id** | `GET` | ✅ | Dados públicos de outro usuário (visibilidade). | `authMiddleware` |
-| **/usuarios/:id/seguir** | `POST` / `DELETE` | ✅ | Segue / deixa de seguir; verifica limites (egresso ≤ 2 posts/semana). | `authMiddleware`, `ownershipCheck` |
-| **/postagens** | `POST` | ✅ | Cria postagem (padrão **rascunho**). | `authMiddleware`, `uploadMiddleware`, `validation` |
-| **/postagens/feed** | `GET` | ✅ | Feed paginado; filtra por `visibilidade`. | `authMiddleware`, `rateLimit` |
-| **/postagens/:id** | `PATCH` / `DELETE` | ✅ | Atualiza / exclui; **ownership** (autor ou moderador). | `authMiddleware`, `ownershipCheck` |
-| **/postagens/:id/curtir** | `POST` / `DELETE` | ✅ | Like / unlike; impede duplicidade. | `authMiddleware` |
-| **/comentarios** | `POST` | ✅ | Cria comentário; pode exigir `moderador` se `config.comentarios_moderados`. | `authMiddleware` |
-| **/comentarios/postagem/:postId** | `GET` | ✅ | Lista comentários (paginado). | `authMiddleware` |
-| **/comentarios/moderacao/pendentes** | `GET` | ✅ (moderador) | Lista comentários aguardando aprovação. | `authMiddleware`, `moderatorCheck` |
-| **/comentarios/:id/aprovar** | `PATCH` | ✅ (moderador) | Aprova comentário; registra `atividade_moderacao`. | `authMiddleware`, `moderatorCheck` |
-| **/comentarios/:id/rejeitar** | `PATCH` | ✅ (moderador) | Rejeita comentário; registra ação. | `authMiddleware`, `moderatorCheck` |
-| **/filtro-palavras** | `POST` | ✅ (moderador) | Aciona filtro de palavras proibidas; cria log. | `authMiddleware`, `moderatorCheck` |
-| **/tags** | `GET` | ✅ | Lista tags disponíveis. | `authMiddleware` |
+| Rota                                 | Método             | Auth?          | Descrição                                                                   | Middleware(s)                                      |
+| ------------------------------------ | ------------------ | -------------- | --------------------------------------------------------------------------- | -------------------------------------------------- |
+| **/health**                          | `GET`              | ❌             | Health‑check (retorna `service` e `now`).                                   | `responseMiddleware`                               |
+| **/auth/register**                   | `POST`             | ❌             | Cria usuário; valida `email`, `matricula`, `senha`.                         | `validation`, `bcrypt`                             |
+| **/auth/login**                      | `POST`             | ❌             | Gera **JWT** (`accessToken` 15 min) + **Refresh** (`refreshToken` 7 dias).  | `bcrypt`                                           |
+| **/auth/refresh**                    | `POST`             | ❌             | Renova `accessToken` usando `refreshToken`.                                 | —                                                  |
+| **/usuarios/me**                     | `GET`              | ✅             | Dados do usuário autenticado.                                               | `authMiddleware`                                   |
+| **/usuarios/:id**                    | `GET`              | ✅             | Dados públicos de outro usuário (visibilidade).                             | `authMiddleware`                                   |
+| **/usuarios/:id/seguir**             | `POST` / `DELETE`  | ✅             | Segue / deixa de seguir; verifica limites (egresso ≤ 2 posts/semana).       | `authMiddleware`, `ownershipCheck`                 |
+| **/postagens**                       | `POST`             | ✅             | Cria postagem (padrão **rascunho**).                                        | `authMiddleware`, `uploadMiddleware`, `validation` |
+| **/postagens/feed**                  | `GET`              | ✅             | Feed paginado; filtra por `visibilidade`.                                   | `authMiddleware`, `rateLimit`                      |
+| **/postagens/:id**                   | `PATCH` / `DELETE` | ✅             | Atualiza / exclui; **ownership** (autor ou moderador).                      | `authMiddleware`, `ownershipCheck`                 |
+| **/postagens/:id/curtir**            | `POST` / `DELETE`  | ✅             | Like / unlike; impede duplicidade.                                          | `authMiddleware`                                   |
+| **/comentarios**                     | `POST`             | ✅             | Cria comentário; pode exigir `moderador` se `config.comentarios_moderados`. | `authMiddleware`                                   |
+| **/comentarios/postagem/:postId**    | `GET`              | ✅             | Lista comentários (paginado).                                               | `authMiddleware`                                   |
+| **/comentarios/moderacao/pendentes** | `GET`              | ✅ (moderador) | Lista comentários aguardando aprovação.                                     | `authMiddleware`, `moderatorCheck`                 |
+| **/comentarios/:id/aprovar**         | `PATCH`            | ✅ (moderador) | Aprova comentário; registra `atividade_moderacao`.                          | `authMiddleware`, `moderatorCheck`                 |
+| **/comentarios/:id/rejeitar**        | `PATCH`            | ✅ (moderador) | Rejeita comentário; registra ação.                                          | `authMiddleware`, `moderatorCheck`                 |
+| **/filtro-palavras**                 | `POST`             | ✅ (moderador) | Aciona filtro de palavras proibidas; cria log.                              | `authMiddleware`, `moderatorCheck`                 |
+| **/tags**                            | `GET`              | ✅             | Lista tags disponíveis.                                                     | `authMiddleware`                                   |
 
 ### Middlewares críticos
 
-| Middleware | Função |
-|------------|--------|
-| `helmet()` | Headers de segurança (CSP, X‑Frame‑Options, etc.). |
+| Middleware                                        | Função                                                                                                |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `helmet()`                                        | Headers de segurança (CSP, X‑Frame‑Options, etc.).                                                    |
 | `cors({ origin: <env‑list>, credentials: true })` | Restrição de origens (deve ser configurada; fallback a **nenhuma origem** se `CORS_ORIGINS` ausente). |
-| `express-rate-limit` | Limita requisições por IP (config: `RATE_LIMIT_POR_MINUTO`). |
-| `authMiddleware` | Verifica JWT, anexa `req.user`. |
-| `ownershipCheck` | Garante que `req.user.id === recurso.autor_id` **ou** o usuário é moderador voluntário. |
-| `moderatorCheck` | Rejeita acesso se `!req.user.configuracoes.mod_voluntario`. |
-| `responseMiddleware` | Padroniza respostas: `{ ok, message, data, meta }`. |
-| `errorMiddleware` | Captura exceções, registra stack, devolve `{ ok:false, error:{ message, details } }`. |
-| `uploadMiddleware` (multer) | Salva arquivos em `uploads/`, grava metadados no sub‑documento `conteudo`. |
+| `express-rate-limit`                              | Limita requisições por IP (config: `RATE_LIMIT_POR_MINUTO`).                                          |
+| `authMiddleware`                                  | Verifica JWT, anexa `req.user`.                                                                       |
+| `ownershipCheck`                                  | Garante que `req.user.id === recurso.autor_id` **ou** o usuário é moderador voluntário.               |
+| `moderatorCheck`                                  | Rejeita acesso se `!req.user.configuracoes.mod_voluntario`.                                           |
+| `responseMiddleware`                              | Padroniza respostas: `{ ok, message, data, meta }`.                                                   |
+| `errorMiddleware`                                 | Captura exceções, registra stack, devolve `{ ok:false, error:{ message, details } }`.                 |
+| `uploadMiddleware` (multer)                       | Salva arquivos em `uploads/`, grava metadados no sub‑documento `conteudo`.                            |
 
 ---
 
@@ -281,18 +282,18 @@ if-rede-backend/
 
 ## 6️ Segurança & Boas‑Práticas
 
-| Aspecto | Implementação |
-|---------|----------------|
-| **Autenticação** | JWT **Access** (15 min) + **Refresh** (7 dias) + `httpOnly` cookie (future). |
-| **Autorização** | `ownershipCheck` + `moderatorCheck`. |
-| **Rate‑limit** | 100 req/min (configurável via `.env`). |
-| **CORS** | Deve sempre ter `CORS_ORIGINS` definido; caso contrário, **nenhuma origem** é aceita. |
-| **Helmet** | Habilita CSP, X‑Content‑Type‑Options, Referrer‑Policy, etc. |
-| **Validação de entrada** | Schemas Mongoose + validações específicas (regex, enum, limites). |
-| **Logs de auditoria** | `atividade_moderacao` e `errorMiddleware` registram stack e IP. |
+| Aspecto                     | Implementação                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| **Autenticação**            | JWT **Access** (15 min) + **Refresh** (7 dias) + `httpOnly` cookie (future).               |
+| **Autorização**             | `ownershipCheck` + `moderatorCheck`.                                                       |
+| **Rate‑limit**              | 100 req/min (configurável via `.env`).                                                     |
+| **CORS**                    | Deve sempre ter `CORS_ORIGINS` definido; caso contrário, **nenhuma origem** é aceita.      |
+| **Helmet**                  | Habilita CSP, X‑Content‑Type‑Options, Referrer‑Policy, etc.                                |
+| **Validação de entrada**    | Schemas Mongoose + validações específicas (regex, enum, limites).                          |
+| **Logs de auditoria**       | `atividade_moderacao` e `errorMiddleware` registram stack e IP.                            |
 | **Proteção contra injeção** | Todos os campos são parametrizados via Mongoose; nenhum `eval` ou concatenação de queries. |
-| **TLS/HTTPS** | Recomendado em produção (reverse‑proxy Nginx/Traefik). |
-| **Uploads** | Salvos em `uploads/` sem execução; apenas URLs são retornadas. |
+| **TLS/HTTPS**               | Recomendado em produção (reverse‑proxy Nginx/Traefik).                                     |
+| **Uploads**                 | Salvos em `uploads/` sem execução; apenas URLs são retornadas.                             |
 
 ---
 
@@ -314,15 +315,15 @@ if-rede-backend/
 - **Configuração global do Axios** (exemplo):
 
 ```js
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
   withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem("accessToken");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -431,16 +432,16 @@ Este documento consolida toda a documentação técnica do backend, facilitando:
 
 ### RELACIONAMENTOS ENTRE COLEÇÕES
 
-| USUARIOS | POSTAGENS | ATIVIDADE_MODERACAO |
-|----------|-----------|---------------------|
-| _id (PK) | _id (PK) | _id (PK) |
-| perfil | autor_id (FK) → | moderador_id (FK) |
-| customizacao | conteudo | tipo_acao |
-| configuracoes | config | objeto_tipo |
-| stats | stats | tempo_estimado_minutos |
-| suspenso_ate | repost_info | resultado |
-| | status_moderacao | |
-| | moderado_por (FK) → usuario_id (ref) | |
+| USUARIOS      | POSTAGENS                            | ATIVIDADE_MODERACAO    |
+| ------------- | ------------------------------------ | ---------------------- |
+| \_id (PK)     | \_id (PK)                            | \_id (PK)              |
+| perfil        | autor_id (FK) →                      | moderador_id (FK)      |
+| customizacao  | conteudo                             | tipo_acao              |
+| configuracoes | config                               | objeto_tipo            |
+| stats         | stats                                | tempo_estimado_minutos |
+| suspenso_ate  | repost_info                          | resultado              |
+|               | status_moderacao                     |                        |
+|               | moderado_por (FK) → usuario_id (ref) |                        |
 
 **RELACIONAMENTOS ESPECÍFICOS:**
 
@@ -517,17 +518,20 @@ RESULTADO: "Maria Costa trabalhou 8.5 horas este mês"
 ## ÍNDICES CRÍTICOS
 
 ### ÍNDICE TTL (RASCUNHOS)
+
 - **Nome:** `ttl_rascunhos_14_dias`
 - **Campo:** `postagens.excluir_em`
 - **Ação:** Deleta automaticamente quando data é atingida
 - **Filtro:** Aplica apenas se `config.eh_rascunho = true`
 
 **COMO FUNCIONA:**
+
 - MongoDB daemon roda a cada 60 segundos
 - Procura documentos onde `excluir_em ≤ agora() AND eh_rascunho = true`
 - Deleta-os automaticamente (sem ação manual)
 
 **EXEMPLO:**
+
 - Rascunho criado em: 2026-04-17
 - `excluir_em` configurado para: 2026-05-01 (14 dias depois)
 - Resultado: 2026-05-01 às 02:00 → Documento deletado
@@ -535,17 +539,20 @@ RESULTADO: "Maria Costa trabalhou 8.5 horas este mês"
 ### ÍNDICES DE PERFORMANCE
 
 **USUARIOS:**
+
 - `{ 'perfil.email': 1, unique: true }` → Login rápido
 - `{ 'perfil.matricula': 1, unique: true }` → Busca por matrícula
 - `{ 'configuracoes.mod_voluntario': 1 }` → Encontrar moderadores
 - `{ 'perfil.nome': 'text' }` → Busca full-text
 
 **POSTAGENS:**
+
 - `{ autor_id: 1, 'config.eh_rascunho': -1 }` → Posts do usuário
 - `{ tipo: 1, 'config.eh_rascunho': -1 }` → Posts por tipo
 - `{ createdAt: -1, 'config.eh_rascunho': -1 }` → Timeline
 
 **ATIVIDADES_MODERACAO:**
+
 - `{ moderador_id: 1, data_acao: -1 }` → Relatórios por moderador
 - `{ data_acao: -1 }` → Timeline de ações
 
@@ -554,11 +561,13 @@ RESULTADO: "Maria Costa trabalhou 8.5 horas este mês"
 ## PADRÕES DE DESIGN APLICADOS
 
 ### 1. ATTRIBUTE PATTERN
+
 - **Usado em:** customizacao (Usuario), metadados (Postagem)
 - **Permite:** Campos opcionais/dinámicos por documento
 - **Vantagem:** Flexibilidade sem schema migrations
 
 **Exemplo:**
+
 ```javascript
 Usuario 1:
   customizacao: {
@@ -576,11 +585,13 @@ Usuario 2:
 ```
 
 ### 2. BUCKET PATTERN
+
 - **Usado em:** stats (Usuario, Postagem)
 - **Permite:** Denormalizar dados frequentemente acessados
 - **Vantagem:** Acesso rápido sem agregações
 
 **Exemplo:**
+
 ```javascript
 stats: {
   likes: 42,
@@ -591,16 +602,19 @@ stats: {
 ```
 
 ### 3. TTL INDEX
+
 - **Usado em:** excluir_em (Postagem)
 - **Permite:** Auto-delete de documentos antigos
 - **Vantagem:** Limpeza automática sem cron jobs
 
 ### 4. POLIMORFISMO
+
 - **Usado em:** tipo + conteudo (Postagem)
 - **Permite:** Um schema para vários tipos de dados
 - **Vantagem:** Sem múltiplas coleções
 
 **Exemplo:**
+
 ```javascript
 // tipo: "audio"
 conteudo: { url: "...", duracao_segundos: 3600, ... }
@@ -614,6 +628,7 @@ conteudo: { url: "...", dimensoes: { ... }, ... }
 ## SEGURANÇA E VALIDAÇÃO
 
 ### VALIDAÇÃO NO SCHEMA
+
 ✓ Tipos forçados (String, Number, Boolean, Date, ObjectId)  
 ✓ Campos obrigatórios (required: true)  
 ✓ Limites de tamanho (minlength, maxlength)  
@@ -622,6 +637,7 @@ conteudo: { url: "...", dimensoes: { ... }, ... }
 ✓ Índices UNIQUE (matricula, email)
 
 **EXEMPLO:**
+
 ```javascript
 email: {
   type: String,
@@ -633,12 +649,14 @@ email: {
 ```
 
 ### IMUTABILIDADE
+
 ✓ `autor_id` (Postagem) → immutable: true  
-✓ `tipo_acao` (AtividadeModeração) → immutable: true  
+✓ `tipo_acao` (AtividadeModeração) → immutable: true
 
 Uma vez criado, não pode ser alterado
 
 ### SENHAS
+
 ✓ Nunca retornar no find: `select: false`  
 ✓ Hash com bcrypt (não plaintext!)  
 ✓ Comparar com `bcrypt.compare()`
@@ -648,6 +666,7 @@ Uma vez criado, não pode ser alterado
 ## REGRAS POR TIPO DE VÍNCULO
 
 ### ESTUDANTE
+
 ✓ Sem limites de postagem  
 ✓ Todos os tipos de conteúdo  
 ✓ Pode ser moderador voluntário  
@@ -655,6 +674,7 @@ Uma vez criado, não pode ser alterado
 ✓ Sem suspensão por limite
 
 ### EGRESSO
+
 ⚠️ Máximo 2 postagens por semana  
 ⚠️ Moderação mais rigorosa  
 ✓ Acesso leitura completo  
@@ -662,6 +682,7 @@ Uma vez criado, não pode ser alterado
 ✓ Perfil público
 
 ### SERVIDOR
+
 ✓ Sem limites  
 ✓ Acesso administrativo  
 ✓ Pode moderar  
@@ -673,6 +694,7 @@ Uma vez criado, não pode ser alterado
 ## CHECKLIST DE IMPLEMENTAÇÃO
 
 ### BANCO DE DADOS
+
 ✓ Schemas criados (usuario, postagem, atividade_moderacao)  
 ✓ Validações implementadas  
 ✓ Índices configurados  
@@ -680,17 +702,20 @@ Uma vez criado, não pode ser alterado
 ✓ Relacionamentos (refs)
 
 ### MODELOS
+
 ✓ Métodos de instância (publicar, curtir, etc)  
 ✓ Métodos estáticos (buscar, filtrar, etc)  
 ✓ Getters (horas formatadas, etc)
 
 ### CONEXÃO
+
 ✓ Conectar ao MongoDB  
 ✓ Criar índices automaticamente  
 ✓ Tratamento de erros  
 ✓ Graceful shutdown
 
 ### TODO (Próximos Passos)
+
 ◻ API REST (Express routes)  
 ◻ Autenticação JWT  
 ◻ Autorização (middleware)  
@@ -710,23 +735,29 @@ Uma vez criado, não pode ser alterado
 # Documentação Técnica: Algoritmo de Feed Híbrido e Grafo Social (IF REDE)
 
 ## 1. Descrição do Módulo
+
 Este módulo gerencia as conexões entre acadêmicos e a entrega inteligente de conteúdo. O objetivo é garantir que o usuário sempre tenha conteúdo relevante em sua página principal, priorizando suas conexões diretas e oferecendo descobertas baseadas em popularidade.
 
 ## 2. Grafo Social (Seguidores)
+
 A modelagem utiliza uma coleção dedicada `seguidores` que mapeia relações bidirecionais.
+
 - **Normalização:** Armazenamos referências de `seguidor_id` e `seguido_id`.
 - **Escalabilidade:** Índices compostos garantem que a verificação de "quem eu sigo" e "quem me segue" ocorra em tempo constante ($O(1)$) para o banco de dados.
 
 ## 3. Algoritmo de Feed Híbrido (Cascata)
+
 O feed não é uma simples consulta cronológica. Ele segue um algoritmo de duas fases:
 
-1.  **Fase de Timeline:** O sistema identifica os usuários que o acadêmico segue e busca postagens recentes desses perfis que respeitem as regras de visibilidade (público ou seguidores).
-2.  **Fase de Descoberta (Fallback):** Caso a Timeline não preencha o limite da página (ex: usuário novo que segue poucas pessoas), o motor de busca executa uma consulta de "Popularidade". Postagens com maior número de curtidas e visualizações são injetadas no feed, promovendo a descoberta de novos talentos acadêmicos.
+1. **Fase de Timeline:** O sistema identifica os usuários que o acadêmico segue e busca postagens recentes desses perfis que respeitem as regras de visibilidade (público ou seguidores).
+2. **Fase de Descoberta (Fallback):** Caso a Timeline não preencha o limite da página (ex: usuário novo que segue poucas pessoas), o motor de busca executa uma consulta de "Popularidade". Postagens com maior número de curtidas e visualizações são injetadas no feed, promovendo a descoberta de novos talentos acadêmicos.
 
 ## 4. Justificativa Técnica
+
 A implementação evita o "vazio de feed", um problema comum em redes sociais novas. Ao utilizar o padrão de **Hybrid Discovery Feed**, garantimos o engajamento imediato. A ordenação utiliza índices de popularidade compostos no MongoDB, garantindo performance mesmo com alto volume de dados.
 
 ## 5. Diagrama de Fluxo do Feed (Discovery)
+
 ```mermaid
 graph TD
     A[Início: Requisição de Feed] --> B{Usuário segue alguém?}
@@ -739,7 +770,6 @@ graph TD
     D --> I[Retornar Feed Discovery]
 ```
 
-
 ---
 
 # 4. DOCUMENTAÇÃO TCC - LOGIN
@@ -747,19 +777,24 @@ graph TD
 # Documentação Técnica: Sistema de Autenticação JWT (IF REDE)
 
 ## 1. Descrição do Módulo
+
 O módulo de Autenticação do IF REDE gerencia a entrada segura de acadêmicos e servidores na plataforma. Utilizando o padrão de Tokens de Acesso (JWT), o sistema garante que a identidade do usuário seja preservada de forma stateless entre o frontend (Next.js) e o backend (Express).
 
 ## 2. Fluxo de Dados e Segurança
+
 A implementação segue o rigor técnico exigido para aplicações modernas:
+
 1. **Sanitização:** Os dados de entrada (Email/Senha) são limpos e normalizados antes de atingir o banco de dados.
 2. **Criptografia:** Senhas nunca são armazenadas em texto plano. Utilizamos o algoritmo **bcrypt** com fator de custo 10 para gerar hashes irreversíveis.
-3. **Persistência Stateless:** Após a validação, o servidor emite um par de tokens. O *AccessToken* (15m) autoriza requisições imediatas, enquanto o *RefreshToken* (7d) permite a renovação da sessão sem nova inserção de senha.
+3. **Persistência Stateless:** Após a validação, o servidor emite um par de tokens. O _AccessToken_ (15m) autoriza requisições imediatas, enquanto o _RefreshToken_ (7d) permite a renovação da sessão sem nova inserção de senha.
 4. **Middleware SSR:** O Next.js utiliza um middleware de borda para ler os cookies de autenticação, impedindo que usuários não autorizados acessem páginas protegidas como `/home` e `/profile`.
 
 ## 3. Justificativa Técnica
+
 A escolha do JWT (JSON Web Token) justifica-se pela escalabilidade horizontal. Ao não armazenar sessões em memória no servidor, permitimos que a aplicação cresça sem gargalos de sincronização de estado. A separação entre perfil e configurações no schema do MongoDB (Mongoose) otimiza as consultas de login, carregando apenas o necessário para a geração do token.
 
 ## 4. Diagrama UML de Autenticação
+
 ```mermaid
 sequenceDiagram
     participant U as Usuário
@@ -779,7 +814,6 @@ sequenceDiagram
     F->>U: Redirecionar para /home
 ```
 
-
 ---
 
 # 5. DOCUMENTAÇÃO TCC - NOTIFICAÇÕES (PARTE 1)
@@ -787,26 +821,32 @@ sequenceDiagram
 # Documentação Técnica: Sistema de Interação Social e Notificações (IF REDE)
 
 ## 1. Descrição do Módulo
+
 O módulo de Notificações e Interações Sociais é o núcleo de engajamento da plataforma IF REDE. Ele permite que os acadêmicos recebam feedback em tempo real sobre suas produções (artes, podcasts, textos) e mantenham-se atualizados sobre a atividade de seus pares.
 
 ## 2. Arquitetura e Fluxo de Dados
+
 A solução foi construída sobre uma arquitetura orientada a eventos, utilizando o padrão **Observer** simulado através de disparos manuais em nível de serviço (Services).
 
-### Fluxo de Notificação:
+### Fluxo de Notificação
+
 1. **Ação:** O usuário A realiza uma ação (ex: curtir uma postagem do usuário B).
 2. **Controller:** Recebe a requisição, valida o JWT e a propriedade do objeto.
 3. **Service:** O `notificacoes.service.js` é invocado para criar um novo documento na coleção `notificacoes`.
 4. **Persistência:** O MongoDB armazena a notificação com um índice **TTL (Time-To-Live)** de 30 dias, garantindo que o banco não cresça indefinidamente com dados efêmeros.
-5. **Consumo:** O Frontend (Next.js) utiliza o `NotificationContext` para realizar *Polling* a cada 30 segundos, atualizando o estado global do "Sino" de notificações.
+5. **Consumo:** O Frontend (Next.js) utiliza o `NotificationContext` para realizar _Polling_ a cada 30 segundos, atualizando o estado global do "Sino" de notificações.
 
 ## 3. Padrões de Projeto Aplicados
+
 - **Bucket Pattern (Denormalização):** As estatísticas de curtidas e comentários são armazenadas diretamente no documento da postagem/comentário. Isso elimina a necessidade de agregações custosas (`$lookup` ou `$count`) em cada carregamento de feed, priorizando a performance de leitura.
 - **Polimorfismo de Objeto:** O Schema de notificações utiliza os campos `objeto_id` e `objeto_tipo` para referenciar dinamicamente diferentes coleções (postagens, comentários ou usuários), reduzindo a redundância de schemas.
 
 ## 4. Justificativa Técnica (Nota de Excelência)
-A implementação de curtidas em comentários (v2.0) elevou o nível de interatividade da plataforma, permitindo uma hierarquia de relevância nas discussões acadêmicas. A escolha do *Polling* em detrimento de *WebSockets* justifica-se pela simplicidade de infraestrutura para um ambiente de TCC, mantendo uma experiência de usuário (UX) próxima do tempo real sem elevar o custo computacional do servidor.
+
+A implementação de curtidas em comentários (v2.0) elevou o nível de interatividade da plataforma, permitindo uma hierarquia de relevância nas discussões acadêmicas. A escolha do _Polling_ em detrimento de _WebSockets_ justifica-se pela simplicidade de infraestrutura para um ambiente de TCC, mantendo uma experiência de usuário (UX) próxima do tempo real sem elevar o custo computacional do servidor.
 
 ## 5. Diagrama de Sequência Sugerido (UML)
+
 ```mermaid
 sequenceDiagram
     participant U as Usuário (Frontend)
@@ -820,14 +860,13 @@ sequenceDiagram
     S->>DB: Create Notificacao Document
     S-->>A: Success
     A-->>U: HTTP 200 (Success)
-    
+
     Note over U,DB: Fluxo Assíncrono de Polling
     U->>A: GET /api/notificacoes/nao-lidas
     A->>DB: Find { lida: false }
     DB-->>A: List results
     A-->>U: Update Notification Bell
 ```
-
 
 ---
 
@@ -841,16 +880,16 @@ O sistema de notificações foi revisado e aprimorado pelo Esquadrão de Desenvo
 
 ### ✅ Melhorias Implementadas (v2.0)
 
-1.  **Integração Total (Backend Triggers)**:
+1. **Integração Total (Backend Triggers)**:
     - Notificações disparadas automaticamente em: **Likes**, **Novos Seguidores** e **Comentários Aprovados**.
     - Lógica de segurança para não notificar o próprio autor da ação.
-2.  **Otimização de Performance**:
+2. **Otimização de Performance**:
     - Uso de `Promise.all` no backend para reduzir o tempo de resposta em 60%.
     - Índices compostos no MongoDB para busca ultrarrápida de não lidas.
-3.  **Frontend Tipado & Inteligente**:
+3. **Frontend Tipado & Inteligente**:
     - Interfaces TypeScript completas para eliminar `any`.
     - Lógica de redirecionamento: clicar na notificação leva o usuário direto para o post ou perfil.
-4.  **UX Aprimorada**:
+4. **UX Aprimorada**:
     - Animações CSS (pulse, fade-in, scale).
     - Badge dinâmica na navbar.
     - Dropdown com ações rápidas (marcar lida, remover).
@@ -860,12 +899,14 @@ O sistema de notificações foi revisado e aprimorado pelo Esquadrão de Desenvo
 ## 📁 Arquivos Principais
 
 ### Backend (Lógica & Gatilhos)
+
 - `routes/postagens.routes.js`: Gatilho de **Like**.
 - `routes/usuarios.routes.js`: Gatilho de **Seguidores**.
 - `routes/comentarios.routes.js`: Gatilho de **Comentários Aprovados**.
 - `controllers/notificacoes.controller.js`: Otimizado com processamento paralelo.
 
 ### Frontend (Interface & Tipagem)
+
 - `src/context/NotificationContext.tsx`: Agora com Tipos e Router Integration.
 - `src/components/NotificationBell.tsx`: Nova UI com suporte a redirecionamento.
 - `src/types/index.ts`: Definições globais de `Notificacao`.
@@ -905,13 +946,13 @@ if-rede-frontend/
 
 ```javascript
 // No seu controller (ex: postagens.controller.js)
-const { notificarLike } = require('../services/notificacoes.service');
+const { notificarLike } = require("../services/notificacoes.service");
 
 // Quando alguém curte uma postagem:
 await notificarLike(
-  autor_postagem_id,  // Quem recebe
-  usuario_id,         // Quem fez a ação
-  postagem_id         // ID da postagem
+  autor_postagem_id, // Quem recebe
+  usuario_id, // Quem fez a ação
+  postagem_id, // ID da postagem
 );
 ```
 
@@ -919,7 +960,7 @@ await notificarLike(
 
 ```javascript
 // Em qualquer componente
-import { useNotifications } from '@/context/NotificationContext';
+import { useNotifications } from "@/context/NotificationContext";
 
 export default function MyComponent() {
   const { notificacoes, naoLidas, marcarComoLida } = useNotifications();
@@ -927,7 +968,7 @@ export default function MyComponent() {
   return (
     <div>
       <p>Notificações não lidas: {naoLidas}</p>
-      {notificacoes.map(notif => (
+      {notificacoes.map((notif) => (
         <div key={notif._id}>
           <p>{notif.mensagem}</p>
           <button onClick={() => marcarComoLida(notif._id)}>
@@ -943,6 +984,7 @@ export default function MyComponent() {
 ### 3. **Bell Icon na Navbar**
 
 O ícone está automaticamente adicionado ao `HomeFeedClient.tsx`:
+
 - Mostra número de notificações não lidas
 - Click abre dropdown com últimas 20 notificações
 - Botão "Ver todas" leva à página `/notificacoes`
@@ -951,26 +993,28 @@ O ícone está automaticamente adicionado ao `HomeFeedClient.tsx`:
 
 ## 📊 Tipos de Notificações Suportados
 
-| Tipo | Mensagem | Ícone | Quando disparar |
-|------|----------|-------|-----------------|
-| **like** | curtiu sua postagem | ❤️ | Quando post recebe like |
-| **comentario** | comentou na sua postagem | 💬 | Quando há novo comentário |
-| **seguidor** | começou a te seguir | 👥 | Quando alguém faz follow |
-| **repost** | compartilhou sua postagem | 🔄 | Quando post é repostado |
-| **tag** | te marcou em uma postagem | 🏷️ | Quando usuário é mencionado |
-| **resposta** | respondeu seu comentário | ↩️ | Quando comentário recebe resposta |
+| Tipo           | Mensagem                  | Ícone | Quando disparar                   |
+| -------------- | ------------------------- | ----- | --------------------------------- |
+| **like**       | curtiu sua postagem       | ❤️    | Quando post recebe like           |
+| **comentario** | comentou na sua postagem  | 💬    | Quando há novo comentário         |
+| **seguidor**   | começou a te seguir       | 👥    | Quando alguém faz follow          |
+| **repost**     | compartilhou sua postagem | 🔄    | Quando post é repostado           |
+| **tag**        | te marcou em uma postagem | 🏷️    | Quando usuário é mencionado       |
+| **resposta**   | respondeu seu comentário  | ↩️    | Quando comentário recebe resposta |
 
 ---
 
 ## 🔌 Endpoints da API
 
 ### GET /notificacoes
+
 ```bash
 curl -H "Authorization: Bearer TOKEN" \
   "http://localhost:3000/api/notificacoes?pagina=1&limite=20&filtro=all"
 ```
 
 **Resposta:**
+
 ```json
 {
   "sucesso": true,
@@ -990,6 +1034,7 @@ curl -H "Authorization: Bearer TOKEN" \
 ```
 
 ### GET /notificacoes/nao-lidas/contador
+
 ```bash
 curl -H "Authorization: Bearer TOKEN" \
   "http://localhost:3000/api/notificacoes/nao-lidas/contador"
@@ -998,24 +1043,28 @@ curl -H "Authorization: Bearer TOKEN" \
 **Resposta:** `{ "sucesso": true, "nao_lidas": 5 }`
 
 ### PATCH /notificacoes/:id/lida
+
 ```bash
 curl -X PATCH -H "Authorization: Bearer TOKEN" \
   "http://localhost:3000/api/notificacoes/64a1b2c3d4e5f6g7h8i9j0/lida"
 ```
 
 ### PATCH /notificacoes/marcar-tudo-lido
+
 ```bash
 curl -X PATCH -H "Authorization: Bearer TOKEN" \
   "http://localhost:3000/api/notificacoes/marcar-tudo-lido"
 ```
 
 ### DELETE /notificacoes/:id
+
 ```bash
 curl -X DELETE -H "Authorization: Bearer TOKEN" \
   "http://localhost:3000/api/notificacoes/64a1b2c3d4e5f6g7h8i9j0"
 ```
 
 ### DELETE /notificacoes (deleta todas)
+
 ```bash
 curl -X DELETE -H "Authorization: Bearer TOKEN" \
   "http://localhost:3000/api/notificacoes"
@@ -1042,7 +1091,6 @@ curl -X DELETE -H "Authorization: Bearer TOKEN" \
 
 **Última atualização**: 2026-06-01  
 **Pronto para produção**: Sim ✅
-
 
 ---
 
@@ -1280,94 +1328,92 @@ as notificações aparecerão em tempo real! ⚡
 
 ```
 
-
 ---
 
 # 8. LISTA DE MELHORIAS
 
 1. Contexto e Propósito
-  O IFRede é uma plataforma de nicho acadêmico projetada para conectar estudantes e servidores, permitindo o
-  compartilhamento de produções intelectuais e artísticas (textos, imagens, áudios e vídeos). O objetivo principal é
-  fomentar o engajamento e a visibilidade de talentos internos através de um grafo social (seguidores) e um algoritmo de
-  feed híbrido.
+   O IFRede é uma plataforma de nicho acadêmico projetada para conectar estudantes e servidores, permitindo o
+   compartilhamento de produções intelectuais e artísticas (textos, imagens, áudios e vídeos). O objetivo principal é
+   fomentar o engajamento e a visibilidade de talentos internos através de um grafo social (seguidores) e um algoritmo de
+   feed híbrido.
 
-  ---
+   ***
 
-  1. Análise de Usabilidade e UX (Pontos Fortes)
+1. Análise de Usabilidade e UX (Pontos Fortes)
 
-* Identidade Visual Coesa: O uso da paleta "Roxo/Oliva" (#2D1B2D, #8F9972) cria uma estética moderna e profissional,
-     alinhada a um ambiente acadêmico diferenciado.
-* Micro-interações de Qualidade: Implementação de atualizações otimistas no botão de curtir e animações suaves
-     (escalonamento, transições de opacidade) que elevam a percepção de performance.
-* Navegação Facilitada: O botão global de "Home" fixo e os botões de retorno nas páginas internas ("Voltar") garantem
-     que o usuário nunca se sinta perdido.
-* Feedback em Tempo Real: O sistema de notificações via polling e o sinalizador visual (sino com contador)
-     proporcionam uma experiência dinâmica, essencial para redes sociais.
+- Identidade Visual Coesa: O uso da paleta "Roxo/Oliva" (#2D1B2D, #8F9972) cria uma estética moderna e profissional,
+  alinhada a um ambiente acadêmico diferenciado.
+- Micro-interações de Qualidade: Implementação de atualizações otimistas no botão de curtir e animações suaves
+  (escalonamento, transições de opacidade) que elevam a percepção de performance.
+- Navegação Facilitada: O botão global de "Home" fixo e os botões de retorno nas páginas internas ("Voltar") garantem
+  que o usuário nunca se sinta perdido.
+- Feedback em Tempo Real: O sistema de notificações via polling e o sinalizador visual (sino com contador)
+  proporcionam uma experiência dinâmica, essencial para redes sociais.
 
-  ---
-
+  ***
   1. Relatório de Melhorias (Correções e Otimizações)
 
 A. Lista de Melhorias Necessárias
-  ┌────────────┬─────────────────┬────────────────────────────────────────┬────────────────────────────────────────┐
-  │ Prioridade │ Localização     │ Problema                               │ Sugestão de Solução                    │
-  ├────────────┼─────────────────┼────────────────────────────────────────┼────────────────────────────────────────┤
-  │ 🔴 Crítica │ Geral (PostCard │ Erros de rede (likes, seguidores) são  │ Implementar Toasts ou Snackbars (ex:   │
-  │            │ / Social)       │ logados no console mas não exibidos ao │ Sonner ou React Hot Toast) para erros. │
-  │            │                 │ usuário.                               │                                        │
-  │ 🟠 Alta    │ Geral           │ Falta de acessibilidade básica         │ Adicionar aria-label descritivos e     │
-  │            │                 │ (aria-label em botões de ícone como    │ garantir navegação via teclado         │
-  │            │                 │ Curtir, Sino, Comentar).               │ (tabindex).                            │
-  │ 🟠 Alta    │ Feed / Busca    │ Mudanças bruscas de conteúdo durante o │ Implementar Skeleton Screens no        │
-  │            │                 │ carregamento de dados assíncronos.     │ HomeFeedClient e SearchClient para     │
-  │            │                 │                                        │ suavizar o carregamento.               │
-  │ 🟡 Média   │ PostCard        │ Player de vídeo e áudio são            │ Integrar componentes de player nativos │
-  │            │                 │ representados por placeholders         │ ou customizados (ex: video-js ou tags  │
-  │            │                 │ estáticos.                             │ HTML5 estilizadas).                    │
-  │ 🟡 Média   │ Navegação       │ Falta de uma barra de navegação        │ Criar um menu lateral persistente com  │
-  │            │                 │ principal (Sidebar/Navbar) no Desktop. │ links rápidos para Search,             │
-  │            │                 │                                        │ Notificações e Perfil.                 │
-  │ ⚪ Baixa   │ NewPostPage     │ Usuário pode digitar títulos longos    │ Adicionar contador de caracteres em    │
-  │            │                 │ sem saber se serão cortados (limite    │ tempo real nos inputs de Título e      │
-  │            │                 │ visual).                               │ Descrição.                             │
-  └────────────┴─────────────────┴────────────────────────────────────────┴────────────────────────────────────────┘
-  ---
+┌────────────┬─────────────────┬────────────────────────────────────────┬────────────────────────────────────────┐
+│ Prioridade │ Localização │ Problema │ Sugestão de Solução │
+├────────────┼─────────────────┼────────────────────────────────────────┼────────────────────────────────────────┤
+│ 🔴 Crítica │ Geral (PostCard │ Erros de rede (likes, seguidores) são │ Implementar Toasts ou Snackbars (ex: │
+│ │ / Social) │ logados no console mas não exibidos ao │ Sonner ou React Hot Toast) para erros. │
+│ │ │ usuário. │ │
+│ 🟠 Alta │ Geral │ Falta de acessibilidade básica │ Adicionar aria-label descritivos e │
+│ │ │ (aria-label em botões de ícone como │ garantir navegação via teclado │
+│ │ │ Curtir, Sino, Comentar). │ (tabindex). │
+│ 🟠 Alta │ Feed / Busca │ Mudanças bruscas de conteúdo durante o │ Implementar Skeleton Screens no │
+│ │ │ carregamento de dados assíncronos. │ HomeFeedClient e SearchClient para │
+│ │ │ │ suavizar o carregamento. │
+│ 🟡 Média │ PostCard │ Player de vídeo e áudio são │ Integrar componentes de player nativos │
+│ │ │ representados por placeholders │ ou customizados (ex: video-js ou tags │
+│ │ │ estáticos. │ HTML5 estilizadas). │
+│ 🟡 Média │ Navegação │ Falta de uma barra de navegação │ Criar um menu lateral persistente com │
+│ │ │ principal (Sidebar/Navbar) no Desktop. │ links rápidos para Search, │
+│ │ │ │ Notificações e Perfil. │
+│ ⚪ Baixa │ NewPostPage │ Usuário pode digitar títulos longos │ Adicionar contador de caracteres em │
+│ │ │ sem saber se serão cortados (limite │ tempo real nos inputs de Título e │
+│ │ │ visual). │ Descrição. │
+└────────────┴─────────────────┴────────────────────────────────────────┴────────────────────────────────────────┘
 
-  1. Funcionalidades Ausentes e Sugestões de Implementação
+---
 
-  ┌──────────────────────────┬──────────────────────────────────────────────────────────────────────┬────────────┐
-  │ Funcionalidade           │ Justificativa                                                        │ Prioridade │
-  ├──────────────────────────┼──────────────────────────────────────────────────────────────────────┼────────────┤
-  │ Mensagens Diretas (Chat) │ Essencial para a colaboração acadêmica privada entre alunos e        │ Essencial  │
-  │                          │ orientadores.                                                        │            │
-  │ Lógica de Repostagem     │ O botão existe na UI (Repeat2), mas não há funcionalidade. Aumenta a │ Essencial  │
-  │                          │ viralidade de bons conteúdos.                                        │            │
-  │ Painel de Moderação      │ Gerenciamento das solicitações de novas tags e moderação de palavras │ Importante │
-  │                          │ proibidas (filtro já existente no backend).                          │            │
-  │ Configurações de Conta   │ Troca de senha, exclusão de conta e preferências de                  │ Importante │
-  │                          │ privacidade/e-mail.                                                  │            │
-  │ Busca Avançada           │ Filtros por data de publicação, curso/campus do autor e tags         │ Desejável  │
-  │                          │ específicas.                                                         │            │
-  │ Sistema de               │ Reconhecimento visual no perfil para usuários que publicam           │ Desejável  │
-  │ Medalhas/Gamificação     │ frequentemente ou ganham muitos likes.                               │            │
-  └──────────────────────────┴──────────────────────────────────────────────────────────────────────┴────────────┘
+1. Funcionalidades Ausentes e Sugestões de Implementação
 
-  ---
+┌──────────────────────────┬──────────────────────────────────────────────────────────────────────┬────────────┐
+│ Funcionalidade │ Justificativa │ Prioridade │
+├──────────────────────────┼──────────────────────────────────────────────────────────────────────┼────────────┤
+│ Mensagens Diretas (Chat) │ Essencial para a colaboração acadêmica privada entre alunos e │ Essencial │
+│ │ orientadores. │ │
+│ Lógica de Repostagem │ O botão existe na UI (Repeat2), mas não há funcionalidade. Aumenta a │ Essencial │
+│ │ viralidade de bons conteúdos. │ │
+│ Painel de Moderação │ Gerenciamento das solicitações de novas tags e moderação de palavras │ Importante │
+│ │ proibidas (filtro já existente no backend). │ │
+│ Configurações de Conta │ Troca de senha, exclusão de conta e preferências de │ Importante │
+│ │ privacidade/e-mail. │ │
+│ Busca Avançada │ Filtros por data de publicação, curso/campus do autor e tags │ Desejável │
+│ │ específicas. │ │
+│ Sistema de │ Reconhecimento visual no perfil para usuários que publicam │ Desejável │
+│ Medalhas/Gamificação │ frequentemente ou ganham muitos likes. │ │
+└──────────────────────────┴──────────────────────────────────────────────────────────────────────┴────────────┘
 
-  1. Resumo Executivo
+---
 
-  Nota Geral: 8.2 / 10
+1. Resumo Executivo
 
-* Pontos Fortes: Arquitetura técnica robusta (JWT, Hybrid Feed), design visual atraente e performance percebida
-     excelente devido às atualizações otimistas.
-* Pontos Fracos: Lacunas em acessibilidade, falta de feedback de erro visual para o usuário e ausência de uma central
-     de mensagens (Chat).
+Nota Geral: 8.2 / 10
+
+- Pontos Fortes: Arquitetura técnica robusta (JWT, Hybrid Feed), design visual atraente e performance percebida
+  excelente devido às atualizações otimistas.
+- Pontos Fracos: Lacunas em acessibilidade, falta de feedback de erro visual para o usuário e ausência de uma central
+  de mensagens (Chat).
 
   Recomendação Estratégica:
   O foco imediato deve ser a Acessibilidade e Feedback de Erro (🔴/🟠). Uma rede social que falha silenciosamente
   frustra o usuário. Em seguida, a implementação da Lógica de Repostagem e Chat transformará o IFRede de um mural de
   publicações em uma rede de colaboração completa.
-
 
 ---
 
@@ -1382,9 +1428,10 @@ Este guia contém o passo a passo completo para configurar e rodar o projeto **I
 ## 📋 Pré-requisitos
 
 Antes de começar, você precisará ter instalado:
-1.  **Node.js** (v18 ou superior recomendado) - [Download](https://nodejs.org/)
-2.  **MongoDB** (Local ou via Atlas) - [Download Community Server](https://www.mongodb.com/try/download/community)
-3.  **Git** (opcional, para clonar o repositório)
+
+1. **Node.js** (v18 ou superior recomendado) - [Download](https://nodejs.org/)
+2. **MongoDB** (Local ou via Atlas) - [Download Community Server](https://www.mongodb.com/try/download/community)
+3. **Git** (opcional, para clonar o repositório)
 
 ---
 
@@ -1392,24 +1439,30 @@ Antes de começar, você precisará ter instalado:
 
 O backend gerencia o banco de dados, autenticação e a lógica de negócios.
 
-1.  Abra um terminal na pasta `if-rede-backend`.
-2.  Instale as dependências:
+1. Abra um terminal na pasta `if-rede-backend`.
+2. Instale as dependências:
+
     ```bash
     npm install
     ```
-3.  Configure as variáveis de ambiente:
-    *   Copie o arquivo `.env.example` e renomeie para `.env`.
-    *   Abra o `.env` e certifique-se de que a `MONGODB_URI` está correta. 
-    *   *Dica:* Se o seu MongoDB estiver rodando localmente sem senha, use: `mongodb://localhost:27017/if-rede`.
-4.  (Opcional) Popular o banco de dados com dados iniciais:
+
+3. Configure as variáveis de ambiente:
+    - Copie o arquivo `.env.example` e renomeie para `.env`.
+    - Abra o `.env` e certifique-se de que a `MONGODB_URI` está correta.
+    - _Dica:_ Se o seu MongoDB estiver rodando localmente sem senha, use: `mongodb://localhost:27017/if-rede`.
+4. (Opcional) Popular o banco de dados com dados iniciais:
+
     ```bash
     npm run seed
     ```
-5.  Inicie o servidor:
+
+5. Inicie o servidor:
+
     ```bash
     npm run dev
     ```
-    *O backend estará rodando em: `http://localhost:3000`*
+
+    _O backend estará rodando em: `http://localhost:3000`_
 
 ---
 
@@ -1417,50 +1470,55 @@ O backend gerencia o banco de dados, autenticação e a lógica de negócios.
 
 O frontend é a interface visual construída em Next.js.
 
-1.  Abra um novo terminal na pasta `if-rede-frontend`.
-2.  Instale as dependências:
+1. Abra um novo terminal na pasta `if-rede-frontend`.
+2. Instale as dependências:
+
     ```bash
     npm install
     ```
-3.  Inicie o servidor de desenvolvimento:
+
+3. Inicie o servidor de desenvolvimento:
+
     ```bash
     npm run dev
     ```
-    *O frontend estará rodando em: `http://localhost:3001`*
+
+    _O frontend estará rodando em: `http://localhost:3001`_
 
 ---
 
 ## 🌐 Resumo de Portas
 
-*   **Frontend:** `http://localhost:3001`
-*   **Backend (API):** `http://localhost:3000`
-*   **MongoDB:** `27017`
+- **Frontend:** `http://localhost:3001`
+- **Backend (API):** `http://localhost:3000`
+- **MongoDB:** `27017`
 
 ---
 
 ## 📝 Comandos Úteis
 
 ### Backend
-*   `npm run dev`: Inicia com Nodemon (recarrega ao salvar).
-*   `npm run seed`: Cria usuários e postagens de teste.
-*   `npm start`: Inicia em modo de produção.
+
+- `npm run dev`: Inicia com Nodemon (recarrega ao salvar).
+- `npm run seed`: Cria usuários e postagens de teste.
+- `npm start`: Inicia em modo de produção.
 
 ### Frontend
-*   `npm run dev`: Inicia o ambiente de desenvolvimento.
-*   `npm run build`: Gera a versão otimizada para produção.
+
+- `npm run dev`: Inicia o ambiente de desenvolvimento.
+- `npm run build`: Gera a versão otimizada para produção.
 
 ---
 
 ## 🧐 Solução de Problemas
 
-1.  **Erro de conexão com o MongoDB:** Verifique se o serviço do MongoDB está ativo (Services.msc no Windows ou `systemctl status mongod` no Linux).
-2.  **Porta 3000 ou 3001 ocupada:** Encerre processos antigos ou mude a porta nos arquivos de configuração (`.env` no backend ou script no `package.json` do frontend).
-3.  **Imagens não carregam:** Verifique se as URLs no banco de dados apontam para o caminho correto ou se o backend está servindo a pasta `uploads`.
+1. **Erro de conexão com o MongoDB:** Verifique se o serviço do MongoDB está ativo (Services.msc no Windows ou `systemctl status mongod` no Linux).
+2. **Porta 3000 ou 3001 ocupada:** Encerre processos antigos ou mude a porta nos arquivos de configuração (`.env` no backend ou script no `package.json` do frontend).
+3. **Imagens não carregam:** Verifique se as URLs no banco de dados apontam para o caminho correto ou se o backend está servindo a pasta `uploads`.
 
 ---
 
 ✨ **IF REDE** - Conectando Conhecimento Acadêmico.
-
 
 ---
 
@@ -1469,51 +1527,59 @@ O frontend é a interface visual construída em Next.js.
 # Deploy IF REDE (Frontend + Backend)
 
 Este guia coloca o site no ar usando:
+
 - Frontend: Vercel (Next.js)
 - Backend: Render (Node.js + MongoDB Atlas)
 
 ## 1) Subir o backend (Render)
 
-1. Crie uma conta em https://render.com.
+1. Crie uma conta em <https://render.com>.
 2. Clique em New + Web Service e conecte o repositorio do backend.
 3. Configure:
+
 - Runtime: Node
 - Build Command: npm install
 - Start Command: npm start
 - Root Directory: if-rede-backend (se o repo for monorepo)
 
-4. Adicione variaveis de ambiente:
+1. Adicione variaveis de ambiente:
+
 - NODE_ENV=production
 - PORT=10000
 - MONGODB_URI=<sua_string_mongodb_atlas>
 - JWT_SECRET=<um_secret_forte>
 - JWT_REFRESH_SECRET=<outro_secret_forte>
 - RATE_LIMIT_POR_MINUTO=100
-- CORS_ORIGINS=https://SEU_FRONTEND.vercel.app
+- CORS_ORIGINS=<https://SEU_FRONTEND.vercel.app>
 
-5. Publique e teste:
-- https://SEU_BACKEND.onrender.com/health
+1. Publique e teste:
+
+- <https://SEU_BACKEND.onrender.com/health>
 
 ## 2) Subir o frontend (Vercel)
 
-1. Crie conta em https://vercel.com.
+1. Crie conta em <https://vercel.com>.
 2. Importe o repositorio do frontend.
 3. Configure:
+
 - Framework Preset: Next.js
 - Root Directory: if-rede-frontend (se o repo for monorepo)
 
-4. Variavel de ambiente obrigatoria:
-- NEXT_PUBLIC_API_URL=https://SEU_BACKEND.onrender.com
+1. Variavel de ambiente obrigatoria:
 
-5. Deploy.
+- NEXT_PUBLIC_API_URL=<https://SEU_BACKEND.onrender.com>
+
+1. Deploy.
 
 ## 3) Ajustar CORS no backend
 
 Depois de publicar o frontend, atualize no Render:
-- CORS_ORIGINS=https://SEU_FRONTEND.vercel.app
+
+- CORS_ORIGINS=<https://SEU_FRONTEND.vercel.app>
 
 Se tiver ambiente preview e producao, use dois dominios separados por virgula:
-- CORS_ORIGINS=https://SEU_FRONTEND.vercel.app,https://SEU_FRONTEND-git-main.vercel.app
+
+- CORS_ORIGINS=<https://SEU_FRONTEND.vercel.app,https://SEU_FRONTEND-git-main.vercel.app>
 
 ## 4) Validacao final
 
@@ -1529,4 +1595,3 @@ Se tiver ambiente preview e producao, use dois dominios separados por virgula:
 - A rota /health ajuda a verificar disponibilidade da API.
 
 ---
-
