@@ -25,17 +25,14 @@ export default function RegisterPage() {
   const [confirmarSenha, setConfirmarSenha] = useState('');
 
   // Etapa 2: Dados do perfil
-  // CORREÇÃO: nome e handle são campos SEPARADOS — não mais concatenados.
-  // Por que: O backend espera apenas o nome no campo 'nome'. O handle (@username)
-  // é apenas uma preferência visual do usuário e NÃO é um campo do schema atual.
   const [nome, setNome] = useState('');
-  const [matricula, setMatricula] = useState('');
   // status_vinculo define as permissões e limites do usuário no sistema
   const [statusVinculo, setStatusVinculo] = useState<'estudante' | 'egresso' | 'servidor'>('estudante');
 
   // Estado de feedback para o usuário
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sucesso, setSucesso] = useState(false);
 
   // ============================================================================
   // VALIDAÇÃO: ETAPA 1 — Credenciais
@@ -54,10 +51,6 @@ export default function RegisterPage() {
   // ============================================================================
   function validarEtapa2(): string | null {
     if (!nome || nome.trim().length < 3) return 'Nome deve ter pelo menos 3 caracteres.';
-    // Regex alinhada com o schema do backend: 4-20 caracteres alfanuméricos
-    if (!matricula || !/^[a-zA-Z0-9\-]{4,20}$/.test(matricula)) {
-      return 'Matrícula inválida. Use entre 4 e 20 caracteres alfanuméricos.';
-    }
     return null;
   }
 
@@ -89,16 +82,14 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      // CORREÇÃO: envia 'nome' puro, sem handle concatenado.
-      // Fluxo: AuthContext.register() → POST /auth/register → { nome, email, matricula, senha, status_vinculo }
       await register({
         nome: nome.trim(),
         email,
-        matricula,
         senha,
         status_vinculo: statusVinculo,
       });
-      // Após sucesso, o próprio AuthContext redireciona para /home
+      // Após sucesso, mostra a tela de confirmação
+      setSucesso(true);
     } catch (err: any) {
       // CORREÇÃO: lê a mensagem de erro real retornada pela API, em vez de mostrar mensagem genérica.
       // Entrada: objeto de erro do Axios com err.response.data.error.message
@@ -126,37 +117,57 @@ export default function RegisterPage() {
     <main className="grid min-h-screen place-items-center bg-if-bg p-4">
       <section className="w-full max-w-xl rounded-main bg-if-card p-7 text-if-text shadow-card">
 
-        {/* Cabeçalho com identidade visual IF REDE */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">
-            Criar conta <span className="text-if-olive">IF REDE</span>
-          </h1>
-          {/* Indicador de progresso visual */}
-          <p className="mt-1 text-sm text-if-text/70">Etapa {step} de 2</p>
-          {/* Barra de progresso */}
-          <div className="mt-3 h-1.5 w-full rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-if-olive transition-all duration-500"
-              style={{ width: step === 1 ? '50%' : '100%' }}
-            />
+        {sucesso ? (
+          <div className="text-center py-8">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-if-olive/20 text-if-olive">
+              <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold mb-3">Quase lá, {nome.split(' ')[0]}!</h2>
+            <p className="text-if-text/80 mb-8">
+              Sua conta foi criada com sucesso. Para começar a usar a IF REDE, por favor <strong>verifique a caixa de entrada do seu e-mail</strong> ({email}) e clique no link de confirmação.
+            </p>
+            <Link
+              href="/login"
+              className="inline-block rounded-full bg-if-olive px-8 py-3 font-semibold text-if-bg hover:brightness-110 transition"
+            >
+              Ir para o Login
+            </Link>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Cabeçalho com identidade visual IF REDE */}
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold">
+                Criar conta <span className="text-if-olive">IF REDE</span>
+              </h1>
+              {/* Indicador de progresso visual */}
+              <p className="mt-1 text-sm text-if-text/70">Etapa {step} de 2</p>
+              {/* Barra de progresso */}
+              <div className="mt-3 h-1.5 w-full rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-if-olive transition-all duration-500"
+                  style={{ width: step === 1 ? '50%' : '100%' }}
+                />
+              </div>
+            </div>
 
-        <form className="space-y-4" onSubmit={onSubmit}>
+            <form className="space-y-4" onSubmit={onSubmit}>
 
-          {/* ============================================================ */}
-          {/* ETAPA 1: Credenciais de acesso */}
-          {/* ============================================================ */}
-          {step === 1 && (
-            <>
-              <label className="block text-sm font-medium">
-                Email institucional
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
-                  placeholder="você@ifc.edu.br"
+              {/* ============================================================ */}
+              {/* ETAPA 1: Credenciais de acesso */}
+              {/* ============================================================ */}
+              {step === 1 && (
+                <>
+                  <label className="block text-sm font-medium">
+                    Email
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                      placeholder="você@email.com"
                   required
                   autoComplete="email"
                 />
@@ -210,20 +221,6 @@ export default function RegisterPage() {
                 />
               </label>
 
-              <label className="block text-sm font-medium">
-                Matrícula
-                {/* Dica visível: informa o formato aceito antes que o backend rejeite */}
-                <span className="ml-2 text-xs text-if-text/50">(4–20 caracteres alfanuméricos)</span>
-                <input
-                  value={matricula}
-                  onChange={(e) => setMatricula(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
-                  placeholder="ex: 20260001 ou IFC-001"
-                  required
-                  autoComplete="off"
-                />
-              </label>
-
               {/* Campo de vínculo institucional — define permissões no sistema */}
               <label className="block text-sm font-medium">
                 Vínculo institucional
@@ -268,12 +265,14 @@ export default function RegisterPage() {
           </div>
         </form>
 
-        <p className="mt-6 text-sm text-if-text/75 text-center">
-          Já possui conta?{' '}
-          <Link href="/login" className="font-semibold text-if-olive hover:underline underline-offset-2">
-            Entrar
-          </Link>
-        </p>
+            <p className="mt-6 text-sm text-if-text/75 text-center">
+              Já possui conta?{' '}
+              <Link href="/login" className="font-semibold text-if-olive hover:underline underline-offset-2">
+                Entrar
+              </Link>
+            </p>
+          </>
+        )}
       </section>
     </main>
   );

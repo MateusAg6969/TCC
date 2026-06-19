@@ -44,10 +44,7 @@ const perfilSchema = new mongoose.Schema(
     // Validação: aceita matrículas numéricas ou alfanuméricas com 4 a 20 caracteres.
     matricula: {
       type: String,
-      required: [true, 'Matrícula é obrigatória'],
-      unique: true,
-      // Aceita dígitos, letras maiúsculas/minúsculas e hífens — cobre padrões reais do IFC
-      match: [/^[a-zA-Z0-9\-]{4,20}$/, 'Matrícula inválida (use entre 4 e 20 caracteres alfanuméricos)'],
+      default: '',
     },
 
     // Informações do perfil
@@ -253,6 +250,16 @@ const usuarioSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+
+    // Confirmação de e-mail
+    email_confirmado: {
+      type: Boolean,
+      default: false,
+    },
+    token_verificacao: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true, // Adiciona createdAt e updatedAt automaticamente
@@ -267,8 +274,8 @@ const usuarioSchema = new mongoose.Schema(
 // Email único (já definido no schema, mas aqui deixamos explícito)
 usuarioSchema.index({ 'perfil.email': 1 }, { unique: true });
 
-// Matrícula única
-usuarioSchema.index({ 'perfil.matricula': 1 }, { unique: true });
+// Matrícula única (removido)
+// usuarioSchema.index({ 'perfil.matricula': 1 }, { unique: true });
 
 // Busca por nome (texto)
 usuarioSchema.index({ 'perfil.nome': 'text' });
