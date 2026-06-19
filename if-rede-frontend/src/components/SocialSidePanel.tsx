@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Users, UserPlus, Loader2, ArrowRight } from 'lucide-react';
 import api from '@/lib/api';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 type Props = {
   isOpen: boolean;
