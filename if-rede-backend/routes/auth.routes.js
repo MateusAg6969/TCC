@@ -18,12 +18,10 @@ router.post('/register', async (req, res, next) => {
     }
 
     const senhaHash = await bcrypt.hash(String(senha), 10);
-    const tokenVerificacao = require('crypto').randomBytes(32).toString('hex');
 
     const usuario = await Usuario.create({
       senha: senhaHash,
-      email_confirmado: false,
-      token_verificacao: tokenVerificacao,
+      email_confirmado: true, // Força a confirmação automática
       perfil: {
         nome,
         email,
@@ -32,12 +30,21 @@ router.post('/register', async (req, res, next) => {
       },
     });
 
-    const { enviarEmailConfirmacao } = require('../services/email.service');
-    await enviarEmailConfirmacao(email, nome, tokenVerificacao);
+    const accessToken = gerarAccessToken(usuario);
+    const refreshToken = gerarRefreshToken(usuario);
 
     return res.success(
-      null,
-      'Usuário criado com sucesso. Verifique seu e-mail para confirmar a conta.',
+      {
+        usuario: {
+          id: usuario._id,
+          nome: usuario.perfil.nome,
+          email: usuario.perfil.email,
+          status_vinculo: usuario.perfil.status_vinculo,
+          mod_voluntario: usuario.configuracoes?.mod_voluntario || false,
+        },
+        tokens: { accessToken, refreshToken },
+      },
+      'Usuário criado com sucesso.',
       undefined,
       201
     );
@@ -80,10 +87,10 @@ router.post('/login', async (req, res, next) => {
       return res.fail('Conta inativa ou suspensa.', 403);
     }
 
-    // Bloqueia acesso se o e-mail não estiver confirmado
-    if (usuario.email_confirmado === false) {
-      return res.fail('Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.', 403);
-    }
+    // Bloqueia acesso se o e-mail não estiver confirmado (desativado temporariamente)
+    // if (usuario.email_confirmado === false) {
+    //   return res.fail('Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.', 403);
+    // }
 
     // 6. Geração de Tokens: Cria Access Token (curta duração) e Refresh Token (longa duração).
     // Fluxo: O Access Token carrega os claims (mod_voluntario, vinculo) para o middleware.

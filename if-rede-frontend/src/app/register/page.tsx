@@ -32,7 +32,6 @@ export default function RegisterPage() {
   // Estado de feedback para o usuário
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sucesso, setSucesso] = useState(false);
 
   // ============================================================================
   // VALIDAÇÃO: ETAPA 1 — Credenciais
@@ -88,8 +87,7 @@ export default function RegisterPage() {
         senha,
         status_vinculo: statusVinculo,
       });
-      // Após sucesso, mostra a tela de confirmação
-      setSucesso(true);
+      // Após sucesso, o próprio AuthContext redireciona para /home
     } catch (err: any) {
       // CORREÇÃO: lê a mensagem de erro real retornada pela API, em vez de mostrar mensagem genérica.
       // Entrada: objeto de erro do Axios com err.response.data.error.message
@@ -117,57 +115,37 @@ export default function RegisterPage() {
     <main className="grid min-h-screen place-items-center bg-if-bg p-4">
       <section className="w-full max-w-xl rounded-main bg-if-card p-7 text-if-text shadow-card">
 
-        {sucesso ? (
-          <div className="text-center py-8">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-if-olive/20 text-if-olive">
-              <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold mb-3">Quase lá, {nome.split(' ')[0]}!</h2>
-            <p className="text-if-text/80 mb-8">
-              Sua conta foi criada com sucesso. Para começar a usar a IF REDE, por favor <strong>verifique a caixa de entrada do seu e-mail</strong> ({email}) e clique no link de confirmação.
-            </p>
-            <Link
-              href="/login"
-              className="inline-block rounded-full bg-if-olive px-8 py-3 font-semibold text-if-bg hover:brightness-110 transition"
-            >
-              Ir para o Login
-            </Link>
+        {/* Cabeçalho com identidade visual IF REDE */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">
+            Criar conta <span className="text-if-olive">IF REDE</span>
+          </h1>
+          {/* Indicador de progresso visual */}
+          <p className="mt-1 text-sm text-if-text/70">Etapa {step} de 2</p>
+          {/* Barra de progresso */}
+          <div className="mt-3 h-1.5 w-full rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-if-olive transition-all duration-500"
+              style={{ width: step === 1 ? '50%' : '100%' }}
+            />
           </div>
-        ) : (
-          <>
-            {/* Cabeçalho com identidade visual IF REDE */}
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold">
-                Criar conta <span className="text-if-olive">IF REDE</span>
-              </h1>
-              {/* Indicador de progresso visual */}
-              <p className="mt-1 text-sm text-if-text/70">Etapa {step} de 2</p>
-              {/* Barra de progresso */}
-              <div className="mt-3 h-1.5 w-full rounded-full bg-white/10">
-                <div
-                  className="h-full rounded-full bg-if-olive transition-all duration-500"
-                  style={{ width: step === 1 ? '50%' : '100%' }}
-                />
-              </div>
-            </div>
+        </div>
 
-            <form className="space-y-4" onSubmit={onSubmit}>
+        <form className="space-y-4" onSubmit={onSubmit}>
 
-              {/* ============================================================ */}
-              {/* ETAPA 1: Credenciais de acesso */}
-              {/* ============================================================ */}
-              {step === 1 && (
-                <>
-                  <label className="block text-sm font-medium">
-                    Email
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
-                      placeholder="você@email.com"
+          {/* ============================================================ */}
+          {/* ETAPA 1: Credenciais de acesso */}
+          {/* ============================================================ */}
+          {step === 1 && (
+            <>
+              <label className="block text-sm font-medium">
+                Email
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                  placeholder="você@email.com"
                   required
                   autoComplete="email"
                 />
@@ -265,14 +243,12 @@ export default function RegisterPage() {
           </div>
         </form>
 
-            <p className="mt-6 text-sm text-if-text/75 text-center">
-              Já possui conta?{' '}
-              <Link href="/login" className="font-semibold text-if-olive hover:underline underline-offset-2">
-                Entrar
-              </Link>
-            </p>
-          </>
-        )}
+        <p className="mt-6 text-sm text-if-text/75 text-center">
+          Já possui conta?{' '}
+          <Link href="/login" className="font-semibold text-if-olive hover:underline underline-offset-2">
+            Entrar
+          </Link>
+        </p>
       </section>
     </main>
   );
