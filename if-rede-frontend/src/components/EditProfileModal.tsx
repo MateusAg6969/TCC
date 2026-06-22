@@ -22,8 +22,10 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
   const [nome, setNome] = useState(defaultData.nome);
   const [bio, setBio] = useState(defaultData.bio);
   const [privacidade, setPrivacidade] = useState(defaultData.privacidade);
-  const [avatarUrl, setAvatarUrl] = useState(defaultData.avatar_url);
-  const [bannerUrl, setBannerUrl] = useState(defaultData.banner_url);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState(defaultData.avatar_url || '');
+  const [bannerPreview, setBannerPreview] = useState(defaultData.banner_url || '');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
 
@@ -33,9 +35,19 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
     setCarregando(true);
     setErro('');
     try {
+      if (avatarFile || bannerFile) {
+        const formData = new FormData();
+        if (avatarFile) formData.append('avatar', avatarFile);
+        if (bannerFile) formData.append('banner', bannerFile);
+        
+        await api.post('/usuarios/me/midia', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
       const payload = {
         perfil: { nome, bio, privacidade },
-        customizacao: { avatar_url: avatarUrl, banner_url: bannerUrl },
+        customizacao: {}, 
       };
       const res = await api.patch('/usuarios/me', payload);
       toast.success('Perfil atualizado com sucesso!');
@@ -92,25 +104,49 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
             />
           </label>
 
-          <label className="block text-sm font-medium text-if-text/70">
-            URL da Foto de Perfil
-            <input
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 outline-none focus:border-if-purple/50 transition-all"
-              placeholder="https://exemplo.com/foto.jpg"
-            />
-          </label>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-if-text/70">Foto de Perfil</span>
+            <div className="flex flex-col gap-2">
+              <div 
+                className="w-20 h-20 rounded-full bg-black/20 border border-white/10 overflow-hidden bg-cover bg-center shrink-0"
+                style={{ backgroundImage: avatarPreview ? `url(${avatarPreview.startsWith('http') || avatarPreview.startsWith('blob:') ? avatarPreview : 'http://localhost:3000' + avatarPreview})` : 'none' }}
+              />
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setAvatarFile(file);
+                    setAvatarPreview(URL.createObjectURL(file));
+                  }
+                }}
+                className="text-sm text-if-text/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-if-purple file:text-white hover:file:bg-if-purple/80 cursor-pointer"
+              />
+            </div>
+          </div>
 
-          <label className="block text-sm font-medium text-if-text/70">
-            URL do Banner
-            <input
-              value={bannerUrl}
-              onChange={(e) => setBannerUrl(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 outline-none focus:border-if-purple/50 transition-all"
-              placeholder="https://exemplo.com/banner.jpg"
-            />
-          </label>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-if-text/70">Banner do Perfil</span>
+            <div className="flex flex-col gap-2">
+              <div 
+                className="w-full h-24 rounded-2xl bg-black/20 border border-white/10 overflow-hidden bg-cover bg-center"
+                style={{ backgroundImage: bannerPreview ? `url(${bannerPreview.startsWith('http') || bannerPreview.startsWith('blob:') ? bannerPreview : 'http://localhost:3000' + bannerPreview})` : 'none' }}
+              />
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setBannerFile(file);
+                    setBannerPreview(URL.createObjectURL(file));
+                  }
+                }}
+                className="text-sm text-if-text/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-if-purple file:text-white hover:file:bg-if-purple/80 cursor-pointer"
+              />
+            </div>
+          </div>
 
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium text-if-text/70">Privacidade do Perfil</span>

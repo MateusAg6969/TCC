@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { Usuario, Seguidor, UsuarioMedalha, PortfolioItem } = require('../models');
 const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
 const { notificarNovoSeguidor } = require('../services/notificacoes.service');
+const { uploadPerfilArquivo } = require('../middleware/upload-perfil.middleware');
 
 const router = express.Router();
 
@@ -100,6 +101,44 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
         customizacao: usuario.customizacao,
       },
       'Perfil atualizado com sucesso.'
+    );
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/me/midia', authMiddleware, uploadPerfilArquivo.fields([{ name: 'avatar', maxCount: 1 }, { name: 'banner', maxCount: 1 }]), async (req, res, next) => {
+  try {
+    const usuario = await Usuario.findById(req.usuario.id);
+
+    if (!usuario) {
+      return res.fail('Usuário não encontrado.', 404);
+    }
+
+    const { files } = req;
+    let atualizado = false;
+
+    if (files && files.avatar && files.avatar[0]) {
+      usuario.customizacao.avatar_url = `/uploads/perfis/${files.avatar[0].filename}`;
+      atualizado = true;
+    }
+
+    if (files && files.banner && files.banner[0]) {
+      usuario.customizacao.banner_url = `/uploads/perfis/${files.banner[0].filename}`;
+      atualizado = true;
+    }
+
+    if (atualizado) {
+      await usuario.save();
+    }
+
+    return res.success(
+      {
+        id: usuario._id,
+        perfil: usuario.perfil,
+        customizacao: usuario.customizacao,
+      },
+      'Mídia atualizada com sucesso.'
     );
   } catch (error) {
     return next(error);
