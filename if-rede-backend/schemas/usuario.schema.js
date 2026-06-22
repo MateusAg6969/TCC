@@ -54,6 +54,21 @@ const perfilSchema = new mongoose.Schema(
       default: '',
     },
 
+    // Identidade e URL (UX)
+    url_personalizada: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+      match: [/^[a-z0-9_.-]+$/, 'URL deve conter apenas letras minúsculas, números, hifens, underscores ou pontos'],
+    },
+
+    verificado: {
+      type: Boolean,
+      default: false,
+    },
+
     // Tipo de vínculo (essencial para regras de acesso e moderação)
     status_vinculo: {
       type: String,
@@ -178,6 +193,19 @@ const configuracoesSchema = new mongoose.Schema(
       default: true,
     },
 
+    // Privacidade e Segurança (UX)
+    usuarios_bloqueados: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'Usuario',
+      default: [],
+    },
+
+    usuarios_silenciados: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'Usuario',
+      default: [],
+    },
+
     // Notificações
     notificacoes: {
       likes: { type: Boolean, default: true },
@@ -232,6 +260,13 @@ const usuarioSchema = new mongoose.Schema(
       total_seguindo: { type: Number, default: 0 },
       total_postagens: { type: Number, default: 0 },
       total_moderacoes: { type: Number, default: 0 }, // Apenas se mod_voluntario: true
+    },
+
+    // Interações sociais do usuário (UX)
+    postagens_salvas: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'Postagem',
+      default: [],
     },
 
     // Status da conta

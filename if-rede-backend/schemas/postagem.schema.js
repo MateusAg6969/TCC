@@ -45,6 +45,13 @@ const conteudoSchema = new mongoose.Schema(
       default: '',
     },
 
+    // Acessibilidade (Alt Text) para imagens e documentos
+    descricao_alternativa: {
+      type: String,
+      maxlength: [300, 'A descrição alternativa não pode exceder 300 caracteres'],
+      default: '',
+    },
+
     // Flag para conteúdo sensível (violência, conteúdo adulto, etc.)
     sensivel: {
       type: Boolean,
@@ -62,6 +69,23 @@ const conteudoSchema = new mongoose.Schema(
       type: Number,
       min: 0,
     },
+
+    // Link Preview para artigos e referências
+    link_preview: {
+      url: String,
+      titulo: String,
+      descricao: String,
+      imagem_url: String,
+    },
+
+    // Opções para postagens do tipo 'enquete'
+    opcoes_enquete: [
+      {
+        texto: { type: String, required: true },
+        votos: { type: Number, default: 0 },
+        votantes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' }],
+      },
+    ],
 
     // Metadados customizados por tipo (Attribute Pattern)
     // Exemplos:
@@ -243,8 +267,8 @@ const postagemSchema = new mongoose.Schema(
     tipo: {
       type: String,
       enum: {
-        values: ['audio', 'imagem', 'texto', 'video'],
-        message: 'Tipo deve ser: audio, imagem, texto ou video',
+        values: ['audio', 'imagem', 'texto', 'video', 'documento', 'enquete'],
+        message: 'Tipo deve ser: audio, imagem, texto, video, documento ou enquete',
       },
       required: [true, 'Tipo de conteúdo é obrigatório'],
     },

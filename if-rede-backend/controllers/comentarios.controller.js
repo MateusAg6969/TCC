@@ -22,10 +22,8 @@ const comentariosController = {
         return res.fail('Postagem não encontrada.', 404);
       }
 
-      if (!postagem.config?.comentarios_ativos && postagem.config?.comentarios_ativos !== undefined) {
-        // Fallback para caso config.comentarios_ativos não exista (consideramos ativo se não houver a flag)
-      } else if (postagem.config && postagem.config.comentarios_ativos === false) {
-          return res.fail('Comentários estão desativados nesta postagem.', 400);
+      if (postagem.config && postagem.config.comentarios_ativos === false) {
+        return res.fail('Comentários estão desativados nesta postagem.', 400);
       }
 
       // Se for uma resposta, verificar se o comentário pai existe
@@ -36,24 +34,24 @@ const comentariosController = {
         }
       }
 
+      // Define status inicial baseado na configuração da postagem
+      let statusInicial = (postagem.config && postagem.config.comentarios_moderados) ? 'pendente' : 'aprovado';
+
       const comentario = new Comentario({
         postagem_id,
         autor_id: req.usuario.id,
         texto,
         parent_id: parent_id || null,
-        status: 'pendente'
+        status: statusInicial
       });
 
       // Filtro de palavras proibidas
       const palavraDetectada = await detectarPalavraProibida(texto);
       if (palavraDetectada) {
+        comentario.status = 'pendente'; // Força para moderação
         comentario.moderacao.auto_marcado = true;
         comentario.moderacao.palavra_detectada = palavraDetectada;
         comentario.moderacao.motivo = 'Comentário marcado automaticamente pelo filtro dinâmico.';
-      } else {
-        // Se não houver palavras proibidas, podemos pré-aprovar ou manter pendente 
-        // conforme a regra de moderação da rede. No fluxo atual, mantemos pendente.
-        // comentario.status = 'aprovado'; 
       }
 
       await comentario.save();
@@ -70,6 +68,16 @@ const comentariosController = {
           objeto_id: comentario._id,
           resultado: 'sucesso'
         });
+      } else if (comentario.status === 'aprovado') {
+        // Notificar autor se o comentário for aprovado automaticamente
+        if (parent_id) {
+          const pai = await Comentario.findById(parent_id);
+          if (pai && String(pai.autor_id) !== String(comentario.autor_id)) {
+            await notificarRespostaComentario(pai.autor_id, comentario.autor_id, comentario._id);
+          }
+        } else if (postagem && String(postagem.autor_id) !== String(comentario.autor_id)) {
+          await notificarComentario(postagem.autor_id, comentario.autor_id, postagem._id, comentario._id);
+        }
       }
 
       return res.success(
@@ -196,7 +204,7 @@ const comentariosController = {
       if (comentario.parent_id) {
         const pai = await Comentario.findById(comentario.parent_id);
         if (pai && String(pai.autor_id) !== String(comentario.autor_id)) {
-          await notificarRespostaComentario(pai.autor_id, comentario.autor_id, postagem._id, comentario._id);
+          await notificarRespostaComentario(pai.autor_id, comentario.autor_id, comentario._id);
         }
       } else if (postagem && String(postagem.autor_id) !== String(comentario.autor_id)) {
         await notificarComentario(postagem.autor_id, comentario.autor_id, postagem._id, comentario._id);
