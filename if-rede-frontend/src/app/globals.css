@@ -2,20 +2,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #2D1B2D;
+  --background: #190E1A;
   --foreground: #F2F2F2;
-  --primary-color: #8F9972;
-  --profile-bg: #2D1B2D;
+  --primary-color: #ADCC5A;
+  --profile-bg: #190E1A;
 }
 
 @theme inline {
-  --color-if-bg: #2D1B2D;
-  --color-if-card: #442844;
-  --color-if-olive: #8F9972;
+  --color-if-bg: #190E1A;
+  --color-if-card: #2A172B;
+  --color-if-olive: #ADCC5A;
   --color-if-text: #F2F2F2;
   --color-if-purple: #8B5CF6;
   --color-if-purple-dark: #6D28D9;
   --color-if-glow: rgba(139, 92, 246, 0.5);
+  --color-if-text-muted: #A99DB0;
+  --color-if-border: #412644;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
