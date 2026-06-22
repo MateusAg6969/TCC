@@ -10,6 +10,7 @@ import DiscussionSection from '@/components/DiscussionSection';
 import ContadorAlcance from '@/components/ContadorAlcance';
 import api, { resolveAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 import { useEffect, useRef, useState, use } from 'react';
 
 export default function PostDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,6 +21,9 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [showOptions, setShowOptions] = useState(false);
   const [deletando, setDeletando] = useState(false);
+  const [curtido, setCurtido] = useState(false);
+  const [totalLikes, setTotalLikes] = useState(0);
+  const [likeLoading, setLikeLoading] = useState(false);
   const hasRegistered = useRef(false);
 
   useEffect(() => {
@@ -27,6 +31,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
       try {
         const res = await api.get<ApiSuccess<Post>>(`/postagens/${id}`);
         setPost(res.data.data);
+        setTotalLikes(res.data.data.stats?.likes || 0);
       } catch (err) {
         console.error(err);
       } finally {
@@ -35,6 +40,45 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
     }
     fetchPost();
   }, [id]);
+
+  useEffect(() => {
+    if (user && post && post.stats?.usuarios_que_curtiram) {
+      const jaCurtiu = post.stats.usuarios_que_curtiram.some(
+        (uid: any) => String(uid) === String(user.id)
+      );
+      setCurtido(jaCurtiu);
+    }
+  }, [user, post]);
+
+  const handleLike = async () => {
+    if (!user || likeLoading || !post) return;
+
+    const novoEstado = !curtido;
+    const novoTotal = novoEstado ? totalLikes + 1 : Math.max(0, totalLikes - 1);
+
+    setCurtido(novoEstado);
+    setTotalLikes(novoTotal);
+    setLikeLoading(true);
+
+    try {
+      if (novoEstado) {
+        await api.post(`/postagens/${post._id}/curtir`);
+      } else {
+        await api.delete(`/postagens/${post._id}/curtir`);
+      }
+    } catch (error) {
+      console.error('Erro ao processar curtida:', error);
+      if (novoEstado) {
+        toast.error('Não foi possível curtir.');
+      } else {
+        toast.error('Não foi possível remover a curtida.');
+      }
+      setCurtido(!novoEstado);
+      setTotalLikes(totalLikes);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!user || !post || hasRegistered.current) return;
@@ -241,11 +285,13 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
           <footer className="bg-white/5 p-6 md:px-10 flex flex-wrap items-center justify-between gap-6 border-t border-white/5">
             <div className="flex items-center gap-8">
               <button 
-                aria-label={`Curtir, ${post.stats?.likes || 0} curtidas`}
-                className="flex items-center gap-2 text-lg font-black text-if-text/60 hover:text-red-500 transition-all group"
+                onClick={handleLike}
+                disabled={!user || likeLoading}
+                aria-label={curtido ? 'Descurtir' : `Curtir, ${totalLikes} curtidas`}
+                className={`flex items-center gap-2 text-lg font-black transition-all duration-300 group ${curtido ? 'text-red-500 scale-110' : 'text-if-text/60 hover:text-if-purple'}`}
               >
-                <Heart size={28} className="group-hover:scale-110 transition-transform" />
-                {post.stats?.likes || 0}
+                <Heart size={28} className={curtido ? 'fill-current' : 'group-hover:scale-110 transition-transform'} />
+                {totalLikes}
               </button>
               
               <button 
