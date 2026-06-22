@@ -29,9 +29,10 @@ interface PostCardProps {
   isOwner?: boolean;
   isPinned?: boolean;
   onPin?: (position: number) => void;
+  onDelete?: (postId: string) => void;
 }
 
-export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardProps) {
+export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: PostCardProps) {
   const { user } = useAuth();
   const [curtido, setCurtido] = useState(false);
   const [totalLikes, setTotalLikes] = useState(post.stats?.likes || 0);
@@ -97,7 +98,11 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
     try {
       await api.delete(`/postagens/${post._id}`);
       toast.success('Postagem excluída com sucesso!');
-      window.location.reload();
+      if (onDelete) {
+        onDelete(post._id);
+      } else {
+        window.location.reload();
+      }
     } catch (err) {
       console.error(err);
       toast.error('Erro ao excluir postagem.');
