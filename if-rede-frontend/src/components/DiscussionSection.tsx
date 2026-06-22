@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { MessageCircle, Send, X } from 'lucide-react';
 import { Comentario } from '@/types';
 import api from '@/lib/api';
