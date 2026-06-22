@@ -237,17 +237,24 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       case 'tag':
       case 'resposta':
         if (notificacao.objeto_id) {
-          if (notificacao.objeto_tipo === 'comentario') {
+          const isCommentTarget = notificacao.objeto_tipo === 'comentario' || 
+                                  notificacao.tipo === 'comentario' || 
+                                  notificacao.tipo === 'resposta' ||
+                                  (notificacao.tipo === 'like' && notificacao.objeto_tipo === 'comentario');
+
+          if (isCommentTarget) {
             // Busca o post_id real do comentário para navegar
             axios.get(`${API_URL}/comentarios/${notificacao.objeto_id}`, {
               headers: { Authorization: `Bearer ${token}` }
             }).then(res => {
               if (res.data?.data?.comentario?.postagem_id) {
                 router.push(`/post/${res.data.data.comentario.postagem_id}#comments`);
+              } else {
+                 toast.error('Postagem original não encontrada.');
               }
             }).catch(err => {
               console.error('Erro ao resolver link do comentário:', err);
-              toast.error('Postagem original não encontrada.');
+              toast.error('Comentário ou postagem original não encontrada.');
             });
           } else {
             router.push(`/post/${notificacao.objeto_id}`);

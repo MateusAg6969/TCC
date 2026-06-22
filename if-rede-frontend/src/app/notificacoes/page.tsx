@@ -26,6 +26,7 @@ export default function NotificacoesPage() {
     deletarNotificacao,
     marcarTudasComoLidas,
     deletarTodasNotificacoes,
+    lidarComCliqueNotificacao,
   } = useNotifications();
 
   const [filtro, setFiltro] = useState('all');
@@ -172,7 +173,8 @@ export default function NotificacoesPage() {
             notificacoesFiltradas.map((notificacao) => (
               <div
                 key={notificacao._id}
-                className={`p-8 transition-all duration-500 relative group ${
+                onClick={() => lidarComCliqueNotificacao(notificacao)}
+                className={`p-8 transition-all duration-500 relative group cursor-pointer ${
                   !notificacao.lida 
                     ? 'bg-gradient-to-r from-if-purple/[0.04] to-transparent' 
                     : 'hover:bg-gray-50/50'
@@ -205,6 +207,7 @@ export default function NotificacoesPage() {
                           */}
                           <Link 
                             href={`/profile/${notificacao.ator_id?.perfil?.nome || 'usuario'}`}
+                            onClick={(e) => e.stopPropagation()}
                             className="font-black text-if-purple hover:underline cursor-pointer transition-all"
                           >
                             {notificacao.ator_id?.perfil?.nome || 'Usuário'}
@@ -228,7 +231,10 @@ export default function NotificacoesPage() {
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                         {!notificacao.lida && (
                           <button
-                            onClick={() => marcarComoLida(notificacao._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              marcarComoLida(notificacao._id);
+                            }}
                             className="p-3 text-if-purple hover:bg-if-purple hover:text-white rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-90"
                             title="Marcar como lida"
                           >
@@ -236,7 +242,10 @@ export default function NotificacoesPage() {
                           </button>
                         )}
                         <button
-                          onClick={() => deletarNotificacao(notificacao._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deletarNotificacao(notificacao._id);
+                          }}
                           className="p-3 text-red-400 hover:bg-red-500 hover:text-white rounded-2xl transition-all shadow-sm hover:shadow-md active:scale-90"
                           title="Excluir"
                         >
