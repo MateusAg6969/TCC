@@ -434,6 +434,27 @@ router.delete('/:id', authMiddleware, async (req, res, next) => {
       return res.fail('Você não pode remover esta postagem.', 403);
     }
 
+    // --- CASCADING DELETE ---
+    // 1. Encontrar todos os comentários dessa postagem
+    const mongoose = require('mongoose');
+    const Comentario = mongoose.model('Comentario');
+    const Notificacao = mongoose.model('Notificacao');
+
+    const comentarios = await Comentario.find({ postagem_id: post._id });
+    const comentariosIds = comentarios.map(c => c._id);
+
+    // 2. Deletar notificações relacionadas à postagem e aos comentários
+    await Notificacao.deleteMany({
+      $or: [
+        { objeto_id: post._id }, // Like, repost, tag na postagem
+        { objeto_id: { $in: comentariosIds } } // Comentários e respostas
+      ]
+    });
+
+    // 3. Deletar os comentários
+    await Comentario.deleteMany({ postagem_id: post._id });
+
+    // 4. Deletar a postagem
     await Postagem.deleteOne({ _id: post._id });
     await Usuario.updateOne({ _id: req.usuario.id }, { $inc: { 'stats.total_postagens': -1 } });
 
