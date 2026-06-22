@@ -40,9 +40,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
         if (avatarFile) formData.append('avatar', avatarFile);
         if (bannerFile) formData.append('banner', bannerFile);
         
-        await api.post('/usuarios/me/midia', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/usuarios/me/midia', formData);
       }
 
       const payload = {
