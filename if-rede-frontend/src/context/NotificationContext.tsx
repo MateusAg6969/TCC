@@ -239,8 +239,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         if (notificacao.objeto_id) {
           const isCommentTarget = notificacao.objeto_tipo === 'comentario' || 
                                   notificacao.tipo === 'comentario' || 
-                                  notificacao.tipo === 'resposta' ||
-                                  (notificacao.tipo === 'like' && notificacao.objeto_tipo === 'comentario');
+                                  notificacao.tipo === 'resposta';
 
           if (isCommentTarget) {
             // Busca o post_id real do comentário para navegar
