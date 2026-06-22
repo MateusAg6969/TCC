@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { Postagem, Usuario, Seguidor, TagSubtipo } = require('../models');
+const { Postagem, Usuario, Seguidor, TagSubtipo, Comentario, Notificacao } = require('../models');
 const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
 const { detectarPalavraEmPartes } = require('../services/palavras-filtro.service');
 const { uploadPostArquivo, LIMITES_POR_TIPO } = require('../middleware/upload-post.middleware');
@@ -434,12 +434,7 @@ router.delete('/:id', authMiddleware, async (req, res, next) => {
       return res.fail('Você não pode remover esta postagem.', 403);
     }
 
-    // --- CASCADING DELETE ---
     // 1. Encontrar todos os comentários dessa postagem
-    const mongoose = require('mongoose');
-    const Comentario = mongoose.model('Comentario');
-    const Notificacao = mongoose.model('Notificacao');
-
     const comentarios = await Comentario.find({ postagem_id: post._id });
     const comentariosIds = comentarios.map(c => c._id);
 
