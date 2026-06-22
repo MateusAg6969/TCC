@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { Postagem, Usuario, Seguidor, TagSubtipo, Comentario, Notificacao } = require('../models');
+const { Postagem, Usuario, Seguidor, TagSubtipo, Comentario, Notificacao, PortfolioItem } = require('../models');
 const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
 const { detectarPalavraEmPartes } = require('../services/palavras-filtro.service');
 const { uploadPostArquivo, LIMITES_POR_TIPO } = require('../middleware/upload-post.middleware');
@@ -449,7 +449,10 @@ router.delete('/:id', authMiddleware, async (req, res, next) => {
     // 3. Deletar os comentários
     await Comentario.deleteMany({ postagem_id: post._id });
 
-    // 4. Deletar a postagem
+    // 4. Deletar postagem do portfólio (se fixada)
+    await PortfolioItem.deleteMany({ postagem_id: post._id });
+
+    // 5. Deletar a postagem
     await Postagem.deleteOne({ _id: post._id });
     await Usuario.updateOne({ _id: req.usuario.id }, { $inc: { 'stats.total_postagens': -1 } });
 

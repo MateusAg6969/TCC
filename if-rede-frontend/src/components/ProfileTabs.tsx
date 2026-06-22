@@ -15,13 +15,15 @@ interface ProfileTabsProps {
   userId: string;
   isOwner: boolean;
   initialPortfolio?: PortfolioItem[];
+  onPostDelete?: (postId: string) => void;
 }
 
 export default function ProfileTabs({ 
   posts, 
   userId,
   isOwner,
-  initialPortfolio = []
+  initialPortfolio = [],
+  onPostDelete
 }: ProfileTabsProps) {
   const [active, setActive] = useState<Tab>('Portfólio');
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>(initialPortfolio);
@@ -38,9 +40,7 @@ export default function ProfileTabs({
     try {
       const res = await api.patch('/portfolio/pin', { postagem_id: postId, posicao: position });
       if (res.data.ok) {
-        // Recarregar portfólio (simplificado: atualização via estado local seria melhor com dados completos)
-        // Por agora, assumimos que o componente pai ou um refresh cuidará disso, 
-        // ou buscamos novamente.
+        // Recarregar portfólio
         const resPort = await api.get(`/portfolio/usuario/${userId}`);
         setPortfolio(resPort.data.data);
       }
@@ -127,6 +127,7 @@ export default function ProfileTabs({
                       isOwner={isOwner} 
                       isPinned={portfolio.some(p => p._id === post._id)}
                       onPin={(pos) => handlePin(post._id, pos)}
+                      onDelete={onPostDelete}
                     />
                   ))}
                 </div>
@@ -142,6 +143,7 @@ export default function ProfileTabs({
                 isOwner={isOwner}
                 isPinned={portfolio.some(p => p._id === post._id)}
                 onPin={(pos) => handlePin(post._id, pos)}
+                onDelete={onPostDelete}
               />
             ))}
             {!filteredPosts.length && (

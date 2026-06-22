@@ -45,11 +45,13 @@ router.get('/me', authMiddleware, async (req, res, next) => {
             ...m.medalha_id.toObject(),
             awarded_at: m.awarded_at
           })),
-          portfolio: portfolio.map(p => ({
-            ...p.postagem_id.toObject(),
-            posicao: p.posicao,
-            fixado_em: p.fixado_em
-          }))
+          portfolio: portfolio
+            .filter(p => p.postagem_id)
+            .map(p => ({
+              ...p.postagem_id.toObject(),
+              posicao: p.posicao,
+              fixado_em: p.fixado_em
+            }))
         },
         configuracoes: usuario.configuracoes,
         stats: {
@@ -162,11 +164,13 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
             ...m.medalha_id.toObject(),
             awarded_at: m.awarded_at
           })),
-          portfolio: portfolio.map(p => ({
-            ...p.postagem_id.toObject(),
-            posicao: p.posicao,
-            fixado_em: p.fixado_em
-          }))
+          portfolio: portfolio
+            .filter(p => p.postagem_id)
+            .map(p => ({
+              ...p.postagem_id.toObject(),
+              posicao: p.posicao,
+              fixado_em: p.fixado_em
+            }))
         },
         stats: {
           ...alvo.stats.toObject?.(),

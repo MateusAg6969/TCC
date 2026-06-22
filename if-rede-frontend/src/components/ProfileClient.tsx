@@ -237,13 +237,19 @@ export default function ProfileClient({
           </div>
         </section>
 
-        {/* Conteúdo Principal */}
         <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
           <ProfileTabs 
             posts={posts} 
             userId={profile?.id || ''} 
             isOwner={ehProprioPerfil || false}
             initialPortfolio={profile?.customizacao?.portfolio}
+            onPostDelete={(postId) => {
+              // The component needs local state to handle this properly,
+              // but since we are modifying props, the quickest way to force a UI refresh 
+              // for now without full state refactoring is simply reloading or handling it in ProfileTabs.
+              // Actually, wait, it's better to reload if we don't have local state.
+              window.location.reload();
+            }}
           />
 
           <aside className="space-y-6">
