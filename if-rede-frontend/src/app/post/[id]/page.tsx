@@ -7,6 +7,7 @@ import { serverGet } from '@/lib/server-api';
 import type { ApiSuccess, Post } from '@/types';
 import { notFound, useRouter } from 'next/navigation';
 import DiscussionSection from '@/components/DiscussionSection';
+import ContadorAlcance from '@/components/ContadorAlcance';
 import api, { resolveAssetUrl } from '@/lib/api';
 import ConfirmModal from '@/components/ConfirmModal';
 import { useAuth } from '@/context/AuthContext';
