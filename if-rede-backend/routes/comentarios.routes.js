@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Public / Auth routes
 router.get('/postagem/:postagemId', comentariosController.listarPorPostagem);
+router.get('/:id', authMiddleware, comentariosController.buscarPorId);
 router.post('/', authMiddleware, comentariosController.criar);
 router.post('/:id/curtir', authMiddleware, comentariosController.curtir);
 router.delete('/:id/curtir', authMiddleware, comentariosController.descurtir);

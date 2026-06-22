@@ -327,12 +327,13 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
             {totalLikes}
           </button>
 
-          <button
+          <Link
+            href={`/post/${post._id}#comments`}
             aria-label={`Comentar, ${post.stats?.comentarios_count || 0} comentários`}
             className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-if-purple transition-colors"
           >
             <MessageCircle size={20} /> {post.stats?.comentarios_count || 0}
-          </button>
+          </Link>
 
           <button
             aria-label={`Republicar, ${post.stats?.shares || 0} republicações`}

@@ -123,6 +123,22 @@ const comentariosController = {
   },
 
   /**
+   * Buscar um comentário específico pelo ID
+   */
+  async buscarPorId(req, res, next) {
+    try {
+      const { id } = req.params;
+      const comentario = await Comentario.findById(id);
+      if (!comentario) {
+        return res.fail('Comentário não encontrado.', 404);
+      }
+      return res.success({ comentario }, 'Comentário encontrado.');
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
    * Alternar destaque pedagógico (Apenas PROFESSOR/ORIENTADOR -> servidor)
    */
   async toggleHighlight(req, res, next) {

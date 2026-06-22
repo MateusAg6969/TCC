@@ -18,6 +18,7 @@ export default function DiscussionSection({ postId }: DiscussionSectionProps) {
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fetchComments = useCallback(async () => {
     try {
@@ -32,6 +33,16 @@ export default function DiscussionSection({ postId }: DiscussionSectionProps) {
 
   useEffect(() => {
     fetchComments();
+    
+    // Auto-focus no campo de comentário se acessado via link de notificação/botão
+    if (window.location.hash === '#comments') {
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
   }, [fetchComments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,7 +72,7 @@ export default function DiscussionSection({ postId }: DiscussionSectionProps) {
   const replyingToComment = comments.find(c => c._id === replyTo);
 
   return (
-    <section className="mt-8 rounded-3xl bg-if-card p-6 md:p-8 border border-white/5 shadow-xl">
+    <section id="comments" className="mt-8 rounded-3xl bg-if-card p-6 md:p-8 border border-white/5 shadow-xl">
       <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-if-text">
         <MessageCircle size={24} className="text-if-purple" />
         Discussão Acadêmica
@@ -86,6 +97,7 @@ export default function DiscussionSection({ postId }: DiscussionSectionProps) {
           )}
           <div className={`relative flex items-end gap-3 bg-white/5 p-3 border transition-all ${replyTo ? 'rounded-b-2xl border-if-purple/20' : 'rounded-2xl border-white/5 focus-within:border-if-purple/30'}`}>
             <textarea
+              ref={textareaRef}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder={replyTo ? "Escreva sua resposta..." : "Inicie uma contribuição acadêmica..."}
