@@ -8,11 +8,12 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import ReplyItem from './ReplyItem';
 
 interface CommentItemProps {
   comment: Comentario;
   postId: string;
-  onReply: (commentId: string) => void;
+  onReply: (commentId: string, mentionName?: string) => void;
   onRefresh: () => void;
 }
 
@@ -165,32 +166,17 @@ export default function CommentItem({ comment, postId, onReply, onRefresh }: Com
 
           {/* Renderização Recursiva de Respostas (apenas 1 nível como definido no controller) */}
           {comment.respostas && comment.respostas.length > 0 && (
-            <div className="mt-4 space-y-3 border-l-2 border-white/5 pl-4">
+            <div className="mt-4 space-y-0 relative">
+              {/* Linha Guia Vertical para o Fio (Thread) */}
+              <div className="absolute left-[13px] top-0 bottom-6 w-px bg-white/10" />
               {comment.respostas.map(reply => (
-                <div key={reply._id} className="flex gap-3">
-                   <div className="h-7 w-7 shrink-0 overflow-hidden rounded-lg bg-if-purple/10 flex items-center justify-center text-[10px] font-bold text-if-purple/60">
-                    {reply.autor_id.customizacao?.avatar_url ? (
-                      <Image 
-                        src={reply.autor_id.customizacao.avatar_url} 
-                        alt={reply.autor_id.perfil.nome} 
-                        width={28} 
-                        height={28} 
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      reply.autor_id.perfil.nome.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-xs font-bold text-if-text/70">{reply.autor_id.perfil.nome}</span>
-                      <span className="text-[10px] text-if-text/20">
-                        {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true, locale: ptBR })}
-                      </span>
-                    </div>
-                    <p className="text-xs text-if-text/60 leading-relaxed">{reply.texto}</p>
-                  </div>
-                </div>
+                <ReplyItem 
+                  key={reply._id}
+                  reply={reply}
+                  parentCommentId={comment._id}
+                  onReply={onReply}
+                  onRefresh={onRefresh}
+                />
               ))}
             </div>
           )}

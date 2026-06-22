@@ -141,7 +141,15 @@ export default function DiscussionSection({ postId }: DiscussionSectionProps) {
               key={comment._id}
               comment={comment}
               postId={postId}
-              onReply={setReplyTo}
+              onReply={(id, mentionName) => {
+                setReplyTo(id);
+                if (mentionName) {
+                  setNewComment(`@${mentionName} `);
+                } else {
+                  setNewComment('');
+                }
+                setTimeout(() => textareaRef.current?.focus(), 100);
+              }}
               onRefresh={fetchComments}
             />
           ))
