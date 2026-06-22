@@ -25,11 +25,11 @@ services:
         
       # Variáveis Sensíveis (O valor 'sync: false' significa que você deve 
       # preencher essas variáveis manualmente pelo Painel Web do Render por segurança)
-      - key: MONGO_URI
+      - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
         sync: false
-      - key: REFRESH_SECRET
+      - key: JWT_REFRESH_SECRET
         sync: false
       - key: FRONTEND_URL
         sync: false
