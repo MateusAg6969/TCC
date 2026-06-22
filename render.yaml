@@ -1,0 +1,35 @@
+# ==============================================================================
+# INFRAESTRUTURA COMO CÓDIGO - RENDER.COM
+# ==============================================================================
+# Este arquivo automatiza as configurações de deploy do Backend Node.js no Render.
+# Toda vez que um 'git push' for feito para a branch principal, o Render
+# lerá este arquivo e atualizará o servidor automaticamente.
+
+services:
+  - type: web
+    name: if-rede-backend
+    env: node
+    # Define a pasta raiz para o serviço (ignora o frontend)
+    rootDir: if-rede-backend
+    
+    # Comandos de construção e inicialização do servidor
+    buildCommand: npm install
+    startCommand: npm start
+    
+    # Variáveis de Ambiente Automáticas
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+        
+      # Variáveis Sensíveis (O valor 'sync: false' significa que você deve 
+      # preencher essas variáveis manualmente pelo Painel Web do Render por segurança)
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
