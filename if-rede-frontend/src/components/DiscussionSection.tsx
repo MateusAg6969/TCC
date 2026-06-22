@@ -72,7 +72,7 @@ export default function DiscussionSection({ postId }: DiscussionSectionProps) {
   const replyingToComment = comments.find(c => c._id === replyTo);
 
   return (
-    <section id="comments" className="mt-8 rounded-3xl bg-if-card p-6 md:p-8 border border-white/5 shadow-xl">
+    <section id="comments" className="mt-8 rounded-3xl bg-if-card p-4 md:p-8 border border-white/5 shadow-xl">
       <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-if-text">
         <MessageCircle size={24} className="text-if-purple" />
         Discussão Acadêmica
