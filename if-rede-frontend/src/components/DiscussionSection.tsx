@@ -6,6 +6,7 @@ import { Comentario } from '@/types';
 import api from '@/lib/api';
 import CommentItem from './CommentItem';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 interface DiscussionSectionProps {
   postId: string;
@@ -60,7 +61,7 @@ export default function DiscussionSection({ postId }: DiscussionSectionProps) {
       setReplyTo(null);
       // Como o comentário vai para moderação, ele não aparecerá imediatamente
       // a menos que o backend pré-aprove. No nosso caso, mostramos um alerta.
-      alert('Seu comentário foi enviado para moderação acadêmica.');
+      toast.info('Seu comentário foi enviado para moderação acadêmica.');
       fetchComments();
     } catch (error) {
       console.error('Erro ao enviar comentário:', error);

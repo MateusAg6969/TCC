@@ -7,8 +7,8 @@ import { serverGet } from '@/lib/server-api';
 import type { ApiSuccess, Post } from '@/types';
 import { notFound, useRouter } from 'next/navigation';
 import DiscussionSection from '@/components/DiscussionSection';
-import ContadorAlcance from '@/components/ContadorAlcance';
 import api, { resolveAssetUrl } from '@/lib/api';
+import ConfirmModal from '@/components/ConfirmModal';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { useEffect, useRef, useState, use } from 'react';
@@ -20,6 +20,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [showOptions, setShowOptions] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletando, setDeletando] = useState(false);
   const [curtido, setCurtido] = useState(false);
   const [totalLikes, setTotalLikes] = useState(0);
@@ -110,19 +111,20 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
   const handleCopyLink = () => {
     const url = `${window.location.origin}/post/${post._id}`;
     navigator.clipboard.writeText(url);
-    alert('Link copiado!');
+    toast.success('Link copiado!');
     setShowOptions(false);
   };
 
   const handleDelete = async () => {
-    if (!confirm('Tem certeza que deseja excluir esta postagem? Esta ação não pode ser desfeita.')) return;
+    setShowDeleteModal(false);
     setDeletando(true);
     try {
       await api.delete(`/postagens/${post._id}`);
+      toast.success('Postagem excluída com sucesso!');
       router.push('/home');
     } catch (err) {
       console.error(err);
-      alert('Erro ao excluir postagem.');
+      toast.error('Erro ao excluir postagem.');
       setDeletando(false);
     }
   };
@@ -141,7 +143,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
           Voltar para o Feed
         </Link>
 
-        <article className="overflow-hidden rounded-3xl bg-if-card shadow-2xl border border-white/5">
+        <article className="overflow-hidden rounded-3xl bg-if-card shadow-2xl border border-white/5 animate-in fade-in slide-in-from-bottom-8 duration-700">
           {/* Cabeçalho do Post */}
           <header className="p-6 md:p-10 border-b border-white/5 bg-gradient-to-b from-if-purple/5 to-transparent">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -195,7 +197,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                     
                     {user?.id === autorId && (
                       <button
-                        onClick={handleDelete}
+                        onClick={() => { setShowOptions(false); setShowDeleteModal(true); }}
                         disabled={deletando}
                         className="w-full flex items-center gap-3 p-3 text-left text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors border-t border-white/5"
                       >
@@ -324,6 +326,15 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
         {/* Discussão Acadêmica Real */}
         <DiscussionSection postId={post._id} />
       </div>
+
+      <ConfirmModal 
+        isOpen={showDeleteModal}
+        title="Excluir Postagem"
+        message="Tem certeza que deseja excluir esta postagem? Esta ação não pode ser desfeita e todos os comentários serão perdidos."
+        confirmText="Excluir"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </main>
   );
 }

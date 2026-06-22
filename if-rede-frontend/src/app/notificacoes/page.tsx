@@ -5,6 +5,7 @@ import { ArrowLeft, Trash2, Check, Bell } from 'lucide-react';
 import { useNotifications } from '@/context/NotificationContext';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ConfirmModal from '@/components/ConfirmModal';
 
 /**
  * ============================================================================
@@ -31,6 +32,7 @@ export default function NotificacoesPage() {
 
   const [filtro, setFiltro] = useState('all');
   const [pagina, setPagina] = useState(1);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   // Efeito: Recarrega as notificações sempre que o filtro ou página mudar.
   useEffect(() => {
@@ -131,11 +133,7 @@ export default function NotificacoesPage() {
 
             {notificacoes.length > 0 && (
               <button
-                onClick={() => {
-                  if (window.confirm('Deseja limpar todo o histórico de notificações?')) {
-                    deletarTodasNotificacoes();
-                  }
-                }}
+                onClick={() => setShowClearModal(true)}
                 className="flex items-center gap-2 text-red-400 hover:text-red-600 text-sm font-bold transition-colors"
               >
                 <Trash2 size={18} /> Limpar histórico
@@ -145,7 +143,7 @@ export default function NotificacoesPage() {
         </div>
 
         {/* Lista de notificações - Estética IF REDE */}
-        <div className="rounded-[2.5rem] bg-if-card border border-if-purple/10 shadow-2xl divide-y divide-if-purple/5 overflow-hidden">
+        <div className="rounded-[2.5rem] bg-if-card border border-if-purple/10 shadow-2xl divide-y divide-if-purple/5 overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
           {carregando ? (
             <div className="p-20 text-center">
               <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-if-purple border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
@@ -269,6 +267,18 @@ export default function NotificacoesPage() {
           </div>
         )}
       </div>
+
+      <ConfirmModal 
+        isOpen={showClearModal}
+        title="Limpar Histórico"
+        message="Tem certeza que deseja apagar todas as notificações? Esta ação não pode ser desfeita."
+        confirmText="Limpar Tudo"
+        onConfirm={() => {
+          deletarTodasNotificacoes();
+          setShowClearModal(false);
+        }}
+        onCancel={() => setShowClearModal(false)}
+      />
     </main>
   );
 }

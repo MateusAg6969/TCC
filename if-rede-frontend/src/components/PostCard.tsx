@@ -9,6 +9,7 @@ import type { Post } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import api, { resolveAssetUrl } from '@/lib/api';
 import ContadorAlcance from './ContadorAlcance';
+import ConfirmModal from './ConfirmModal';
 
 /**
  * ============================================================================
@@ -39,6 +40,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
   const [carregando, setCarregando] = useState(false);
   const [showPinOptions, setShowPinOptions] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletando, setDeletando] = useState(false);
 
   // Efeito: Inicializa o estado de 'curtido' com base nos dados do usuário logado.
@@ -93,7 +95,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
   };
 
   const handleDelete = async () => {
-    if (!confirm('Tem certeza que deseja excluir esta postagem? Esta ação não pode ser desfeita.')) return;
+    setShowDeleteModal(false);
     setDeletando(true);
     try {
       await api.delete(`/postagens/${post._id}`);
@@ -128,7 +130,8 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
   const avatarUrl = (post.autor_id as any)?.customizacao?.avatar_url;
 
   return (
-    <article className="group overflow-hidden rounded-main bg-if-card/90 backdrop-blur-md border border-white/5 transition-all duration-300 hover:border-if-purple/40 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] text-if-text hover:-translate-y-1">
+    <>
+      <article className="group overflow-hidden rounded-main bg-if-card/90 backdrop-blur-md border border-white/5 transition-all duration-300 hover:border-if-purple/40 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] text-if-text hover:-translate-y-1 animate-in fade-in zoom-in-95 duration-500">
       <header className="p-3 sm:p-4 flex items-center justify-between border-b border-white/5 bg-gradient-to-r from-transparent via-transparent to-if-purple/5 gap-2 sm:gap-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <Link
@@ -225,7 +228,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
 
                   {user?.id === autorId && (
                     <button
-                      onClick={(e) => { e.preventDefault(); handleDelete(); }}
+                      onClick={(e) => { e.preventDefault(); setShowOptions(false); setShowDeleteModal(true); }}
                       disabled={deletando}
                       className="w-full flex items-center gap-3 p-3 text-left text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors border-t border-white/5"
                     >
@@ -360,6 +363,15 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
         </div>
       </footer>
     </article>
+    <ConfirmModal 
+      isOpen={showDeleteModal}
+      title="Excluir Postagem"
+      message="Tem certeza que deseja excluir esta postagem? Esta ação não pode ser desfeita e todos os comentários e reações serão perdidos."
+      confirmText="Excluir"
+      onConfirm={handleDelete}
+      onCancel={() => setShowDeleteModal(false)}
+    />
+    </>
   );
 }
 

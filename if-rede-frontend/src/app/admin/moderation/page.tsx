@@ -8,6 +8,7 @@ import ModerationCard from '@/components/ModerationCard';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 /**
  * ============================================================================
@@ -54,8 +55,9 @@ export default function ModerationPage() {
       await api.patch(`/admin/moderation/posts/${postId}/approve`);
       // Atualização de Estado Instantânea (Feedback Dinâmico)
       setPosts(prev => prev.filter(p => p._id !== postId));
+      toast.success('Postagem aprovada com sucesso.');
     } catch (error) {
-      alert('Erro ao aprovar postagem. Tente novamente.');
+      toast.error('Erro ao aprovar postagem. Tente novamente.');
     } finally {
       setProcessingId(null);
     }
@@ -67,8 +69,9 @@ export default function ModerationPage() {
     try {
       await api.patch(`/admin/moderation/posts/${postId}/reject`, { motivo });
       setPosts(prev => prev.filter(p => p._id !== postId));
+      toast.success('Postagem rejeitada.');
     } catch (error) {
-      alert('Erro ao rejeitar postagem.');
+      toast.error('Erro ao rejeitar postagem.');
     } finally {
       setProcessingId(null);
     }
@@ -123,7 +126,7 @@ export default function ModerationPage() {
         </div>
 
         {/* Fila de Moderação */}
-        <section>
+        <section className="animate-in fade-in slide-in-from-bottom-8 duration-700">
           {posts.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {posts.map((post) => (

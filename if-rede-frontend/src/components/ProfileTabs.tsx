@@ -6,6 +6,7 @@ import PostCard from './PostCard';
 import PortfolioCard from './PortfolioCard';
 import { Briefcase, LayoutGrid, Music, FileText, Image as ImageIcon } from 'lucide-react';
 import api from '@/lib/api';
+import { toast } from 'sonner';
 
 const tabs = ['Portfólio', 'Postagens', 'Msc', 'Text', 'Img'] as const;
 type Tab = (typeof tabs)[number];
@@ -45,7 +46,7 @@ export default function ProfileTabs({
         setPortfolio(resPort.data.data);
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Erro ao fixar postagem.');
+      toast.error(error.response?.data?.message || 'Erro ao fixar postagem.');
     }
   };
 
@@ -89,7 +90,7 @@ export default function ProfileTabs({
 
       <div className="space-y-8">
         {active === 'Portfólio' ? (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
             {portfolio.length > 0 ? (
               <div className="grid gap-6">
                 {portfolio.map((item) => (
@@ -135,7 +136,7 @@ export default function ProfileTabs({
             )}
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-8 duration-700">
             {filteredPosts.map((post) => (
               <PostCard 
                 key={post._id} 

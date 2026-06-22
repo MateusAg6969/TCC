@@ -6,6 +6,8 @@ import api from '@/lib/api';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface UserData {
   _id: string;
@@ -29,6 +31,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [unsuspendUserId, setUnsuspendUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && (!user || !user.admin)) {
@@ -71,19 +74,19 @@ export default function AdminUsersPage() {
         return u;
       }));
     } catch (error) {
-      alert('Erro ao alterar privilégios.');
+      toast.error('Erro ao alterar privilégios.');
     } finally {
       setProcessingId(null);
     }
   };
 
   const handleSuspend = async (userId: string) => {
-    const diasStr = prompt('Quantos dias de suspensão? (ex: 7)');
+    const diasStr = window.prompt('Quantos dias de suspensão? (ex: 7)');
     if (!diasStr) return;
     const dias = parseInt(diasStr);
-    if (isNaN(dias) || dias <= 0) return alert('Quantidade de dias inválida.');
+    if (isNaN(dias) || dias <= 0) return toast.error('Quantidade de dias inválida.');
 
-    const motivo = prompt('Qual o motivo da suspensão? (opcional)');
+    const motivo = window.prompt('Qual o motivo da suspensão? (opcional)');
 
     setProcessingId(userId);
     try {
@@ -91,20 +94,21 @@ export default function AdminUsersPage() {
       const newSuspensoAte = res.data.data.suspenso_ate;
       setUsers(prev => prev.map(u => u._id === userId ? { ...u, suspenso_ate: newSuspensoAte } : u));
     } catch (error: any) {
-      alert(error.response?.data?.error?.message || 'Erro ao suspender usuário.');
+      toast.error(error.response?.data?.error?.message || 'Erro ao suspender usuário.');
     } finally {
       setProcessingId(null);
     }
   };
 
   const handleUnsuspend = async (userId: string) => {
-    if (!confirm('Deseja realmente remover a suspensão deste usuário?')) return;
+    setUnsuspendUserId(null);
     setProcessingId(userId);
     try {
       await api.patch(`/admin/users/${userId}/unsuspend`);
       setUsers(prev => prev.map(u => u._id === userId ? { ...u, suspenso_ate: null } : u));
+      toast.success('Suspensão removida.');
     } catch (error) {
-      alert('Erro ao remover suspensão.');
+      toast.error('Erro ao remover suspensão.');
     } finally {
       setProcessingId(null);
     }
@@ -155,7 +159,7 @@ export default function AdminUsersPage() {
         </header>
 
         {/* Tabela de Usuários */}
-        <section className="bg-if-card border border-white/5 rounded-3xl overflow-hidden shadow-xl">
+        <section className="bg-if-card border border-white/5 rounded-3xl overflow-hidden shadow-xl animate-in fade-in slide-in-from-bottom-8 duration-700">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -232,7 +236,7 @@ export default function AdminUsersPage() {
 
                               {suspended ? (
                                 <button
-                                  onClick={() => handleUnsuspend(u._id)}
+                                  onClick={() => setUnsuspendUserId(u._id)}
                                   className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
                                 >
                                   Desbloquear
@@ -258,6 +262,18 @@ export default function AdminUsersPage() {
           </div>
         </section>
       </div>
+
+      <ConfirmModal 
+        isOpen={!!unsuspendUserId}
+        title="Remover Suspensão"
+        message="Deseja realmente remover a suspensão deste usuário? Ele poderá interagir na rede novamente."
+        confirmText="Desbloquear"
+        isDestructive={false}
+        onConfirm={() => {
+          if (unsuspendUserId) handleUnsuspend(unsuspendUserId);
+        }}
+        onCancel={() => setUnsuspendUserId(null)}
+      />
     </main>
   );
 }
