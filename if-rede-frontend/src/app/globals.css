@@ -13,6 +13,9 @@
   --color-if-card: #442844;
   --color-if-olive: #8F9972;
   --color-if-text: #F2F2F2;
+  --color-if-purple: #8B5CF6;
+  --color-if-purple-dark: #6D28D9;
+  --color-if-glow: rgba(139, 92, 246, 0.5);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);

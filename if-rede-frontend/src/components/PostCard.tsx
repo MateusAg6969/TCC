@@ -123,8 +123,8 @@ export default function PostCard({ post, isOwner, isPinned, onPin }: PostCardPro
   const avatarUrl = (post.autor_id as any)?.customizacao?.avatar_url;
 
   return (
-    <article className="group overflow-hidden rounded-main bg-if-card border border-if-purple/10 transition-all hover:border-if-purple/30 text-if-text shadow-card">
-      <header className="p-4 flex items-center justify-between border-b border-if-purple/5 gap-4">
+    <article className="group overflow-hidden rounded-main bg-if-card/90 backdrop-blur-md border border-white/5 transition-all duration-300 hover:border-if-purple/40 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] text-if-text hover:-translate-y-1">
+      <header className="p-4 flex items-center justify-between border-b border-white/5 bg-gradient-to-r from-transparent via-transparent to-if-purple/5 gap-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <Link
             href={`/profile/${autorId}`}

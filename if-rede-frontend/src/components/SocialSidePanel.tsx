@@ -48,12 +48,14 @@ export default function SocialSidePanel({ isOpen, onClose, userId, type, userNam
       />
 
       {/* Painel Lateral */}
-      <aside className="relative w-full max-w-md bg-if-card h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500 border-l border-white/5">
-        <header className="p-6 border-b border-white/5 bg-gradient-to-r from-if-purple/10 to-transparent flex items-center justify-between">
+      <aside className="relative w-full max-w-md bg-if-card/80 backdrop-blur-2xl h-full shadow-[0_0_50px_rgba(139,92,246,0.15)] flex flex-col animate-in slide-in-from-right duration-500 border-l border-white/10">
+        <header className="p-6 border-b border-white/10 bg-gradient-to-br from-if-purple/20 via-if-purple/5 to-transparent flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-black text-if-purple flex items-center gap-2">
-              {type === 'followers' ? <Users size={24} /> : <UserPlus size={24} />}
-              {type === 'followers' ? 'Seguidores' : 'Seguindo'}
+            <h2 className="text-2xl font-black flex items-center gap-2">
+              <span className="text-if-purple">{type === 'followers' ? <Users size={24} /> : <UserPlus size={24} />}</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-if-purple to-fuchsia-400">
+                {type === 'followers' ? 'Seguidores' : 'Seguindo'}
+              </span>
             </h2>
             <p className="text-xs text-if-text/50 font-medium mt-1 uppercase tracking-widest">
               Rede de {userName}
