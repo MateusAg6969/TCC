@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useState, useRef, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, UploadCloud, X, Plus, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import CustomSelect from '@/components/CustomSelect';
@@ -20,10 +21,8 @@ type FormState = {
 export default function NewPostPage() {
   const router = useRouter();
   const { token } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Estado unico do formulario para manter todo o payload em uma fonte de verdade.
-  // Entrada: interacoes dos campos pelo usuario.
-  // Saida: objeto serializavel para enviar no POST /postagens.
   const [form, setForm] = useState<FormState>({
     titulo: '',
     descricao: '',
@@ -32,36 +31,21 @@ export default function NewPostPage() {
     subtipo_tag_id: '',
   });
 
-  // Arquivo binario selecionado para upload multipart.
-  // Entrada: input type=file do usuario.
-  // Saida: objeto File enviado ao backend via FormData.
   const [arquivo, setArquivo] = useState<File | null>(null);
-
-  // Catalogo de tags por tipo para classificar subtipo da postagem.
-  // Entrada: resposta da API /tags/subtipos?tipo=...
-  // Saida: opcoes renderizadas no select.
   const [tags, setTags] = useState<TagSubtipo[]>([]);
-
-  // Campos da solicitacao de nova tag quando a opcao desejada nao existir.
+  
+  const [showTagForm, setShowTagForm] = useState(false);
   const [novaTagNome, setNovaTagNome] = useState('');
   const [novaTagJustificativa, setNovaTagJustificativa] = useState('');
 
-  // Flags de UX para comunicar progresso e erros sem recarregar a pagina.
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
 
-
-  // Atualiza qualquer campo textual mantendo o estado imutavel.
-  // Entrada: nome do campo + valor digitado.
-  // Saida: novo estado refletido imediatamente na interface.
   function updateField(field: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   useEffect(() => {
-    // O que faz: carrega tags de subtipo correspondentes ao tipo selecionado.
-    // Por que: evita mostrar tags de categorias incompatíveis (ex.: fotografia para audio).
-    // Fluxo de dados: tipo do formulario -> GET /tags/subtipos -> estado tags -> select de opcoes.
     let ativo = true;
 
     async function carregarTags() {
@@ -69,43 +53,33 @@ export default function NewPostPage() {
 
       try {
         const response = await api.get<ApiSuccess<TagSubtipo[]>>(`/tags/subtipos?tipo=${form.tipo}`);
-
         if (!ativo) return;
 
         const lista = response.data?.data || [];
         setTags(lista);
 
-        // Mantem selecionada apenas tag valida para o tipo atual.
         if (!lista.find((item) => item._id === form.subtipo_tag_id)) {
           setForm((prev) => ({ ...prev, subtipo_tag_id: '' }));
         }
       } catch {
         if (!ativo) return;
         setTags([]);
-
-        // O que faz: informa falha de carregamento do catalogo de tags.
-        // Por que: sem feedback, o usuario entende que "nao existem tags" em vez de erro de integracao.
-        // Fluxo de dados: erro de requisicao -> estado de status -> mensagem visivel no formulario.
         setStatus({
           ok: false,
-          message: 'Nao foi possivel carregar as tags agora. Verifique a sessao e tente novamente.',
+          message: 'Não foi possível carregar as tags agora. Verifique a sessão e tente novamente.',
         });
       }
     }
 
     carregarTags();
-
     return () => {
       ativo = false;
     };
   }, [form.tipo, form.subtipo_tag_id, token]);
 
   async function solicitarNovaTag() {
-    // O que faz: envia pedido de criacao de tag para moderacao.
-    // Por que: o usuario pode nao encontrar subtipo desejado no catalogo atual.
-    // Fluxo de dados: campos do formulario de solicitacao -> POST /tags/solicitacoes -> resposta de status.
     if (!token) {
-      setStatus({ ok: false, message: 'Sessao expirada. Faca login novamente.' });
+      setStatus({ ok: false, message: 'Sessão expirada. Faça login novamente.' });
       return;
     }
 
@@ -118,20 +92,18 @@ export default function NewPostPage() {
     setStatus(null);
 
     try {
-      await api.post(
-        '/tags/solicitacoes',
-        {
-          nome_sugerido: novaTagNome.trim(),
-          tipo: form.tipo,
-          justificativa: novaTagJustificativa.trim(),
-        }
-      );
+      await api.post('/tags/solicitacoes', {
+        nome_sugerido: novaTagNome.trim(),
+        tipo: form.tipo,
+        justificativa: novaTagJustificativa.trim(),
+      });
 
       setNovaTagNome('');
       setNovaTagJustificativa('');
-      setStatus({ ok: true, message: 'Solicitacao enviada. A equipe vai avaliar sua nova tag.' });
+      setShowTagForm(false);
+      setStatus({ ok: true, message: 'Solicitação enviada. A equipe vai avaliar sua nova tag.' });
     } catch {
-      setStatus({ ok: false, message: 'Nao foi possivel enviar a solicitacao da tag agora.' });
+      setStatus({ ok: false, message: 'Não foi possível enviar a solicitação da tag agora.' });
     } finally {
       setLoading(false);
     }
@@ -141,16 +113,13 @@ export default function NewPostPage() {
     event.preventDefault();
     setStatus(null);
 
-    // Guarda de seguranca: a rota e protegida no middleware, mas a validacao local
-    // evita envio acidental sem token caso o estado de sessao seja perdido no client.
     if (!token) {
-      setStatus({ ok: false, message: 'Sessao expirada. Faca login novamente.' });
+      setStatus({ ok: false, message: 'Sessão expirada. Faça login novamente.' });
       return;
     }
 
-    // Validacao minima para manter o contrato da API e reduzir respostas 400.
     if (!form.titulo.trim()) {
-      setStatus({ ok: false, message: 'Informe um titulo para a postagem.' });
+      setStatus({ ok: false, message: 'Informe um título para a postagem.' });
       return;
     }
 
@@ -167,9 +136,6 @@ export default function NewPostPage() {
     setLoading(true);
 
     try {
-      // Montagem multipart para suportar binario + campos textuais no mesmo request.
-      // Entrada: estado do formulario + arquivo selecionado.
-      // Saida: FormData serializada para endpoint de criacao de post.
       const payload = new FormData();
       payload.append('titulo', form.titulo.trim());
       payload.append('descricao', form.descricao.trim());
@@ -181,149 +147,245 @@ export default function NewPostPage() {
       await api.post('/postagens', payload);
 
       setStatus({ ok: true, message: 'Postagem publicada com sucesso.' });
-
-      // Navegacao apos sucesso: retorna ao feed para feedback imediato de publicacao.
       router.push('/home');
       router.refresh();
     } catch (error: any) {
-      const msg = error.response?.data?.message || 'Nao foi possivel publicar agora. Tente novamente.';
+      const msg = error.response?.data?.message || 'Não foi possível publicar agora. Tente novamente.';
       setStatus({ ok: false, message: msg });
     } finally {
       setLoading(false);
     }
   }
 
+  // Helper para lidar com arquivos no drag and drop ou click
+  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) setArquivo(file);
+  };
+
   return (
-    <main className="min-h-screen bg-if-bg text-if-text">
-      <div className="mx-auto max-w-3xl p-4 md:p-8">
-        <header className="mb-6 flex items-center justify-between rounded-main bg-if-card p-4">
-          {/*
-            Botao de retorno rapido para manter navegacao previsivel.
-            Fluxo: clique -> /home sem depender do historico do navegador.
-          */}
+    <main className="min-h-screen bg-if-bg text-if-text pb-20">
+      <div className="mx-auto max-w-5xl p-4 md:p-8">
+        <header className="mb-8 flex items-center justify-between">
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 rounded-full border border-if-olive px-4 py-2 text-sm font-semibold text-if-olive"
+            className="group flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm font-semibold text-if-text/70 transition-all hover:bg-white/10 hover:text-white"
           >
-            <ArrowLeft size={16} /> Voltar
+            <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" /> Voltar
           </Link>
-          <h1 className="text-lg font-semibold">Nova postagem</h1>
+          <h1 className="flex items-center gap-2 text-lg font-bold text-if-olive">
+            <Sparkles size={20} /> Nova Publicação
+          </h1>
         </header>
 
-        <form onSubmit={onSubmit} className="space-y-4 rounded-main bg-if-card p-6">
-          <label className="block text-sm">
-            Titulo
-            <input
-              value={form.titulo}
-              onChange={(event) => updateField('titulo', event.target.value)}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-              placeholder="Digite um titulo para sua postagem"
-            />
-          </label>
-
-          <label className="block text-sm">
-            Descricao
-            <textarea
-              value={form.descricao}
-              onChange={(event) => updateField('descricao', event.target.value)}
-              className="mt-2 min-h-24 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-              placeholder="Descreva brevemente o conteudo"
-            />
-          </label>
-
-          <label className="block text-sm relative z-20">
-            Tipo de postagem
-            <CustomSelect
-              options={[
-                { value: 'texto', label: 'Texto' },
-                { value: 'imagem', label: 'Imagem' },
-                { value: 'audio', label: 'Áudio' },
-                { value: 'video', label: 'Vídeo' }
-              ]}
-              value={form.tipo}
-              onChange={(val) => updateField('tipo', val as FormState['tipo'])}
-              placeholder="Selecione o tipo..."
-            />
-          </label>
-
-          <label className="block text-sm relative z-10">
-            Subtipo (tag)
-            <CustomSelect
-              options={tags.map((tag) => ({ value: tag._id, label: tag.nome }))}
-              value={form.subtipo_tag_id}
-              onChange={(val) => updateField('subtipo_tag_id', val)}
-              placeholder="Selecione uma tag"
-            />
-          </label>
-
-          {form.tipo === 'texto' && (
-            <label className="block text-sm">
-              Descricao textual opcional
-              <textarea
-                value={form.texto_longo}
-                onChange={(event) => updateField('texto_longo', event.target.value)}
-                className="mt-2 min-h-36 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-                placeholder="Resumo do arquivo textual (opcional)"
-              />
-            </label>
-          )}
-
-          <label className="block text-sm">
-            Arquivo da postagem (limite: 25MB)
-            <input
-              type="file"
-              onChange={(event) => {
-                const file = event.target.files?.[0] || null;
-                setArquivo(file);
-              }}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-            />
-          </label>
-
-          <div className="rounded-xl border border-dashed border-if-olive/60 bg-black/20 p-4">
-            <p className="text-sm font-semibold text-if-olive">Nao encontrou a tag que queria?</p>
-            <p className="mt-1 text-xs text-if-text/70">
-              Envie uma solicitacao para adicionar um novo subtipo ao catalogo.
-            </p>
-
-            <div className="mt-3 space-y-2">
+        <form onSubmit={onSubmit} className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 items-start">
+          
+          {/* COLUNA ESQUERDA - CONTEÚDO PRINCIPAL */}
+          <div className="flex flex-col gap-6">
+            <div className="rounded-3xl bg-if-card/50 backdrop-blur-md border border-white/5 p-6 md:p-8 shadow-2xl">
               <input
-                value={novaTagNome}
-                onChange={(event) => setNovaTagNome(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-                placeholder="Ex.: fotografia analogica"
+                value={form.titulo}
+                onChange={(event) => updateField('titulo', event.target.value)}
+                className="w-full bg-transparent text-3xl md:text-5xl font-black text-white outline-none placeholder:text-white/20 transition-all focus:placeholder:opacity-0"
+                placeholder="Título da sua obra..."
               />
-              <textarea
-                value={novaTagJustificativa}
-                onChange={(event) => setNovaTagJustificativa(event.target.value)}
-                className="min-h-20 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-                placeholder="Explique rapidamente por que essa tag e importante (opcional)"
-              />
+              <div className="mt-6">
+                <textarea
+                  value={form.descricao}
+                  onChange={(event) => updateField('descricao', event.target.value)}
+                  className="w-full min-h-[120px] resize-none bg-transparent text-lg md:text-xl text-if-text/80 outline-none placeholder:text-white/20"
+                  placeholder="Conte-nos um pouco sobre o que você criou..."
+                />
+              </div>
 
-              <button
-                type="button"
-                onClick={solicitarNovaTag}
-                disabled={loading}
-                className="rounded-full border border-if-olive px-4 py-2 text-sm font-semibold text-if-olive disabled:opacity-60"
-              >
-                Solicitar nova tag
-              </button>
+              <AnimatePresence>
+                {form.tipo === 'texto' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: 'auto', marginTop: 32 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    className="overflow-hidden"
+                  >
+                    <label className="mb-2 block text-sm font-bold text-if-purple">Texto Completo</label>
+                    <textarea
+                      value={form.texto_longo}
+                      onChange={(event) => updateField('texto_longo', event.target.value)}
+                      className="w-full min-h-[300px] rounded-2xl bg-black/30 p-5 text-base text-if-text outline-none border border-white/5 focus:border-if-purple/50 transition-colors custom-scrollbar"
+                      placeholder="Escreva sua redação, artigo ou poema completo aqui..."
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
-          {status && (
-            <p className={`text-sm ${status.ok ? 'text-emerald-300' : 'text-rose-300'}`}>
-              {status.message}
-            </p>
-          )}
+          {/* COLUNA DIREITA - OPÇÕES E UPLOAD */}
+          <div className="flex flex-col gap-6">
+            
+            {/* AREA DE UPLOAD */}
+            <div className="rounded-3xl bg-if-card/50 backdrop-blur-md border border-white/5 p-6 shadow-2xl">
+              <label className="mb-3 block text-sm font-bold text-if-text/80">Arquivo da Postagem</label>
+              
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleFileDrop}
+                onClick={() => !arquivo && fileInputRef.current?.click()}
+                className={`relative flex flex-col items-center justify-center w-full min-h-[200px] rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden
+                  ${arquivo ? 'border-if-olive bg-if-olive/5' : 'border-white/20 hover:border-if-purple hover:bg-if-purple/5'}`}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) setArquivo(e.target.files[0]);
+                  }}
+                />
+                
+                <AnimatePresence mode="wait">
+                  {arquivo ? (
+                    <motion.div 
+                      key="file"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      className="flex flex-col items-center p-6 text-center"
+                    >
+                      <div className="h-16 w-16 rounded-2xl bg-if-olive/20 text-if-olive flex items-center justify-center mb-4">
+                        <UploadCloud size={32} />
+                      </div>
+                      <p className="font-bold text-white line-clamp-1 break-all px-4">{arquivo.name}</p>
+                      <p className="mt-1 text-xs text-if-text/50">{(arquivo.size / 1024 / 1024).toFixed(2)} MB</p>
+                      
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setArquivo(null);
+                        }}
+                        className="mt-6 rounded-full bg-red-500/20 px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
+                      >
+                        <X size={14} /> Remover arquivo
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="empty"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      className="flex flex-col items-center p-6 text-center"
+                    >
+                      <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-white/50 group-hover:text-if-purple group-hover:bg-if-purple/10 transition-all">
+                        <UploadCloud size={32} />
+                      </div>
+                      <p className="font-bold text-white">Clique ou Arraste um arquivo</p>
+                      <p className="mt-1 text-xs text-if-text/50">Até 25MB (Imagens, Vídeos, Áudios ou PDFs)</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-full bg-if-olive px-5 py-3 font-semibold text-if-bg disabled:opacity-60"
-          >
-            <Send size={16} /> {loading ? 'Publicando...' : 'Publicar'}
-          </button>
+            {/* SELETORES */}
+            <div className="rounded-3xl bg-if-card/50 backdrop-blur-md border border-white/5 p-6 shadow-2xl space-y-5">
+              <label className="block text-sm relative z-20">
+                <span className="font-bold text-if-text/80">Categoria Principal</span>
+                <CustomSelect
+                  options={[
+                    { value: 'texto', label: '📖 Texto Literário' },
+                    { value: 'imagem', label: '🎨 Arte Visual' },
+                    { value: 'audio', label: '🎧 Produção Sonora' },
+                    { value: 'video', label: '🎬 Produção Audiovisual' }
+                  ]}
+                  value={form.tipo}
+                  onChange={(val) => updateField('tipo', val as FormState['tipo'])}
+                  placeholder="Selecione o tipo..."
+                />
+              </label>
+
+              <label className="block text-sm relative z-10">
+                <span className="font-bold text-if-text/80">Especificação (Tag)</span>
+                <CustomSelect
+                  options={tags.map((tag) => ({ value: tag._id, label: tag.nome }))}
+                  value={form.subtipo_tag_id}
+                  onChange={(val) => updateField('subtipo_tag_id', val)}
+                  placeholder="Selecione uma tag"
+                />
+              </label>
+
+              {/* AREA DE NOVA TAG */}
+              <div className="pt-2">
+                {!showTagForm ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowTagForm(true)}
+                    className="flex items-center gap-2 text-xs font-bold text-if-purple hover:text-if-purple-dark transition-colors"
+                  >
+                    <Plus size={14} /> Não encontrou a tag ideal? Solicitar nova.
+                  </button>
+                ) : (
+                  <AnimatePresence>
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="rounded-2xl border border-dashed border-if-purple/40 bg-if-purple/5 p-4 mt-2">
+                        <div className="flex justify-between items-center mb-3">
+                          <p className="text-sm font-bold text-if-purple">Solicitar Tag</p>
+                          <button type="button" onClick={() => setShowTagForm(false)} className="text-white/40 hover:text-white"><X size={14}/></button>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <input
+                            value={novaTagNome}
+                            onChange={(event) => setNovaTagNome(event.target.value)}
+                            className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-if-purple/50"
+                            placeholder="Ex.: Fotografia analógica"
+                          />
+                          <textarea
+                            value={novaTagJustificativa}
+                            onChange={(event) => setNovaTagJustificativa(event.target.value)}
+                            className="min-h-16 w-full resize-none rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-if-purple/50"
+                            placeholder="Por que precisamos dessa tag?"
+                          />
+                          <button
+                            type="button"
+                            onClick={solicitarNovaTag}
+                            disabled={loading}
+                            className="w-full rounded-xl bg-if-purple/20 px-4 py-2 text-sm font-bold text-if-purple hover:bg-if-purple hover:text-white transition-all disabled:opacity-50"
+                          >
+                            Enviar Solicitação
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+              </div>
+            </div>
+
+            {status && (
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                className={`text-sm text-center font-bold px-4 py-3 rounded-2xl ${status.ok ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}
+              >
+                {status.message}
+              </motion.p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-if-olive py-4 text-base font-black text-if-bg hover:brightness-110 active:scale-95 transition-all shadow-[0_0_40px_rgba(182,240,152,0.1)] hover:shadow-[0_0_40px_rgba(182,240,152,0.3)] disabled:opacity-60 disabled:hover:scale-100 disabled:hover:shadow-none"
+            >
+              <Send size={18} /> {loading ? 'Publicando sua obra...' : 'Publicar Postagem'}
+            </button>
+          </div>
         </form>
       </div>
     </main>
