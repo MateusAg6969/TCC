@@ -208,8 +208,7 @@ export default function ProfileClient({
                 {ehProprioPerfil ? (
                   <button
                     onClick={() => setOpenModal(true)}
-                    className="rounded-2xl px-8 py-3 text-sm font-bold text-if-bg shadow-xl hover:scale-105 active:scale-95 transition-all"
-                    style={{ background: 'var(--primary-color)' }}
+                    className="rounded-2xl border-2 border-if-olive/20 bg-if-olive/10 px-8 py-3 text-sm font-bold text-if-olive shadow-xl hover:bg-if-olive hover:text-if-bg active:scale-95 transition-all"
                   >
                     Editar Perfil
                   </button>
@@ -219,8 +218,8 @@ export default function ProfileClient({
                     disabled={carregandoSeguir}
                     className={`rounded-2xl px-10 py-3 text-sm font-black shadow-xl transition-all active:scale-95 flex items-center gap-2 ${
                       profile?.seguindo 
-                        ? 'bg-if-purple/10 text-if-purple border-2 border-if-purple/20' 
-                        : 'bg-if-purple text-white'
+                        ? 'bg-if-purple/10 text-if-purple border-2 border-if-purple/20 hover:bg-red-500 hover:text-white hover:border-red-500' 
+                        : 'bg-if-purple/10 text-if-purple border-2 border-if-purple/20 hover:bg-if-purple hover:text-white'
                     } disabled:opacity-50`}
                   >
                     {carregandoSeguir ? (

@@ -381,7 +381,7 @@ export default function NewPostPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-if-olive py-4 text-base font-black text-if-bg hover:brightness-110 active:scale-95 transition-all shadow-[0_0_40px_rgba(182,240,152,0.1)] hover:shadow-[0_0_40px_rgba(182,240,152,0.3)] disabled:opacity-60 disabled:hover:scale-100 disabled:hover:shadow-none"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-if-olive/10 border border-if-olive/20 py-4 text-base font-black text-if-olive hover:bg-if-olive hover:text-if-bg active:scale-95 transition-all shadow-[0_0_40px_rgba(182,240,152,0.1)] hover:shadow-[0_0_40px_rgba(182,240,152,0.3)] disabled:opacity-60 disabled:hover:scale-100 disabled:hover:shadow-none"
             >
               <Send size={18} /> {loading ? 'Publicando sua obra...' : 'Publicar Postagem'}
             </button>
