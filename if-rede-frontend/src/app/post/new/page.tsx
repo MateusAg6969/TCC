@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Send } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import CustomSelect from '@/components/CustomSelect';
 import type { ApiSuccess, TagSubtipo } from '@/types';
 
 type FormState = {
@@ -230,34 +231,29 @@ export default function NewPostPage() {
             />
           </label>
 
-          <label className="block text-sm">
+          <label className="block text-sm relative z-20">
             Tipo de postagem
-            <select
+            <CustomSelect
+              options={[
+                { value: 'texto', label: 'Texto' },
+                { value: 'imagem', label: 'Imagem' },
+                { value: 'audio', label: 'Áudio' },
+                { value: 'video', label: 'Vídeo' }
+              ]}
               value={form.tipo}
-              onChange={(event) => updateField('tipo', event.target.value as FormState['tipo'])}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-            >
-              <option value="texto">Texto</option>
-              <option value="imagem">Imagem</option>
-              <option value="audio">Audio</option>
-              <option value="video">Vídeo</option>
-            </select>
+              onChange={(val) => updateField('tipo', val as FormState['tipo'])}
+              placeholder="Selecione o tipo..."
+            />
           </label>
 
-          <label className="block text-sm">
+          <label className="block text-sm relative z-10">
             Subtipo (tag)
-            <select
+            <CustomSelect
+              options={tags.map((tag) => ({ value: tag._id, label: tag.nome }))}
               value={form.subtipo_tag_id}
-              onChange={(event) => updateField('subtipo_tag_id', event.target.value)}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none"
-            >
-              <option value="">Selecione uma tag</option>
-              {tags.map((tag) => (
-                <option key={tag._id} value={tag._id}>
-                  {tag.nome}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => updateField('subtipo_tag_id', val)}
+              placeholder="Selecione uma tag"
+            />
           </label>
 
           {form.tipo === 'texto' && (
