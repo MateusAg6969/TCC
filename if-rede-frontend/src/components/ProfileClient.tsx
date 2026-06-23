@@ -182,9 +182,9 @@ export default function ProfileClient({
             }}
           />
           <div className="p-6 pb-10">
-            <div className="-mt-16 flex flex-wrap items-end justify-between gap-6">
-              <div className="flex items-end gap-6">
-                <div className="relative group">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div className="flex flex-wrap items-end gap-6">
+                <div className="relative group -mt-16 z-10">
                   <div className="grid h-32 w-32 place-items-center rounded-3xl border-4 border-if-card bg-gradient-to-br from-if-purple to-if-olive overflow-hidden shadow-2xl bg-cover bg-center"
                        style={profile?.customizacao?.avatar_url ? { backgroundImage: `url(${resolveAssetUrl(profile.customizacao.avatar_url)})` } : {}}>
                     {!profile?.customizacao?.avatar_url && (
@@ -194,7 +194,7 @@ export default function ProfileClient({
                     )}
                   </div>
                 </div>
-                <div className="translate-y-4">
+                <div className="mb-2">
                   <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
                   </div>
@@ -228,7 +228,7 @@ export default function ProfileClient({
               </div>
 
               {/* Ações Sociais */}
-              <div className="translate-y-4">
+              <div className="mb-2">
                 {ehProprioPerfil ? (
                   <button
                     onClick={() => setOpenModal(true)}
