@@ -194,8 +194,15 @@ export default function ProfileClient({
                   </div>
                 </div>
                 <div className="translate-y-4">
-                  <h1 className="text-3xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
-                  <p className="max-w-xl text-if-text/60 mt-1 font-medium italic">
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
+                  </div>
+                  {profile?.perfil?.username && (
+                    <div className="inline-block mt-1 px-3 py-0.5 rounded-full bg-if-olive/10 border border-if-olive/20 text-if-olive text-sm font-bold tracking-wide">
+                      @{profile.perfil.username}
+                    </div>
+                  )}
+                  <p className="max-w-xl text-if-text/60 mt-2 font-medium italic">
                     {profile?.perfil?.bio || 'Sem bio por enquanto.'}
                   </p>
                   
@@ -300,6 +307,7 @@ export default function ProfileClient({
         onSave={handleUpdateProfile}
         defaultData={{
           nome: profile?.perfil?.nome || '',
+          username: profile?.perfil?.username || '',
           bio: profile?.perfil?.bio || '',
           privacidade: profile?.perfil?.privacidade || 'publico',
           avatar_url: profile?.customizacao?.avatar_url || '',

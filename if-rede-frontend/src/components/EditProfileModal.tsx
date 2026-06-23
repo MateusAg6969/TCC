@@ -13,6 +13,7 @@ type Props = {
   onSave: (data: any) => void;
   defaultData: {
     nome: string;
+    username?: string;
     bio: string;
     privacidade: string;
     avatar_url: string;
@@ -22,6 +23,7 @@ type Props = {
 
 export default function EditProfileModal({ open, onClose, onSave, defaultData }: Props) {
   const [nome, setNome] = useState(defaultData.nome);
+  const [username, setUsername] = useState(defaultData.username || '');
   const [bio, setBio] = useState(defaultData.bio);
   const [privacidade, setPrivacidade] = useState(defaultData.privacidade || 'publico');
   
@@ -50,7 +52,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
       }
 
       const payload = {
-        perfil: { nome, bio, privacidade },
+        perfil: { nome, username, bio, privacidade },
         customizacao: {}, 
       };
       const res = await api.patch('/usuarios/me', payload);
@@ -191,6 +193,19 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
                     className="w-full rounded-2xl border border-white/5 bg-black/20 px-5 py-4 text-base outline-none focus:border-if-olive/50 transition-all font-medium text-white"
                     placeholder="Como você quer ser chamado?"
                   />
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Apelido (Username)</span>
+                  <div className="flex items-center w-full rounded-2xl border border-white/5 bg-black/20 focus-within:border-if-olive/50 transition-all">
+                    <span className="pl-5 text-if-text/50 font-bold">@</span>
+                    <input
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ''))}
+                      className="w-full bg-transparent px-2 py-4 text-base outline-none font-medium text-white placeholder-if-text/30"
+                      placeholder="seu_apelido"
+                    />
+                  </div>
                 </label>
 
                 <label className="block">
