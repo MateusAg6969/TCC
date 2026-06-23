@@ -186,7 +186,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
               {/* DADOS TEXTUAIS */}
               <div className="space-y-5">
                 <label className="block">
-                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Nome de exibição</span>
+                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Apelido (Como você aparece na rede)</span>
                   <input
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
@@ -196,7 +196,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
                 </label>
 
                 <label className="block">
-                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Apelido (Username)</span>
+                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Nome de Usuário (Sua @)</span>
                   <div className="flex items-center w-full rounded-2xl border border-white/5 bg-black/20 focus-within:border-if-olive/50 transition-all">
                     <span className="pl-5 text-if-text/50 font-bold">@</span>
                     <input
