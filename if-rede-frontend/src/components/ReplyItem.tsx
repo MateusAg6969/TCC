@@ -61,12 +61,12 @@ export default function ReplyItem({ reply, parentCommentId, onReply, onRefresh }
             className="h-full w-full object-cover"
           />
         ) : (
-          reply.autor_id.perfil.nome.charAt(0).toUpperCase()
+          (reply.autor_id.perfil.apelido || reply.autor_id.perfil.nome).charAt(0).toUpperCase()
         )}
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-xs font-bold text-if-text/70">{reply.autor_id.perfil.nome}</span>
+          <span className="text-xs font-bold text-if-text/70">{reply.autor_id.perfil.apelido || reply.autor_id.perfil.nome}</span>
           {reply.autor_id.perfil.status_vinculo === 'servidor' && (
             <span className="text-[8px] bg-white/10 px-1 py-0.5 rounded text-if-text/40 font-bold uppercase">
               Staff
@@ -90,7 +90,7 @@ export default function ReplyItem({ reply, parentCommentId, onReply, onRefresh }
           </button>
 
           <button 
-            onClick={() => onReply(parentCommentId, reply.autor_id.perfil.nome)}
+            onClick={() => onReply(parentCommentId, reply.autor_id.perfil.apelido || reply.autor_id.perfil.nome)}
             className="flex items-center gap-1 text-[10px] font-bold text-if-text/30 hover:text-if-purple transition-colors"
           >
             <MessageCircle size={12} />

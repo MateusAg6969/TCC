@@ -154,14 +154,14 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                   className="h-14 w-14 rounded-2xl bg-if-purple/20 flex items-center justify-center font-black text-xl border-2 border-if-purple/20 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-cover bg-center"
                   style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : {}}
                 >
-                  {!avatarUrl && (post.autor_id?.perfil?.nome || 'U').charAt(0).toUpperCase()}
+                  {!avatarUrl && (post.autor_id?.perfil?.apelido || post.autor_id?.perfil?.nome || 'U').charAt(0).toUpperCase()}
                 </Link>
                 <div>
                   <Link 
                     href={`/profile/${autorId}`}
                     className="text-xl font-black text-if-purple hover:underline"
                   >
-                    {post.autor_id?.perfil?.nome || 'Acadêmico'}
+                    {post.autor_id?.perfil?.apelido || post.autor_id?.perfil?.nome || 'Acadêmico'}
                   </Link>
                   <div className="flex items-center gap-3 text-sm text-if-text/50 font-medium mt-1">
                     <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(post.createdAt || '').toLocaleDateString('pt-BR')}</span>

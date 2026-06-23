@@ -155,8 +155,8 @@ export default function NotificationBell() {
                   {/* Conteúdo */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-if-text/90 leading-snug">
-                      <span className="font-black text-if-purple">
-                        {notificacao.ator_id?.perfil?.nome || 'Usuário'}
+                      <span className="font-bold text-white">
+                        {notificacao.ator_id?.perfil?.apelido || notificacao.ator_id?.perfil?.nome || 'Usuário'}
                       </span>{' '}
                       {notificacao.mensagem}
                     </p>

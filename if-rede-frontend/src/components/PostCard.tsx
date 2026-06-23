@@ -147,7 +147,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
             className="h-10 w-10 shrink-0 rounded-xl bg-if-purple/20 flex items-center justify-center font-black border border-white/5 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-cover bg-center"
             style={avatarUrl ? { backgroundImage: `url(${resolveAssetUrl(avatarUrl)})` } : {}}
           >
-            {!avatarUrl && (post.autor_id?.perfil?.nome || 'U').charAt(0).toUpperCase()}
+            {!avatarUrl && (post.autor_id?.perfil?.apelido || post.autor_id?.perfil?.nome || 'U').charAt(0).toUpperCase()}
           </Link>
           <div className="min-w-0 flex-1">
             <Link href={`/post/${post._id}`} className="block">
@@ -161,7 +161,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
                 href={`/profile/${autorId}`}
                 className="text-if-purple font-bold hover:underline transition-all"
               >
-                {post.autor_id?.perfil?.nome || 'Acadêmico'}
+                {post.autor_id?.perfil?.apelido || post.autor_id?.perfil?.nome || 'Acadêmico'}
               </Link>
             </p>
           </div>

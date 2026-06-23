@@ -122,11 +122,11 @@ export default function SearchClient({ initialQuery, initialTipo }: { initialQue
                     className="w-12 h-12 rounded-full border border-white/10 shrink-0 bg-cover bg-center flex items-center justify-center font-black text-white"
                     style={user.customizacao?.avatar_url ? { backgroundImage: `url(${resolveAssetUrl(user.customizacao.avatar_url)})` } : {}}
                   >
-                    {!user.customizacao?.avatar_url && (user.perfil?.nome || 'U').charAt(0).toUpperCase()}
+                    {!user.customizacao?.avatar_url && (user.perfil?.apelido || user.perfil?.nome || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-if-text group-hover:text-if-purple transition-colors truncate">
-                      {user.perfil?.nome}
+                      {user.perfil?.apelido || user.perfil?.nome}
                     </h4>
                     <p className="text-[10px] text-if-text/40 font-bold uppercase tracking-tighter">Ver perfil acadêmico</p>
                   </div>

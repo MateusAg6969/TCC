@@ -204,11 +204,11 @@ export default function NotificacoesPage() {
                               Fluxo: Clique -> /profile/[username]
                           */}
                           <Link 
-                            href={`/profile/${notificacao.ator_id?.perfil?.nome || 'usuario'}`}
+                            href={`/profile/${notificacao.ator_id?._id || '1'}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="font-black text-if-purple hover:underline cursor-pointer transition-all"
+                            className="font-bold text-if-text hover:text-if-purple transition-colors"
                           >
-                            {notificacao.ator_id?.perfil?.nome || 'Usuário'}
+                            {notificacao.ator_id?.perfil?.apelido || notificacao.ator_id?.perfil?.nome || 'Usuário'}
                           </Link>{' '}
                           <span className="font-medium text-if-text/80">{notificacao.mensagem}</span>
                         </p>

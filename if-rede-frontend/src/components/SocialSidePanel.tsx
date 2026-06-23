@@ -89,11 +89,11 @@ export default function SocialSidePanel({ isOpen, onClose, userId, type, userNam
                     className="w-10 h-10 rounded-xl border border-white/10 shrink-0 bg-cover bg-center flex items-center justify-center font-black text-white"
                     style={user.customizacao?.avatar_url ? { backgroundImage: `url(${resolveAssetUrl(user.customizacao.avatar_url)})` } : {}}
                   >
-                    {!user.customizacao?.avatar_url && (user.perfil?.nome || 'U').charAt(0).toUpperCase()}
+                    {!user.customizacao?.avatar_url && (user.perfil?.apelido || user.perfil?.nome || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-if-text group-hover:text-if-purple transition-colors truncate">
-                      {user.perfil?.nome}
+                      {user.perfil?.apelido || user.perfil?.nome}
                     </h4>
                     <p className="text-xs text-if-text/40 font-medium">Acadêmico do IFC</p>
                   </div>

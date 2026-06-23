@@ -106,13 +106,13 @@ export default function CommentItem({ comment, postId, onReply, onRefresh }: Com
           {comment.autor_id.customizacao?.avatar_url ? (
             <Image 
               src={resolveAssetUrl(comment.autor_id.customizacao.avatar_url)} 
-              alt={comment.autor_id.perfil.nome} 
+              alt={comment.autor_id.perfil.apelido || comment.autor_id.perfil.nome} 
               width={40} 
               height={40} 
               className="h-full w-full object-cover"
             />
           ) : (
-            comment.autor_id.perfil.nome.charAt(0).toUpperCase()
+            (comment.autor_id.perfil.apelido || comment.autor_id.perfil.nome).charAt(0).toUpperCase()
           )}
         </div>
 
@@ -121,7 +121,7 @@ export default function CommentItem({ comment, postId, onReply, onRefresh }: Com
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <span className="font-bold text-if-text">
-                {comment.autor_id.perfil.nome}
+                {comment.autor_id.perfil.apelido || comment.autor_id.perfil.nome}
               </span>
               {comment.autor_id.perfil.status_vinculo === 'servidor' && (
                 <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-if-text/40 font-bold uppercase">
