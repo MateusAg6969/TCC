@@ -2,6 +2,7 @@
 
 import { X, AlertTriangle } from 'lucide-react';
 import { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type ConfirmModalProps = {
   isOpen: boolean;
@@ -37,18 +38,27 @@ export default function ConfirmModal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
-        onClick={onCancel}
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={onCancel}
+          />
 
-      {/* Modal Box */}
-      <div className="relative w-full max-w-md bg-if-card/95 backdrop-blur-2xl rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 animate-in fade-in zoom-in-95 duration-300 overflow-hidden flex flex-col">
+          {/* Modal Box */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="relative w-full max-w-md bg-if-card/95 backdrop-blur-2xl rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden flex flex-col"
+          >
         {/* Header Decorativo */}
         <div className={`h-2 w-full ${isDestructive ? 'bg-red-500' : 'bg-if-purple'}`} />
         
@@ -99,7 +109,9 @@ export default function ConfirmModal({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

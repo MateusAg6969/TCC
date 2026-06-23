@@ -1,6 +1,12 @@
 @config "../../tailwind.config.ts";
 @import "tailwindcss";
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 :root {
   --background: #190E1A;
   --foreground: #F2F2F2;

@@ -3,6 +3,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
 import api, { resolveAssetUrl } from '@/lib/api';
 
 type Props = {
@@ -28,8 +29,6 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
   const [bannerPreview, setBannerPreview] = useState(defaultData.banner_url || '');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
-
-  if (!open) return null;
 
   const handleSalvar = async () => {
     setCarregando(true);
@@ -61,8 +60,23 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 overflow-y-auto py-8">
-      <div className="w-full max-w-lg rounded-main bg-if-card p-6 text-if-text shadow-card my-auto">
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 grid place-items-center px-4 overflow-y-auto py-8">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="w-full max-w-lg rounded-main bg-if-card p-6 text-if-text shadow-card my-auto relative z-10"
+          >
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-xl font-semibold">Editar perfil</h3>
           <button 
@@ -186,7 +200,9 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
             {carregando ? 'Salvando...' : 'Salvar Alterações'}
           </button>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

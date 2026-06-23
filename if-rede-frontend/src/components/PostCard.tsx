@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown, MoreHorizontal, Trash2, Link as LinkIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import type { Post } from '@/types';
 import { useAuth } from '@/context/AuthContext';
@@ -131,7 +132,14 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
 
   return (
     <>
-      <article className="group overflow-hidden rounded-main bg-if-card/90 backdrop-blur-md border border-white/5 transition-all duration-300 hover:border-if-purple/40 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] text-if-text hover:-translate-y-1 animate-in fade-in zoom-in-95 duration-500">
+      <motion.article 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-20px" }}
+        whileHover={{ y: -4 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+        className="group overflow-hidden rounded-main bg-if-card/90 backdrop-blur-md border border-white/5 transition-colors duration-300 hover:border-if-purple/40 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] text-if-text"
+      >
       <header className="p-3 sm:p-4 flex items-center justify-between border-b border-white/5 bg-gradient-to-r from-transparent via-transparent to-if-purple/5 gap-2 sm:gap-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <Link
@@ -321,11 +329,12 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
       {/* Footer com Interações */}
       <footer className="bg-if-purple/5 p-2 px-3 sm:p-3 sm:px-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 sm:gap-6 shrink-0">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.8 }}
             onClick={handleLike}
             disabled={!user || carregando}
             aria-label={curtido ? 'Descurtir' : `Curtir, ${totalLikes} curtidas`}
-            className={`flex items-center gap-2 text-sm font-bold transition-all duration-300 ${curtido ? 'text-red-500 scale-110' : 'text-gray-500 hover:text-if-purple'
+            className={`flex items-center gap-2 text-sm font-bold transition-colors duration-300 ${curtido ? 'text-red-500' : 'text-gray-500 hover:text-if-purple'
               }`}
           >
             <Heart
@@ -333,7 +342,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
               className={curtido ? 'fill-current' : ''}
             />
             {totalLikes}
-          </button>
+          </motion.button>
 
           <Link
             href={`/post/${post._id}#comments`}
@@ -362,7 +371,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
           </div>
         </div>
       </footer>
-    </article>
+    </motion.article>
     <ConfirmModal 
       isOpen={showDeleteModal}
       title="Excluir Postagem"
