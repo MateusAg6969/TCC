@@ -5,7 +5,7 @@ import { Filter, Users, ArrowRight } from 'lucide-react';
 import PostCard from '@/components/PostCard';
 import PostSkeleton from '@/components/PostSkeleton';
 import UserSkeleton from '@/components/UserSkeleton';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
 import type { Post } from '@/types';
 import Link from 'next/link';
 import SearchInput from './SearchInput';
@@ -119,8 +119,8 @@ export default function SearchClient({ initialQuery, initialTipo }: { initialQue
                   className="flex items-center gap-4 p-4 rounded-2xl bg-if-card border border-white/5 hover:border-if-purple/40 transition-all group shadow-sm"
                 >
                   <div 
-                    className="h-12 w-12 rounded-xl bg-if-purple/20 flex items-center justify-center font-black text-lg bg-cover bg-center border border-transparent group-hover:border-if-purple/30 transition-all"
-                    style={user.customizacao?.avatar_url ? { backgroundImage: `url(${user.customizacao.avatar_url})` } : {}}
+                    className="w-12 h-12 rounded-full border border-white/10 shrink-0 bg-cover bg-center flex items-center justify-center font-black text-white"
+                    style={user.customizacao?.avatar_url ? { backgroundImage: `url(${resolveAssetUrl(user.customizacao.avatar_url)})` } : {}}
                   >
                     {!user.customizacao?.avatar_url && (user.perfil?.nome || 'U').charAt(0).toUpperCase()}
                   </div>

@@ -10,7 +10,7 @@ import EditProfileModal from './EditProfileModal';
 import SocialSidePanel from './SocialSidePanel';
 import BadgeGallery from './BadgeGallery';
 import { useAuth } from '@/context/AuthContext';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
 
 type ProfilePayload = {
   id: string;
@@ -160,7 +160,7 @@ export default function ProfileClient({
             className="h-48 bg-cover bg-center transition-all bg-if-purple/20"
             style={{
               backgroundImage: profile?.customizacao?.banner_url
-                ? `url(${profile.customizacao.banner_url})`
+                ? `url(${resolveAssetUrl(profile.customizacao.banner_url)})`
                 : 'linear-gradient(120deg, #442844, #2d1b2d)',
             }}
           />
@@ -169,7 +169,7 @@ export default function ProfileClient({
               <div className="flex items-end gap-6">
                 <div className="relative group">
                   <div className="grid h-32 w-32 place-items-center rounded-3xl border-4 border-if-card bg-gradient-to-br from-if-purple to-if-olive overflow-hidden shadow-2xl bg-cover bg-center"
-                       style={profile?.customizacao?.avatar_url ? { backgroundImage: `url(${profile.customizacao.avatar_url})` } : {}}>
+                       style={profile?.customizacao?.avatar_url ? { backgroundImage: `url(${resolveAssetUrl(profile.customizacao.avatar_url)})` } : {}}>
                     {!profile?.customizacao?.avatar_url && (
                       <span className="text-5xl font-black text-white">
                         {(profile?.perfil?.nome || 'U').charAt(0).toUpperCase()}

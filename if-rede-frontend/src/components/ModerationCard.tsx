@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Check, X, AlertTriangle, User, Calendar, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { resolveAssetUrl } from '@/lib/api';
 
 interface ModerationCardProps {
   post: Post;
@@ -25,7 +26,7 @@ export default function ModerationCard({ post, onApprove, onReject, isProcessing
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-if-purple/20 flex items-center justify-center font-bold text-if-purple overflow-hidden border border-if-purple/10">
               {autor?.customizacao?.avatar_url ? (
-                <Image src={autor.customizacao.avatar_url} alt={autor?.perfil?.nome} width={40} height={40} className="object-cover" />
+                <Image src={resolveAssetUrl(autor.customizacao.avatar_url)} alt={autor?.perfil?.nome} width={40} height={40} className="object-cover" />
               ) : (
                 <User size={20} />
               )}

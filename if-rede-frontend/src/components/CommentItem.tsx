@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Heart, MessageCircle, ShieldCheck, Star, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import api, { resolveAssetUrl } from '@/lib/api';
 import { Comentario, HighlightType } from '@/types';
 import { useAuth } from '@/context/AuthContext';
-import api from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReplyItem from './ReplyItem';
@@ -92,7 +93,7 @@ export default function CommentItem({ comment, postId, onReply, onRefresh }: Com
         <div className="h-8 w-8 md:h-10 md:w-10 shrink-0 overflow-hidden rounded-xl bg-if-purple/20 flex items-center justify-center font-bold text-if-purple border border-if-purple/10">
           {comment.autor_id.customizacao?.avatar_url ? (
             <Image 
-              src={comment.autor_id.customizacao.avatar_url} 
+              src={resolveAssetUrl(comment.autor_id.customizacao.avatar_url)} 
               alt={comment.autor_id.perfil.nome} 
               width={40} 
               height={40} 

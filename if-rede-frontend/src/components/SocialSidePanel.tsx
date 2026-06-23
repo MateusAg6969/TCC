@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Users, UserPlus, Loader2, ArrowRight } from 'lucide-react';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -86,8 +86,8 @@ export default function SocialSidePanel({ isOpen, onClose, userId, type, userNam
                   className="flex items-center gap-4 p-4 rounded-2xl bg-black/20 border border-white/5 hover:border-if-purple/40 hover:bg-black/30 transition-all group"
                 >
                   <div 
-                    className="h-14 w-14 rounded-2xl bg-if-purple/20 flex items-center justify-center font-black text-xl bg-cover bg-center border-2 border-transparent group-hover:border-if-purple/50 transition-all"
-                    style={user.customizacao?.avatar_url ? { backgroundImage: `url(${user.customizacao.avatar_url})` } : {}}
+                    className="w-10 h-10 rounded-xl border border-white/10 shrink-0 bg-cover bg-center flex items-center justify-center font-black text-white"
+                    style={user.customizacao?.avatar_url ? { backgroundImage: `url(${resolveAssetUrl(user.customizacao.avatar_url)})` } : {}}
                   >
                     {!user.customizacao?.avatar_url && (user.perfil?.nome || 'U').charAt(0).toUpperCase()}
                   </div>

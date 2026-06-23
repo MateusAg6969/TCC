@@ -3,7 +3,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
 
 type Props = {
   open: boolean;
@@ -107,7 +107,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
             <div className="flex flex-col gap-2">
               <div 
                 className="w-20 h-20 rounded-full bg-black/20 border border-white/10 overflow-hidden bg-cover bg-center shrink-0"
-                style={{ backgroundImage: avatarPreview ? `url(${avatarPreview.startsWith('http') || avatarPreview.startsWith('blob:') ? avatarPreview : 'http://localhost:3000' + avatarPreview})` : 'none' }}
+                style={{ backgroundImage: avatarPreview ? `url(${avatarPreview.startsWith('blob:') ? avatarPreview : resolveAssetUrl(avatarPreview)})` : 'none' }}
               />
               <input 
                 type="file" 
@@ -129,7 +129,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
             <div className="flex flex-col gap-2">
               <div 
                 className="w-full h-24 rounded-2xl bg-black/20 border border-white/10 overflow-hidden bg-cover bg-center"
-                style={{ backgroundImage: bannerPreview ? `url(${bannerPreview.startsWith('http') || bannerPreview.startsWith('blob:') ? bannerPreview : 'http://localhost:3000' + bannerPreview})` : 'none' }}
+                style={{ backgroundImage: bannerPreview ? `url(${bannerPreview.startsWith('blob:') ? bannerPreview : resolveAssetUrl(bannerPreview)})` : 'none' }}
               />
               <input 
                 type="file" 

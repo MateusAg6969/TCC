@@ -137,7 +137,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
           <Link
             href={`/profile/${autorId}`}
             className="h-10 w-10 shrink-0 rounded-xl bg-if-purple/20 flex items-center justify-center font-black border border-white/5 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-cover bg-center"
-            style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : {}}
+            style={avatarUrl ? { backgroundImage: `url(${resolveAssetUrl(avatarUrl)})` } : {}}
           >
             {!avatarUrl && (post.autor_id?.perfil?.nome || 'U').charAt(0).toUpperCase()}
           </Link>
