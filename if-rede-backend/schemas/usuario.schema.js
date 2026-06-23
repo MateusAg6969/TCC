@@ -123,19 +123,11 @@ const customizacaoSchema = new mongoose.Schema(
     // Personalização adicional
     avatar_url: {
       type: String,
-      match: [
-        /^https?:\/\/.+/,
-        'Avatar URL deve ser uma URL válida (http ou https)',
-      ],
       default: '',
     },
 
     banner_url: {
       type: String,
-      match: [
-        /^https?:\/\/.+/,
-        'Banner URL deve ser uma URL válida (http ou https)',
-      ],
       default: '',
     },
 
