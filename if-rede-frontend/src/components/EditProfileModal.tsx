@@ -1,10 +1,11 @@
 'use client';
 
-import { X, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { X, Loader2, UploadCloud } from 'lucide-react';
+import { useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import api, { resolveAssetUrl } from '@/lib/api';
+import CustomSelect from '@/components/CustomSelect';
 
 type Props = {
   open: boolean;
@@ -22,13 +23,19 @@ type Props = {
 export default function EditProfileModal({ open, onClose, onSave, defaultData }: Props) {
   const [nome, setNome] = useState(defaultData.nome);
   const [bio, setBio] = useState(defaultData.bio);
-  const [privacidade, setPrivacidade] = useState(defaultData.privacidade);
+  const [privacidade, setPrivacidade] = useState(defaultData.privacidade || 'publico');
+  
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
+  
   const [avatarPreview, setAvatarPreview] = useState(defaultData.avatar_url || '');
   const [bannerPreview, setBannerPreview] = useState(defaultData.banner_url || '');
+  
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const handleSalvar = async () => {
     setCarregando(true);
@@ -59,6 +66,24 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
     }
   };
 
+  const handleAvatarDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleBannerDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      setBannerFile(file);
+      setBannerPreview(URL.createObjectURL(file));
+    }
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -75,131 +100,144 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="w-full max-w-lg rounded-main bg-if-card p-6 text-if-text shadow-card my-auto relative z-10"
+            className="w-full max-w-lg rounded-[2rem] bg-if-card/90 backdrop-blur-xl border border-white/10 p-8 text-if-text shadow-2xl relative z-10"
           >
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-xl font-semibold">Editar perfil</h3>
-          <button 
-            onClick={onClose} 
-            aria-label="Fechar modal"
-            className="rounded-full bg-black/20 p-2 hover:bg-black/30"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {erro && (
-          <div className="mb-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-500 border border-red-500/20">
-            {erro}
-          </div>
-        )}
-
-        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-          <label className="block text-sm font-medium text-if-text/70">
-            Nome de exibição
-            <input
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 outline-none focus:border-if-purple/50 transition-all"
-              placeholder="Como você quer ser chamado?"
-            />
-          </label>
-
-          <label className="block text-sm font-medium text-if-text/70">
-            Bio / Descrição
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={3}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 outline-none focus:border-if-purple/50 transition-all resize-none"
-              placeholder="Conte um pouco sobre você..."
-            />
-          </label>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-if-text/70">Foto de Perfil</span>
-            <div className="flex flex-col gap-2">
-              <div 
-                className="w-20 h-20 rounded-full bg-black/20 border border-white/10 overflow-hidden bg-cover bg-center shrink-0"
-                style={{ backgroundImage: avatarPreview ? `url(${avatarPreview.startsWith('blob:') ? avatarPreview : resolveAssetUrl(avatarPreview)})` : 'none' }}
-              />
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setAvatarFile(file);
-                    setAvatarPreview(URL.createObjectURL(file));
-                  }
-                }}
-                className="text-sm text-if-text/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-if-purple file:text-white hover:file:bg-if-purple/80 cursor-pointer"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-if-text/70">Banner do Perfil</span>
-            <div className="flex flex-col gap-2">
-              <div 
-                className="w-full h-24 rounded-2xl bg-black/20 border border-white/10 overflow-hidden bg-cover bg-center"
-                style={{ backgroundImage: bannerPreview ? `url(${bannerPreview.startsWith('blob:') ? bannerPreview : resolveAssetUrl(bannerPreview)})` : 'none' }}
-              />
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setBannerFile(file);
-                    setBannerPreview(URL.createObjectURL(file));
-                  }
-                }}
-                className="text-sm text-if-text/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-if-purple file:text-white hover:file:bg-if-purple/80 cursor-pointer"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-if-text/70">Privacidade do Perfil</span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPrivacidade('publico')}
-                className={`flex-1 rounded-xl py-2 text-sm font-bold border transition-all ${
-                  privacidade === 'publico' ? 'bg-if-purple border-if-purple text-white' : 'bg-black/20 border-white/10'
-                }`}
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-2xl font-black text-white">Editar Perfil</h3>
+              <button 
+                onClick={onClose} 
+                aria-label="Fechar modal"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/10 transition-colors"
               >
-                Público
-              </button>
-              <button
-                onClick={() => setPrivacidade('privado')}
-                className={`flex-1 rounded-xl py-2 text-sm font-bold border transition-all ${
-                  privacidade === 'privado' ? 'bg-if-purple border-if-purple text-white' : 'bg-black/20 border-white/10'
-                }`}
-              >
-                Privado
+                <X size={20} className="text-white/70" />
               </button>
             </div>
-          </div>
-        </div>
 
-        <div className="mt-8 flex justify-end gap-3">
-          <button 
-            disabled={carregando}
-            onClick={onClose} 
-            className="rounded-full border border-white/10 px-6 py-2 text-sm font-medium hover:bg-white/5 disabled:opacity-50"
-          >
-            Cancelar
-          </button>
-          <button 
-            disabled={carregando}
-            onClick={handleSalvar} 
-            className="rounded-full bg-if-olive px-8 py-2 text-sm font-bold text-if-bg hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
-          >
-            {carregando && <Loader2 size={16} className="animate-spin" />}
-            {carregando ? 'Salvando...' : 'Salvar Alterações'}
-          </button>
-        </div>
+            {erro && (
+              <div className="mb-6 rounded-2xl bg-red-500/10 p-4 text-sm font-bold text-red-500 border border-red-500/20 text-center">
+                {erro}
+              </div>
+            )}
+
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+              
+              {/* AREA DA CAPA (BANNER) */}
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-bold text-if-text/70">Capa do Perfil</span>
+                <div 
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleBannerDrop}
+                  onClick={() => bannerInputRef.current?.click()}
+                  className="group relative w-full h-32 rounded-2xl border-2 border-dashed border-white/10 bg-black/20 overflow-hidden cursor-pointer transition-all hover:border-if-olive/50 hover:bg-black/40 flex items-center justify-center bg-cover bg-center"
+                  style={{ backgroundImage: bannerPreview ? `url(${bannerPreview.startsWith('blob:') ? bannerPreview : resolveAssetUrl(bannerPreview)})` : 'none' }}
+                >
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    ref={bannerInputRef}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setBannerFile(file);
+                        setBannerPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 backdrop-blur-sm">
+                    <div className="w-10 h-10 rounded-full bg-if-olive/20 text-if-olive flex items-center justify-center">
+                      <UploadCloud size={20} />
+                    </div>
+                    <span className="text-xs font-bold text-white">Alterar Capa</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* AREA DO AVATAR */}
+              <div className="flex flex-col gap-2 -mt-12 relative z-10 pl-4">
+                <div 
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleAvatarDrop}
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="group relative w-24 h-24 rounded-3xl border-4 border-if-card bg-black/40 border-dashed overflow-hidden cursor-pointer transition-all hover:border-if-olive/50 bg-cover bg-center shadow-xl"
+                  style={{ backgroundImage: avatarPreview ? `url(${avatarPreview.startsWith('blob:') ? avatarPreview : resolveAssetUrl(avatarPreview)})` : 'none' }}
+                >
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    ref={avatarInputRef}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setAvatarFile(file);
+                        setAvatarPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                    <UploadCloud size={24} className="text-if-olive" />
+                  </div>
+                </div>
+              </div>
+
+              {/* DADOS TEXTUAIS */}
+              <div className="space-y-5">
+                <label className="block">
+                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Nome de exibição</span>
+                  <input
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    className="w-full rounded-2xl border border-white/5 bg-black/20 px-5 py-4 text-base outline-none focus:border-if-olive/50 transition-all font-medium text-white"
+                    placeholder="Como você quer ser chamado?"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Bio / Descrição</span>
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={4}
+                    className="w-full rounded-2xl border border-white/5 bg-black/20 px-5 py-4 text-base outline-none focus:border-if-olive/50 transition-all resize-none font-medium text-white"
+                    placeholder="Conte um pouco sobre você..."
+                  />
+                </label>
+
+                <div className="relative z-50">
+                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Privacidade do Perfil</span>
+                  <CustomSelect 
+                    options={[
+                      { value: 'publico', label: '🌍 Público (Visível para todos)' },
+                      { value: 'privado', label: '🔒 Privado (Apenas seguidores aprovados)' }
+                    ]}
+                    value={privacidade}
+                    onChange={(val) => setPrivacidade(val)}
+                  />
+                </div>
+              </div>
+
+            </div>
+
+            {/* BOTOES DE ACAO */}
+            <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-white/5">
+              <button 
+                disabled={carregando}
+                onClick={onClose} 
+                className="rounded-2xl border-2 border-transparent px-6 py-3 text-sm font-bold text-if-text/70 hover:bg-white/5 hover:text-white transition-all disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button 
+                disabled={carregando}
+                onClick={handleSalvar} 
+                className="rounded-2xl border-2 border-if-olive/20 bg-if-olive/10 px-8 py-3 text-sm font-bold text-if-olive hover:bg-if-olive hover:text-if-bg active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
+              >
+                {carregando && <Loader2 size={16} className="animate-spin" />}
+                {carregando ? 'Salvando...' : 'Salvar Alterações'}
+              </button>
+            </div>
+
           </motion.div>
         </div>
       )}
