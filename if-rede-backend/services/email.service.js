@@ -59,6 +59,45 @@ async function enviarEmailConfirmacao(email, nome, token) {
   }
 }
 
+async function enviarEmailRecuperacao(email, nome, token) {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const urlRecuperacao = `${frontendUrl}/reset-password?token=${token}`;
+
+  const mailOptions = {
+    from: '"IF REDE" <noreply@if-rede.com>',
+    to: email,
+    subject: 'IF REDE - Recuperação de Senha',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <h2 style="color: #1E40AF; text-align: center;">Recuperação de Senha</h2>
+        <p style="font-size: 16px; color: #333;">Olá, ${nome}!</p>
+        <p style="font-size: 16px; color: #333;">Recebemos uma solicitação para redefinir a senha da sua conta no IF REDE.</p>
+        <p style="font-size: 16px; color: #333;">Se foi você, clique no botão abaixo para criar uma nova senha:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${urlRecuperacao}" style="background-color: #1E40AF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;">Redefinir Senha</a>
+        </div>
+        <p style="font-size: 14px; color: #666;">Este link expira em 1 hora.</p>
+        <p style="font-size: 14px; color: #666;">Se você não solicitou a recuperação, pode ignorar este e-mail em segurança.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+        <p style="font-size: 12px; color: #999; text-align: center;">Este é um e-mail automático, por favor, não responda.</p>
+      </div>
+    `,
+  };
+
+  try {
+    if (process.env.SMTP_HOST) {
+      await transporter.sendMail(mailOptions);
+      console.log(`E-mail de recuperação enviado para: ${email}`);
+    } else {
+      console.log(`[DEV MODE] E-mail de recuperação NÃO enviado. Link: ${urlRecuperacao}`);
+    }
+  } catch (error) {
+    console.error('Erro ao enviar e-mail de recuperação:', error);
+    console.log(`[FALLBACK] Link de recuperação gerado: ${urlRecuperacao}`);
+  }
+}
+
 module.exports = {
   enviarEmailConfirmacao,
+  enviarEmailRecuperacao,
 };

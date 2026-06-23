@@ -300,6 +300,14 @@ const usuarioSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    token_recuperacao_senha: {
+      type: String,
+      default: null,
+    },
+    expiracao_recuperacao: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true, // Adiciona createdAt e updatedAt automaticamente

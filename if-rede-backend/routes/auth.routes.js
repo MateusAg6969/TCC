@@ -1,11 +1,13 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { Usuario, TokenBlacklist } = require('../models');
+const crypto = require('crypto');
 const {
   gerarAccessToken,
   gerarRefreshToken,
   validarRefreshToken,
 } = require('../services/token.service');
+const { enviarEmailConfirmacao, enviarEmailRecuperacao } = require('../services/email.service');
 
 const router = express.Router();
 
@@ -19,9 +21,12 @@ router.post('/register', async (req, res, next) => {
 
     const senhaHash = await bcrypt.hash(String(senha), 10);
 
+    const tokenVerificacao = crypto.randomBytes(32).toString('hex');
+
     const usuario = await Usuario.create({
       senha: senhaHash,
-      email_confirmado: true, // Força a confirmação automática
+      email_confirmado: false,
+      token_verificacao: tokenVerificacao,
       perfil: {
         nome,
         apelido: apelido || '',
@@ -30,6 +35,9 @@ router.post('/register', async (req, res, next) => {
         status_vinculo,
       },
     });
+
+    // Envia o e-mail de confirmação em background
+    enviarEmailConfirmacao(email, nome, tokenVerificacao).catch(err => console.error('Falha ao enviar e-mail de confirmação:', err));
 
     const accessToken = gerarAccessToken(usuario);
     const refreshToken = gerarRefreshToken(usuario);
@@ -90,9 +98,10 @@ router.post('/login', async (req, res, next) => {
     }
 
     // Bloqueia acesso se o e-mail não estiver confirmado (desativado temporariamente)
-    // if (usuario.email_confirmado === false) {
-    //   return res.fail('Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.', 403);
-    // }
+    // Bloqueia acesso se o e-mail não estiver confirmado
+    if (usuario.email_confirmado === false) {
+      return res.fail('Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.', 403);
+    }
 
     // 6. Geração de Tokens: Cria Access Token (curta duração) e Refresh Token (longa duração).
     // Fluxo: O Access Token carrega os claims (mod_voluntario, vinculo) para o middleware.
@@ -217,6 +226,59 @@ router.get('/verify/:token', async (req, res, next) => {
     await usuario.save();
 
     return res.success(null, 'E-mail confirmado com sucesso!');
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/forgot-password', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.fail('Informe o e-mail.', 400);
+
+    const usuario = await Usuario.findOne({ 'perfil.email': String(email).toLowerCase() });
+    if (!usuario) {
+      // Retorna sucesso mesmo se não existir para evitar enumeração de usuários
+      return res.success(null, 'Se o e-mail estiver cadastrado, você receberá um link de recuperação.');
+    }
+
+    const tokenRecuperacao = crypto.randomBytes(32).toString('hex');
+    usuario.token_recuperacao_senha = tokenRecuperacao;
+    usuario.expiracao_recuperacao = new Date(Date.now() + 3600000); // 1 hora
+    await usuario.save();
+
+    enviarEmailRecuperacao(usuario.perfil.email, usuario.perfil.nome, tokenRecuperacao).catch(err => console.error('Falha ao enviar e-mail de recuperação:', err));
+
+    return res.success(null, 'Se o e-mail estiver cadastrado, você receberá um link de recuperação.');
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/reset-password', async (req, res, next) => {
+  try {
+    const { token, nova_senha } = req.body;
+    if (!token || !nova_senha) return res.fail('Token e nova senha são obrigatórios.', 400);
+
+    if (nova_senha.length < 8) {
+      return res.fail('A senha deve ter pelo menos 8 caracteres.', 400);
+    }
+
+    const usuario = await Usuario.findOne({
+      token_recuperacao_senha: token,
+      expiracao_recuperacao: { $gt: Date.now() }
+    });
+
+    if (!usuario) {
+      return res.fail('Token inválido ou expirado.', 400);
+    }
+
+    usuario.senha = await bcrypt.hash(String(nova_senha), 10);
+    usuario.token_recuperacao_senha = null;
+    usuario.expiracao_recuperacao = null;
+    await usuario.save();
+
+    return res.success(null, 'Senha redefinida com sucesso! Você já pode fazer login.');
   } catch (error) {
     return next(error);
   }

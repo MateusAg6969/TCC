@@ -131,8 +131,13 @@ export default function LoginPage() {
           </label>
 
           {/* Campo de senha */}
-          <label className="block text-sm font-medium">
-            Senha
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium" htmlFor="login-senha">Senha</label>
+              <Link href="/forgot-password" className="text-xs font-medium text-if-olive hover:underline transition-colors">
+                Esqueci minha senha
+              </Link>
+            </div>
             <input
               id="login-senha"
               type="password"
@@ -143,7 +148,7 @@ export default function LoginPage() {
               required
               autoComplete="current-password"
             />
-          </label>
+          </div>
 
           {/* Exibição de erros — mensagem real da API ou validação local */}
           {erro && (

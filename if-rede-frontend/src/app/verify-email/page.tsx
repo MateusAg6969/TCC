@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
@@ -11,82 +12,64 @@ export default function VerifyEmailPage() {
   const router = useRouter();
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [mensagem, setMensagem] = useState('Verificando seu e-mail...');
+  const [message, setMessage] = useState('Verificando seu e-mail...');
+  const hasVerified = useRef(false);
 
   useEffect(() => {
     if (!token) {
       setStatus('error');
-      setMensagem('Nenhum token de verificação foi encontrado na URL.');
+      setMessage('Token de verificação ausente na URL.');
       return;
     }
 
-    let isMounted = true;
+    if (hasVerified.current) return;
+    hasVerified.current = true;
 
-    async function verificar() {
-      try {
-        const res = await api.get(`/auth/verify/${token}`);
-        if (isMounted) {
-          setStatus('success');
-          setMensagem(res.data?.message || 'E-mail confirmado com sucesso!');
-        }
-      } catch (error: any) {
-        if (isMounted) {
-          setStatus('error');
-          setMensagem(
-            error.response?.data?.error?.message ||
-              'Não foi possível confirmar o e-mail. O link pode ser inválido ou já ter sido usado.'
-          );
-        }
-      }
-    }
-
-    verificar();
-
-    return () => {
-      isMounted = false;
-    };
+    api.get(`/auth/verify/${token}`)
+      .then((res) => {
+        setStatus('success');
+        setMessage(res.data.message || 'E-mail confirmado com sucesso!');
+      })
+      .catch((err) => {
+        setStatus('error');
+        setMessage(err.response?.data?.error?.message || 'Token de verificação inválido ou expirado.');
+      });
   }, [token]);
 
   return (
-    <main className="grid min-h-screen place-items-center bg-if-bg p-4">
-      <section className="w-full max-w-md rounded-main bg-if-card p-8 text-center text-if-text shadow-card">
-        {/* Ícones de feedback */}
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full">
-          {status === 'loading' && (
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-if-olive border-t-transparent" />
-          )}
-          {status === 'success' && (
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-green-500/20 text-green-500">
-              <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          )}
-          {status === 'error' && (
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-rose-500/20 text-rose-500">
-              <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
-          )}
+    <main className="grid min-h-screen place-items-center bg-if-bg p-4 text-if-text">
+      <section className="w-full max-w-md rounded-main bg-if-card p-8 text-center shadow-card border border-white/5">
+        <div className="mb-6 flex justify-center">
+          {status === 'loading' && <Loader2 className="h-16 w-16 animate-spin text-if-olive" />}
+          {status === 'success' && <CheckCircle2 className="h-16 w-16 text-green-500" />}
+          {status === 'error' && <XCircle className="h-16 w-16 text-rose-500" />}
         </div>
-
-        <h1 className="mb-4 text-2xl font-bold">
-          {status === 'loading' && 'Aguarde...'}
-          {status === 'success' && 'Tudo pronto!'}
-          {status === 'error' && 'Oops! Algo deu errado.'}
+        
+        <h1 className="mb-4 text-2xl font-black tracking-tight">
+          Verificação de E-mail
         </h1>
+        
+        <p className="mb-8 text-if-text/70">
+          {message}
+        </p>
 
-        <p className="mb-8 text-if-text/80">{mensagem}</p>
-
-        {status !== 'loading' && (
+        {status === 'success' ? (
           <Link
             href="/login"
-            className="inline-block w-full rounded-full bg-if-olive px-6 py-3 font-semibold text-if-bg transition hover:brightness-110"
+            className="inline-block w-full rounded-full bg-if-olive px-6 py-3 font-bold text-if-bg transition hover:brightness-110 active:scale-95"
           >
-            Ir para o Login
+            Fazer Login
           </Link>
-        )}
+        ) : status === 'error' ? (
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/login"
+              className="inline-block w-full rounded-full bg-white/5 px-6 py-3 font-bold text-white transition hover:bg-white/10 active:scale-95 border border-white/10"
+            >
+              Voltar ao Login
+            </Link>
+          </div>
+        ) : null}
       </section>
     </main>
   );
