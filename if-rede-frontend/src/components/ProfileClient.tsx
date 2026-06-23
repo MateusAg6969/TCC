@@ -16,7 +16,7 @@ type ProfilePayload = {
   id: string;
   perfil: {
     nome: string;
-    username?: string;
+    apelido?: string;
     bio?: string;
     privacidade?: string;
   };
@@ -308,7 +308,7 @@ export default function ProfileClient({
         onSave={handleUpdateProfile}
         defaultData={{
           nome: profile?.perfil?.nome || '',
-          username: profile?.perfil?.username || '',
+          apelido: profile?.perfil?.apelido || '',
           bio: profile?.perfil?.bio || '',
           privacidade: profile?.perfil?.privacidade || 'publico',
           avatar_url: profile?.customizacao?.avatar_url || '',
