@@ -70,6 +70,7 @@ export interface Post {
     _id?: string;
     perfil?: {
       nome?: string;
+      apelido?: string;
     };
   };
   denuncias?: {
@@ -133,6 +134,7 @@ export interface Notificacao {
     _id: string;
     perfil: {
       nome: string;
+      apelido?: string;
       email: string;
     };
   };
@@ -154,6 +156,7 @@ export interface Comentario {
     _id: string;
     perfil: {
       nome: string;
+      apelido?: string;
       status_vinculo?: 'estudante' | 'egresso' | 'servidor';
     };
     customizacao?: {
