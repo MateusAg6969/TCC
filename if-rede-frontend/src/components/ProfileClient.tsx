@@ -71,28 +71,44 @@ export default function ProfileClient({
   const alternarSeguir = async () => {
     if (!profile || carregandoSeguir) return;
 
+    const estavaSeguindo = profile.seguindo;
+
+    // Optimistic UI update
+    setProfile(prev => prev ? {
+      ...prev,
+      seguindo: !estavaSeguindo,
+      stats: { 
+        ...prev.stats, 
+        total_seguidores: estavaSeguindo 
+          ? Math.max(0, (prev.stats?.total_seguidores || 1) - 1) 
+          : (prev.stats?.total_seguidores || 0) + 1 
+      }
+    } : null);
+    
     setCarregandoSeguir(true);
+
     try {
-      if (profile.seguindo) {
+      if (estavaSeguindo) {
         await api.delete(`/usuarios/${profile.id}/seguir`);
-        setProfile(prev => prev ? {
-          ...prev,
-          seguindo: false,
-          stats: { ...prev.stats, total_seguidores: Math.max(0, (prev.stats?.total_seguidores || 1) - 1) }
-        } : null);
       } else {
         await api.post(`/usuarios/${profile.id}/seguir`);
-        setProfile(prev => prev ? {
-          ...prev,
-          seguindo: true,
-          stats: { ...prev.stats, total_seguidores: (prev.stats?.total_seguidores || 0) + 1 }
-        } : null);
       }
     } catch (error) {
       console.error('Erro na ação social:', error);
       
-      // Mostrar toast amigável ao usuário
-      if (profile.seguindo) {
+      // Revert in case of failure
+      setProfile(prev => prev ? {
+        ...prev,
+        seguindo: estavaSeguindo,
+        stats: { 
+          ...prev.stats, 
+          total_seguidores: estavaSeguindo 
+            ? (prev.stats?.total_seguidores || 0) + 1 
+            : Math.max(0, (prev.stats?.total_seguidores || 1) - 1) 
+        }
+      } : null);
+
+      if (estavaSeguindo) {
         toast.error('Não foi possível deixar de seguir. Tente novamente.');
       } else {
         toast.error('Erro ao seguir. Tente novamente mais tarde.');

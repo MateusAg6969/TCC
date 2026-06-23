@@ -20,20 +20,30 @@ export default function ReplyItem({ reply, parentCommentId, onReply, onRefresh }
   const { user } = useAuth();
   const [isLiking, setIsLiking] = useState(false);
 
-  const isLiked = reply.stats.usuarios_que_curtiram.includes(user?.id || '');
+  const [localLiked, setLocalLiked] = useState(reply.stats.usuarios_que_curtiram.includes(user?.id || ''));
+  const [localLikesCount, setLocalLikesCount] = useState(reply.stats.likes);
 
   const handleLike = async () => {
     if (!user) return;
+    
+    const newLiked = !localLiked;
+    const newCount = newLiked ? localLikesCount + 1 : Math.max(0, localLikesCount - 1);
+    
+    setLocalLiked(newLiked);
+    setLocalLikesCount(newCount);
     setIsLiking(true);
+    
     try {
-      if (isLiked) {
-        await api.delete(`/comentarios/${reply._id}/curtir`);
-      } else {
+      if (newLiked) {
         await api.post(`/comentarios/${reply._id}/curtir`);
+      } else {
+        await api.delete(`/comentarios/${reply._id}/curtir`);
       }
       onRefresh();
     } catch (error) {
       console.error('Erro ao curtir resposta:', error);
+      setLocalLiked(!newLiked);
+      setLocalLikesCount(localLikesCount);
     } finally {
       setIsLiking(false);
     }
@@ -73,10 +83,10 @@ export default function ReplyItem({ reply, parentCommentId, onReply, onRefresh }
           <button 
             disabled={isLiking || !user}
             onClick={handleLike}
-            className={`flex items-center gap-1 text-[10px] font-bold transition-colors ${isLiked ? 'text-red-500' : 'text-if-text/30 hover:text-red-500'}`}
+            className={`flex items-center gap-1 text-[10px] font-bold transition-colors ${localLiked ? 'text-red-500' : 'text-if-text/30 hover:text-red-500'}`}
           >
-            <Heart size={12} fill={isLiked ? 'currentColor' : 'none'} />
-            {reply.stats.likes}
+            <Heart size={12} fill={localLiked ? 'currentColor' : 'none'} />
+            {localLikesCount}
           </button>
 
           <button 

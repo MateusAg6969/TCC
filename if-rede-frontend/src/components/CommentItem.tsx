@@ -22,22 +22,34 @@ export default function CommentItem({ comment, postId, onReply, onRefresh }: Com
   const { user } = useAuth();
   const [isLiking, setIsLiking] = useState(false);
 
-  const isLiked = comment.stats.usuarios_que_curtiram.includes(user?.id || '');
+  const [localLiked, setLocalLiked] = useState(comment.stats.usuarios_que_curtiram.includes(user?.id || ''));
+  const [localLikesCount, setLocalLikesCount] = useState(comment.stats.likes);
   const isAuthor = user?.id === comment.autor_id._id;
   const isStaff = user?.status_vinculo === 'servidor';
 
   const handleLike = async () => {
     if (!user) return;
+    
+    const newLiked = !localLiked;
+    const newCount = newLiked ? localLikesCount + 1 : Math.max(0, localLikesCount - 1);
+    
+    setLocalLiked(newLiked);
+    setLocalLikesCount(newCount);
     setIsLiking(true);
+    
     try {
-      if (isLiked) {
-        await api.delete(`/comentarios/${comment._id}/curtir`);
-      } else {
+      if (newLiked) {
         await api.post(`/comentarios/${comment._id}/curtir`);
+      } else {
+        await api.delete(`/comentarios/${comment._id}/curtir`);
       }
+      // Avoid awaiting onRefresh so UI doesn't freeze
       onRefresh();
     } catch (error) {
       console.error('Erro ao curtir:', error);
+      setLocalLiked(!newLiked);
+      setLocalLikesCount(localLikesCount);
+      toast.error('Falha ao registrar curtida.');
     } finally {
       setIsLiking(false);
     }
@@ -150,10 +162,10 @@ export default function CommentItem({ comment, postId, onReply, onRefresh }: Com
             <button 
               disabled={isLiking || !user}
               onClick={handleLike}
-              className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${isLiked ? 'text-red-500' : 'text-if-text/40 hover:text-red-500'}`}
+              className={`flex items-center gap-1 text-xs font-bold transition-colors ${localLiked ? 'text-red-500' : 'text-if-text/30 hover:text-red-500'}`}
             >
-              <Heart size={14} fill={isLiked ? 'currentColor' : 'none'} />
-              {comment.stats.likes}
+              <Heart size={14} fill={localLiked ? 'currentColor' : 'none'} />
+              {localLikesCount}
             </button>
 
             <button 
