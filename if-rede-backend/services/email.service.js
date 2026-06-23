@@ -24,7 +24,7 @@ async function enviarEmailConfirmacao(email, nome, token) {
   const urlConfirmacao = `${frontendUrl}/verify-email?token=${token}`;
 
   const mailOptions = {
-    from: '"IF REDE" <noreply@if-rede.com>',
+    from: `"IF REDE" <${process.env.SMTP_USER}>`,
     to: email,
     subject: 'IF REDE - Confirme seu e-mail',
     html: `
@@ -64,7 +64,7 @@ async function enviarEmailRecuperacao(email, nome, token) {
   const urlRecuperacao = `${frontendUrl}/reset-password?token=${token}`;
 
   const mailOptions = {
-    from: '"IF REDE" <noreply@if-rede.com>',
+    from: `"IF REDE" <${process.env.SMTP_USER}>`,
     to: email,
     subject: 'IF REDE - Recuperação de Senha',
     html: `

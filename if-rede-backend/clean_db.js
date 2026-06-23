@@ -8,13 +8,20 @@ async function cleanDB() {
     
     const db = mongoose.connection.db;
     
-    // IDs to keep: Antigravity and Administrador IF REDE
-    const keepIds = [
-      new mongoose.Types.ObjectId('6a38b6aa9248145417e45514'), // Antigravity
-      new mongoose.Types.ObjectId('6a3577046c9ff41e2e0574f4')  // Administrador IF REDE
-    ];
+    // Preservar dinamicamente usuários administradores
+    const adminUsers = await db.collection('usuarios').find({
+      $or: [
+        { 'configuracoes.mod_voluntario': true },
+        { 'perfil.nome': /admin/i },
+        { 'perfil.nome': /antigravity/i }
+      ]
+    }).toArray();
 
-    // 1. Delete Users
+    const keepIds = adminUsers.map(user => user._id);
+    
+    console.log(`Preservando ${keepIds.length} usuários (Administradores/Moderadores)`);
+
+    // 1. Delete Users (exceto admins)
     const userResult = await db.collection('usuarios').deleteMany({
       _id: { $nin: keepIds }
     });
@@ -40,7 +47,15 @@ async function cleanDB() {
     const reportResult = await db.collection('denuncias').deleteMany({});
     console.log(`Deleted ${reportResult.deletedCount || 0} reports.`);
 
-    // 7. Clean followers/following for kept users
+    // 7. Delete Followers
+    const followersResult = await db.collection('seguidores').deleteMany({});
+    console.log(`Deleted ${followersResult.deletedCount || 0} follower relationships.`);
+
+    // 8. Delete Portfolio
+    const portfolioResult = await db.collection('portfolioitems').deleteMany({});
+    console.log(`Deleted ${portfolioResult.deletedCount || 0} portfolio items.`);
+
+    // 9. Clean followers/following for kept users
     await db.collection('usuarios').updateMany(
       { _id: { $in: keepIds } },
       { 
