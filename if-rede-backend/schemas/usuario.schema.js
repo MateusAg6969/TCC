@@ -27,13 +27,11 @@ const perfilSchema = new mongoose.Schema(
       maxlength: [100, 'Nome não pode exceder 100 caracteres'],
     },
 
-    username: {
+    apelido: {
       type: String,
-      required: [true, 'Username é obrigatório'],
-      unique: true,
-      lowercase: true,
       trim: true,
-      match: [/^[a-z0-9_.-]+$/, 'Username deve conter apenas letras minúsculas, números, hifens, underlines ou pontos'],
+      maxlength: [50, 'Apelido não pode exceder 50 caracteres'],
+      default: '',
     },
 
     email: {

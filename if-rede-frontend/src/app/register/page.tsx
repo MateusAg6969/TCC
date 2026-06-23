@@ -26,7 +26,7 @@ export default function RegisterPage() {
 
   // Etapa 2: Dados do perfil
   const [nome, setNome] = useState('');
-  const [username, setUsername] = useState('');
+  const [apelido, setApelido] = useState('');
   // status_vinculo define as permissões e limites do usuário no sistema
   const [statusVinculo, setStatusVinculo] = useState<'estudante' | 'egresso' | 'servidor'>('estudante');
 
@@ -50,9 +50,8 @@ export default function RegisterPage() {
   // VALIDAÇÃO: ETAPA 2 — Perfil
   // ============================================================================
   function validarEtapa2(): string | null {
-    if (!nome || nome.trim().length < 3) return 'O Apelido deve ter pelo menos 3 caracteres.';
-    if (!username || username.trim().length < 3) return 'O Nome de Usuário deve ter pelo menos 3 caracteres.';
-    if (!/^[a-z0-9_.-]+$/.test(username)) return 'O Nome de Usuário deve conter apenas letras minúsculas, números, hifens, underlines ou pontos.';
+    if (!nome || nome.trim().length < 3) return 'O Nome deve ter pelo menos 3 caracteres.';
+    if (!apelido || apelido.trim().length < 3) return 'O Apelido deve ter pelo menos 3 caracteres.';
     return null;
   }
 
@@ -86,7 +85,7 @@ export default function RegisterPage() {
     try {
       await register({
         nome: nome.trim(),
-        username: username.toLowerCase().trim(),
+        apelido: apelido.trim(),
         email,
         senha,
         status_vinculo: statusVinculo,
@@ -190,30 +189,27 @@ export default function RegisterPage() {
           {step === 2 && (
             <>
               <label className="block text-sm font-medium">
-                Apelido (Como você aparece na rede)
+                Nome completo
                 <input
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
-                  placeholder="Seu apelido ou nome principal"
+                  placeholder="Seu nome completo"
                   minLength={3}
                   required
                 />
               </label>
 
               <label className="block text-sm font-medium">
-                Nome de Usuário (Sua @)
-                <div className="flex items-center mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 focus-within:border-if-olive/60 transition overflow-hidden">
-                  <span className="pl-4 pr-2 text-if-text/50 font-bold">@</span>
-                  <input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ''))}
-                    className="w-full bg-transparent px-2 py-3 outline-none"
-                    placeholder="seu_usuario"
-                    minLength={3}
-                    required
-                  />
-                </div>
+                Apelido (Como você quer ser chamado)
+                <input
+                  value={apelido}
+                  onChange={(e) => setApelido(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
+                  placeholder="Seu apelido curto"
+                  minLength={3}
+                  required
+                />
               </label>
 
               {/* Campo de vínculo institucional — define permissões no sistema */}

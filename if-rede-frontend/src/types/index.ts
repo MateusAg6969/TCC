@@ -2,7 +2,7 @@ export type PostType = 'texto' | 'imagem' | 'audio' | 'msc' | 'video';
 
 export interface Perfil {
   nome: string;
-  username?: string;
+  apelido?: string;
   email?: string;
   bio?: string;
   privacidade?: 'publico' | 'privado';

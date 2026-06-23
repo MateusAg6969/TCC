@@ -60,7 +60,6 @@ async function bootstrap() {
       senha: senhaHash,
       perfil: {
         nome: 'Estudante de Teste',
-        username: 'estudante_teste',
         email: 'estudante@test.com',
         matricula: '20260001',
         status_vinculo: 'estudante',
@@ -82,7 +81,6 @@ async function bootstrap() {
       senha: senhaHash,
       perfil: {
         nome: 'Administrador IF REDE',
-        username: 'admin_ifrede',
         email: 'admin@ifc.edu.br',
         matricula: 'ADMIN001',
         status_vinculo: 'servidor', // Role de Professor/Orientador

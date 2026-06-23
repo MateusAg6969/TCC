@@ -6,7 +6,7 @@ type ProfilePayload = {
   id: string;
   perfil: {
     nome: string;
-    username?: string;
+    apelido?: string;
     bio?: string;
     privacidade?: string;
   };

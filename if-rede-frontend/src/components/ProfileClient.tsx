@@ -198,9 +198,9 @@ export default function ProfileClient({
                   <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
                   </div>
-                  {profile?.perfil?.username && (
+                  {profile?.perfil?.apelido && (
                     <div className="inline-block mt-1 px-3 py-0.5 rounded-full bg-if-olive/10 border border-if-olive/20 text-if-olive text-sm font-bold tracking-wide">
-                      @{profile.perfil.username}
+                      {profile.perfil.apelido}
                     </div>
                   )}
                   <p className="max-w-xl text-if-text/60 mt-2 font-medium italic">

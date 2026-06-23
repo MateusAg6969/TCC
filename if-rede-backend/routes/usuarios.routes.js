@@ -80,6 +80,7 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
     // Atualiza campos do perfil se fornecidos
     if (perfil) {
       if (perfil.nome) usuario.perfil.nome = perfil.nome;
+      if (perfil.apelido !== undefined) usuario.perfil.apelido = perfil.apelido;
       if (perfil.bio !== undefined) usuario.perfil.bio = perfil.bio;
       if (perfil.privacidade) usuario.perfil.privacidade = perfil.privacidade;
     }

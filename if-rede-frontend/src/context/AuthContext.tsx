@@ -28,7 +28,7 @@ type AuthContextValue = {
   login: (email: string, senha: string) => Promise<void>;
   register: (payload: {
     nome: string;
-    username: string;
+    apelido: string;
     email: string;
     senha: string;
     status_vinculo?: string;
@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (payload: {
     nome: string;
-    username: string;
+    apelido: string;
     email: string;
     senha: string;
     status_vinculo?: string;

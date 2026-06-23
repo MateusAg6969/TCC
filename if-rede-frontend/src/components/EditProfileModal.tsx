@@ -13,8 +13,8 @@ type Props = {
   onSave: (data: any) => void;
   defaultData: {
     nome: string;
-    username?: string;
-    bio: string;
+    apelido?: string;
+    bio?: string;
     privacidade: string;
     avatar_url: string;
     banner_url: string;
@@ -23,8 +23,8 @@ type Props = {
 
 export default function EditProfileModal({ open, onClose, onSave, defaultData }: Props) {
   const [nome, setNome] = useState(defaultData.nome);
-  const [username, setUsername] = useState(defaultData.username || '');
-  const [bio, setBio] = useState(defaultData.bio);
+  const [apelido, setApelido] = useState(defaultData.apelido || '');
+  const [bio, setBio] = useState(defaultData.bio || '');
   const [privacidade, setPrivacidade] = useState(defaultData.privacidade || 'publico');
   
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -52,7 +52,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
       }
 
       const payload = {
-        perfil: { nome, username, bio, privacidade },
+        perfil: { nome, apelido, bio, privacidade },
         customizacao: {}, 
       };
       const res = await api.patch('/usuarios/me', payload);
@@ -195,18 +195,16 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
                   />
                 </label>
 
-                <label className="block">
-                  <span className="text-sm font-bold text-if-text/70 mb-2 block">Nome de Usuário (Sua @)</span>
-                  <div className="flex items-center w-full rounded-2xl border border-white/5 bg-black/20 focus-within:border-if-olive/50 transition-all">
-                    <span className="pl-5 text-if-text/50 font-bold">@</span>
+                <div>
+                    <label className="mb-2 block text-sm font-bold text-if-text/80">Apelido (Curto)</label>
                     <input
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ''))}
-                      className="w-full bg-transparent px-2 py-4 text-base outline-none font-medium text-white placeholder-if-text/30"
-                      placeholder="seu_apelido"
+                      value={apelido}
+                      onChange={(e) => setApelido(e.target.value)}
+                      className="w-full rounded-2xl border-2 border-if-olive/10 bg-white/5 px-4 py-3 text-if-text outline-none focus:border-if-olive transition-colors"
+                      placeholder="Como você prefere ser chamado"
+                      maxLength={50}
                     />
                   </div>
-                </label>
 
                 <label className="block">
                   <span className="text-sm font-bold text-if-text/70 mb-2 block">Bio / Descrição</span>

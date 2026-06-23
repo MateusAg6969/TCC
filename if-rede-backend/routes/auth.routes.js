@@ -11,10 +11,10 @@ const router = express.Router();
 
 router.post('/register', async (req, res, next) => {
   try {
-    const { nome, username, email, senha, status_vinculo = 'estudante' } = req.body;
+    const { nome, apelido, email, senha, status_vinculo = 'estudante' } = req.body;
 
-    if (!nome || !username || !email || !senha) {
-      return res.fail('Campos obrigatórios: nome, username, email e senha.', 400);
+    if (!nome || !email || !senha) {
+      return res.fail('Campos obrigatórios: nome, email e senha.', 400);
     }
 
     const senhaHash = await bcrypt.hash(String(senha), 10);
@@ -24,7 +24,7 @@ router.post('/register', async (req, res, next) => {
       email_confirmado: true, // Força a confirmação automática
       perfil: {
         nome,
-        username,
+        apelido: apelido || '',
         email,
         matricula: '',
         status_vinculo,
@@ -39,7 +39,7 @@ router.post('/register', async (req, res, next) => {
         usuario: {
           id: usuario._id,
           nome: usuario.perfil.nome,
-          username: usuario.perfil.username,
+          apelido: usuario.perfil.apelido,
           email: usuario.perfil.email,
           status_vinculo: usuario.perfil.status_vinculo,
           mod_voluntario: usuario.configuracoes?.mod_voluntario || false,
@@ -106,7 +106,7 @@ router.post('/login', async (req, res, next) => {
         usuario: {
           id: usuario._id,
           nome: usuario.perfil.nome,
-          username: usuario.perfil.username,
+          apelido: usuario.perfil.apelido,
           email: usuario.perfil.email,
           status_vinculo: usuario.perfil.status_vinculo,
           mod_voluntario: Boolean(usuario.configuracoes?.mod_voluntario),
