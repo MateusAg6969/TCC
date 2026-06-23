@@ -180,7 +180,7 @@ export default function ProfileClient({
                 : 'linear-gradient(120deg, #442844, #2d1b2d)',
             }}
           />
-          <div className="p-6">
+          <div className="p-6 pb-10">
             <div className="-mt-16 flex flex-wrap items-end justify-between gap-6">
               <div className="flex items-end gap-6">
                 <div className="relative group">
@@ -193,7 +193,7 @@ export default function ProfileClient({
                     )}
                   </div>
                 </div>
-                <div className="pb-2">
+                <div className="translate-y-4">
                   <h1 className="text-3xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
                   <p className="max-w-xl text-if-text/60 mt-1 font-medium italic">
                     {profile?.perfil?.bio || 'Sem bio por enquanto.'}
@@ -220,7 +220,7 @@ export default function ProfileClient({
               </div>
 
               {/* Ações Sociais */}
-              <div className="pb-2">
+              <div className="translate-y-4">
                 {ehProprioPerfil ? (
                   <button
                     onClick={() => setOpenModal(true)}
