@@ -90,7 +90,8 @@ export default function RegisterPage() {
         senha,
         status_vinculo: statusVinculo,
       });
-      // Após sucesso, o próprio AuthContext redireciona para /home
+      // Após sucesso, mostra mensagem na tela com novo state 'sucesso' em vez de fazer login
+      setStep(3);
     } catch (err: any) {
       // CORREÇÃO: lê a mensagem de erro real retornada pela API, em vez de mostrar mensagem genérica.
       // Entrada: objeto de erro do Axios com err.response.data.error.message
@@ -124,7 +125,7 @@ export default function RegisterPage() {
             Criar conta <span className="text-if-olive">IF REDE</span>
           </h1>
           {/* Indicador de progresso visual */}
-          <p className="mt-1 text-sm text-if-text/70">Etapa {step} de 2</p>
+          <p className="mt-1 text-sm text-if-text/70">Etapa {step > 2 ? 2 : step} de 2</p>
           {/* Barra de progresso */}
           <div className="mt-3 h-1.5 w-full rounded-full bg-white/10">
             <div
@@ -134,134 +135,154 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <form className="space-y-4" onSubmit={onSubmit}>
-
-          {/* ============================================================ */}
-          {/* ETAPA 1: Credenciais de acesso */}
-          {/* ============================================================ */}
-          {step === 1 && (
-            <>
-              <label className="block text-sm font-medium">
-                Email
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
-                  placeholder="você@email.com"
-                  required
-                  autoComplete="email"
-                />
-              </label>
-
-              <label className="block text-sm font-medium">
-                Senha
-                <input
-                  type="password"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
-                  placeholder="Mínimo 8 caracteres"
-                  minLength={8}
-                  required
-                  autoComplete="new-password"
-                />
-              </label>
-
-              <label className="block text-sm font-medium">
-                Confirmar senha
-                <input
-                  type="password"
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
-                  placeholder="Repita sua senha"
-                  required
-                  autoComplete="new-password"
-                />
-              </label>
-            </>
-          )}
-
-          {/* ============================================================ */}
-          {/* ETAPA 2: Dados de perfil e vínculo institucional */}
-          {/* ============================================================ */}
-          {step === 2 && (
-            <>
-              <label className="block text-sm font-medium">
-                Nome completo
-                <input
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
-                  placeholder="Seu nome completo"
-                  minLength={3}
-                  required
-                />
-              </label>
-
-              <label className="block text-sm font-medium">
-                Apelido (Como você quer ser chamado)
-                <input
-                  value={apelido}
-                  onChange={(e) => setApelido(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
-                  placeholder="Seu apelido curto"
-                  minLength={3}
-                  required
-                />
-              </label>
-
-              {/* Campo de vínculo institucional — define permissões no sistema */}
-              <label className="block text-sm font-medium">
-                Vínculo institucional
-                <select
-                  value={statusVinculo}
-                  onChange={(e) => setStatusVinculo(e.target.value as any)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition text-if-text"
-                >
-                  <option value="estudante">Estudante</option>
-                  <option value="egresso">Egresso (ex-aluno)</option>
-                  <option value="servidor">Servidor / Professor</option>
-                </select>
-              </label>
-            </>
-          )}
-
-          {/* Exibição de erros — mostra a mensagem real da API, não uma genérica */}
-          {erro && (
-            <p className="rounded-lg bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm text-rose-300">
-              {erro}
+        {step === 3 ? (
+          <div className="text-center py-6 animate-in fade-in zoom-in-95 duration-500">
+            <div className="mx-auto h-16 w-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-black mb-2 text-white">Conta Criada!</h2>
+            <p className="text-if-text/70 mb-8">
+              Enviamos um e-mail de confirmação para <strong className="text-white">{email}</strong>. Por favor, verifique sua caixa de entrada e spam para ativar sua conta.
             </p>
-          )}
-
-          {/* Botões de navegação */}
-          <div className="flex gap-3 pt-1">
-            {step === 2 && (
-              <button
-                type="button"
-                onClick={() => { setStep(1); setErro(''); }}
-                className="w-full rounded-full border border-white/20 px-4 py-3 text-sm hover:bg-white/5 transition"
-              >
-                ← Voltar
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-full bg-if-olive px-5 py-3 font-semibold text-if-bg hover:brightness-110 transition disabled:opacity-60"
+            <Link
+              href="/login"
+              className="inline-block w-full rounded-full bg-if-olive px-6 py-3 font-bold text-if-bg transition hover:brightness-110 active:scale-95"
             >
-              {loading ? 'Criando conta...' : step === 1 ? 'Próximo →' : 'Criar conta'}
-            </button>
+              Fazer Login
+            </Link>
           </div>
-        </form>
+        ) : (
+          <>
+            <form className="space-y-4" onSubmit={onSubmit}>
 
-        <p className="mt-6 text-sm text-if-text/75 text-center">
-          Já possui conta?{' '}
-          <Link href="/login" className="font-semibold text-if-olive hover:underline underline-offset-2">
-            Entrar
-          </Link>
-        </p>
+              {/* ============================================================ */}
+              {/* ETAPA 1: Credenciais de acesso */}
+              {step === 1 && (
+                <>
+                  <label className="block text-sm font-medium">
+                    Email
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                      placeholder="você@email.com"
+                      required
+                      autoComplete="email"
+                    />
+                  </label>
+
+                  <label className="block text-sm font-medium">
+                    Senha
+                    <input
+                      type="password"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                      placeholder="Mínimo 8 caracteres"
+                      minLength={8}
+                      required
+                      autoComplete="new-password"
+                    />
+                  </label>
+
+                  <label className="block text-sm font-medium">
+                    Confirmar senha
+                    <input
+                      type="password"
+                      value={confirmarSenha}
+                      onChange={(e) => setConfirmarSenha(e.target.value)}
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                      placeholder="Repita sua senha"
+                      required
+                      autoComplete="new-password"
+                    />
+                  </label>
+                </>
+              )}
+
+              {/* ============================================================ */}
+              {/* ETAPA 2: Dados de perfil e vínculo institucional */}
+              {step === 2 && (
+                <>
+                  <label className="block text-sm font-medium">
+                    Nome completo
+                    <input
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
+                      placeholder="Seu nome completo"
+                      minLength={3}
+                      required
+                    />
+                  </label>
+
+                  <label className="block text-sm font-medium">
+                    Apelido (Como você quer ser chamado)
+                    <input
+                      value={apelido}
+                      onChange={(e) => setApelido(e.target.value)}
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
+                      placeholder="Seu apelido curto"
+                      minLength={3}
+                      required
+                    />
+                  </label>
+
+                  {/* Campo de vínculo institucional — define permissões no sistema */}
+                  <label className="block text-sm font-medium">
+                    Vínculo institucional
+                    <select
+                      value={statusVinculo}
+                      onChange={(e) => setStatusVinculo(e.target.value as any)}
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition text-if-text"
+                    >
+                      <option value="estudante">Estudante</option>
+                      <option value="egresso">Egresso (ex-aluno)</option>
+                      <option value="servidor">Servidor / Professor</option>
+                    </select>
+                  </label>
+                </>
+              )}
+
+              {/* Exibição de erros — mostra a mensagem real da API, não uma genérica */}
+              {erro && (
+                <p className="rounded-lg bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm text-rose-300">
+                  {erro}
+                </p>
+              )}
+
+              {/* Botões de navegação */}
+              <div className="flex gap-3 pt-1">
+                {step === 2 && (
+                  <button
+                    type="button"
+                    onClick={() => { setStep(1); setErro(''); }}
+                    className="w-full rounded-full border border-white/20 px-4 py-3 text-sm hover:bg-white/5 transition"
+                  >
+                    ← Voltar
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-full bg-if-olive px-5 py-3 font-semibold text-if-bg hover:brightness-110 transition disabled:opacity-60"
+                >
+                  {loading ? 'Criando conta...' : step === 1 ? 'Próximo →' : 'Criar conta'}
+                </button>
+              </div>
+            </form>
+
+            <p className="mt-6 text-sm text-if-text/75 text-center">
+              Já possui conta?{' '}
+              <Link href="/login" className="font-semibold text-if-olive hover:underline underline-offset-2">
+                Entrar
+              </Link>
+            </p>
+          </>
+        )}
       </section>
     </main>
   );

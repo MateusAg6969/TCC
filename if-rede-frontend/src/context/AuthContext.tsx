@@ -149,20 +149,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }) => {
     const response = await api.post('/auth/register', payload);
     const data = response.data?.data;
-    const accessToken = data?.tokens?.accessToken;
-    const refreshToken = data?.tokens?.refreshToken;
 
-    if (!accessToken || !data?.usuario) {
+    if (!data?.usuario) {
       throw new Error('Resposta de cadastro inválida.');
     }
 
-    Cookies.set(ACCESS_COOKIE, accessToken, { expires: 1 });
-    Cookies.set(REFRESH_COOKIE, refreshToken, { expires: 7 });
-
-    setAuthHeader(accessToken);
-    setToken(accessToken);
-    setUser(data.usuario);
-    router.push('/home');
+    // Não logamos o usuário automaticamente, ele precisa confirmar o e-mail primeiro.
   };
 
   const logout = async () => {

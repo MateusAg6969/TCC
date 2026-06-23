@@ -39,9 +39,6 @@ router.post('/register', async (req, res, next) => {
     // Envia o e-mail de confirmação em background
     enviarEmailConfirmacao(email, nome, tokenVerificacao).catch(err => console.error('Falha ao enviar e-mail de confirmação:', err));
 
-    const accessToken = gerarAccessToken(usuario);
-    const refreshToken = gerarRefreshToken(usuario);
-
     return res.success(
       {
         usuario: {
@@ -51,10 +48,9 @@ router.post('/register', async (req, res, next) => {
           email: usuario.perfil.email,
           status_vinculo: usuario.perfil.status_vinculo,
           mod_voluntario: usuario.configuracoes?.mod_voluntario || false,
-        },
-        tokens: { accessToken, refreshToken },
+        }
       },
-      'Usuário criado com sucesso.',
+      'Usuário criado com sucesso. Verifique seu e-mail.',
       undefined,
       201
     );
