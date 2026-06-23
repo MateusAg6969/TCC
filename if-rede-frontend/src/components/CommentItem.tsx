@@ -179,9 +179,9 @@ export default function CommentItem({ comment, postId, onReply, onRefresh }: Com
 
           {/* Renderização Recursiva de Respostas (apenas 1 nível como definido no controller) */}
           {comment.respostas && comment.respostas.length > 0 && (
-            <div className="mt-4 space-y-0 relative">
+            <div className="mt-4 space-y-0 relative ml-3">
               {/* Linha Guia Vertical para o Fio (Thread) */}
-              <div className="absolute left-[13px] top-0 bottom-6 w-px bg-white/10" />
+              <div className="absolute -left-3 top-0 bottom-6 w-px bg-white/10" />
               {comment.respostas.map(reply => (
                 <ReplyItem 
                   key={reply._id}
