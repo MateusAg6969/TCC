@@ -16,6 +16,7 @@ type ProfilePayload = {
   id: string;
   perfil: {
     nome: string;
+    username?: string;
     bio?: string;
     privacidade?: string;
   };
