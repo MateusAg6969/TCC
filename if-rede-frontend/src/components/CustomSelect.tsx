@@ -37,7 +37,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="mt-2 flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-if-purple/50 transition-all text-left"
+        className="mt-2 flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-if-olive/50 transition-all text-left"
       >
         <span className={selectedOption ? 'text-if-text' : 'text-if-text/50 font-normal'}>
           {selectedOption ? selectedOption.label : placeholder}
@@ -68,7 +68,7 @@ export default function CustomSelect({ options, value, onChange, placeholder = '
                     }}
                     className={`flex w-full items-center justify-between rounded-lg p-3 text-sm transition-colors ${
                       String(opt.value) === String(value)
-                        ? 'bg-if-purple/20 text-if-purple font-bold'
+                        ? 'bg-if-olive/20 text-if-olive font-bold'
                         : 'text-if-text/80 hover:bg-white/5 font-medium'
                     }`}
                   >

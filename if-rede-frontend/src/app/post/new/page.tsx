@@ -208,11 +208,11 @@ export default function NewPostPage() {
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     className="overflow-hidden"
                   >
-                    <label className="mb-2 block text-sm font-bold text-if-purple">Texto Completo</label>
+                    <label className="mb-2 block text-sm font-bold text-if-olive">Texto Completo</label>
                     <textarea
                       value={form.texto_longo}
                       onChange={(event) => updateField('texto_longo', event.target.value)}
-                      className="w-full min-h-[300px] rounded-2xl bg-black/30 p-5 text-base text-if-text outline-none border border-white/5 focus:border-if-purple/50 transition-colors custom-scrollbar"
+                      className="w-full min-h-[300px] rounded-2xl bg-black/30 p-5 text-base text-if-text outline-none border border-white/5 focus:border-if-olive/50 transition-colors custom-scrollbar"
                       placeholder="Escreva sua redação, artigo ou poema completo aqui..."
                     />
                   </motion.div>
@@ -233,7 +233,7 @@ export default function NewPostPage() {
                 onDrop={handleFileDrop}
                 onClick={() => !arquivo && fileInputRef.current?.click()}
                 className={`relative flex flex-col items-center justify-center w-full min-h-[200px] rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden
-                  ${arquivo ? 'border-if-olive bg-if-olive/5' : 'border-white/20 hover:border-if-purple hover:bg-if-purple/5'}`}
+                  ${arquivo ? 'border-if-olive bg-if-olive/5' : 'border-white/20 hover:border-if-olive hover:bg-if-olive/5'}`}
               >
                 <input
                   type="file"
@@ -278,7 +278,7 @@ export default function NewPostPage() {
                       exit={{ scale: 0.8, opacity: 0 }}
                       className="flex flex-col items-center p-6 text-center"
                     >
-                      <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-white/50 group-hover:text-if-purple group-hover:bg-if-purple/10 transition-all">
+                      <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-white/50 group-hover:text-if-olive group-hover:bg-if-olive/10 transition-all">
                         <UploadCloud size={32} />
                       </div>
                       <p className="font-bold text-white">Clique ou Arraste um arquivo</p>
@@ -322,7 +322,7 @@ export default function NewPostPage() {
                   <button
                     type="button"
                     onClick={() => setShowTagForm(true)}
-                    className="flex items-center gap-2 text-xs font-bold text-if-purple hover:text-if-purple-dark transition-colors"
+                    className="flex items-center gap-2 text-xs font-bold text-if-olive hover:text-if-olive/80 transition-colors"
                   >
                     <Plus size={14} /> Não encontrou a tag ideal? Solicitar nova.
                   </button>
@@ -334,9 +334,9 @@ export default function NewPostPage() {
                       exit={{ opacity: 0, height: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="rounded-2xl border border-dashed border-if-purple/40 bg-if-purple/5 p-4 mt-2">
+                      <div className="rounded-2xl border border-dashed border-if-olive/40 bg-if-olive/5 p-4 mt-2">
                         <div className="flex justify-between items-center mb-3">
-                          <p className="text-sm font-bold text-if-purple">Solicitar Tag</p>
+                          <p className="text-sm font-bold text-if-olive">Solicitar Tag</p>
                           <button type="button" onClick={() => setShowTagForm(false)} className="text-white/40 hover:text-white"><X size={14}/></button>
                         </div>
                         
@@ -344,20 +344,20 @@ export default function NewPostPage() {
                           <input
                             value={novaTagNome}
                             onChange={(event) => setNovaTagNome(event.target.value)}
-                            className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-if-purple/50"
+                            className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-if-olive/50"
                             placeholder="Ex.: Fotografia analógica"
                           />
                           <textarea
                             value={novaTagJustificativa}
                             onChange={(event) => setNovaTagJustificativa(event.target.value)}
-                            className="min-h-16 w-full resize-none rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-if-purple/50"
+                            className="min-h-16 w-full resize-none rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none focus:border-if-olive/50"
                             placeholder="Por que precisamos dessa tag?"
                           />
                           <button
                             type="button"
                             onClick={solicitarNovaTag}
                             disabled={loading}
-                            className="w-full rounded-xl bg-if-purple/20 px-4 py-2 text-sm font-bold text-if-purple hover:bg-if-purple hover:text-white transition-all disabled:opacity-50"
+                            className="w-full rounded-xl bg-if-olive/20 px-4 py-2 text-sm font-bold text-if-olive hover:bg-if-olive hover:text-white transition-all disabled:opacity-50"
                           >
                             Enviar Solicitação
                           </button>
