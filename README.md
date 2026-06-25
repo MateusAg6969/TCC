@@ -1602,3 +1602,50 @@ Se tiver ambiente preview e producao, use dois dominios separados por virgula:
 - A rota /health ajuda a verificar disponibilidade da API.
 
 ---
+
+# 11. FUNDAMENTAÇÃO TÉCNICA E METODOLÓGICA (TCC)
+
+Esta seção foi elaborada pelo *Agente de Documentação Acadêmica (O Redator de TCC)*, em conformidade com o rigor acadêmico e as normas da ABNT, visando subsidiar o embasamento teórico e metodológico do Trabalho de Conclusão de Curso.
+
+## 11.1 Fundamentação Tecnológica
+
+A escolha do ecossistema tecnológico para o **IF REDE** pautou-se na necessidade de construir uma aplicação escalável, reativa e de fácil manutenção, capaz de suportar as demandas interativas de uma rede social acadêmica.
+
+- **Node.js e Express**: A utilização do Node.js, aliado ao *framework* Express, fundamenta-se em seu modelo de entrada e saída não bloqueante (*non-blocking I/O*) e na arquitetura orientada a eventos. Segundo a literatura técnica, essa abordagem é altamente eficiente para aplicações *I/O-bound*, como redes sociais, onde a concorrência de múltiplas requisições simultâneas (ex: curtidas, comentários, atualizações de feed) exige alta performance na resposta.
+- **Next.js (React)**: No ambiente front-end, o Next.js foi adotado por oferecer suporte nativo à renderização híbrida (SSG - *Static Site Generation* e SSR - *Server-Side Rendering*). Isso garante não apenas tempos de carregamento otimizados (cruciais para a experiência do usuário - UX), mas também melhora a indexação e a acessibilidade, pilares fundamentais no contexto de uma plataforma inclusiva.
+- **MongoDB**: O MongoDB, como sistema de banco de dados não relacional (NoSQL) orientado a documentos, permite flexibilidade na modelagem de dados, essencial para suportar o *polimorfismo* das postagens (texto, imagem, áudio, enquete). A adoção de padrões como *Attribute Pattern* e *Bucket Pattern* justifica-se pela otimização de consultas de leitura intensiva, típicas de *feeds* de redes sociais.
+
+## 11.2 Metodologia de Desenvolvimento
+
+A metodologia adotada consistiu em pesquisa aplicada e desenvolvimento de _software_ iterativo. O processo foi estruturado nas seguintes etapas:
+1. **Levantamento de Requisitos**: Identificação das necessidades da comunidade acadêmica (estudantes, egressos e servidores).
+2. **Modelagem Arquitetural**: Definição de diagramas UML (Classes, Sequência) e estruturação do banco de dados visando segurança e performance (detalhados nas seções 3, 4 e 8 deste documento).
+3. **Desenvolvimento (Implementação)**: Construção progressiva da API *RESTful* e das interfaces de usuário (*UI/UX*), com integrações contínuas e versionamento.
+4. **Validação**: Testes práticos de fluxos críticos (autenticação, moderação de conteúdo, limites de publicação para egressos).
+
+---
+
+# 12. ANÁLISE PEDAGÓGICA E JUSTIFICATIVA ARQUITETURAL
+
+Esta seção traz as considerações do *Agente Analista e Pedagógico (O Consultor Acadêmico)*, traduzindo as complexidades técnicas para o propósito do TCC.
+
+## 12.1 Conexão com os Objetivos do IF REDE
+
+O **IF REDE** não é apenas um sistema de *software*; é uma ferramenta de intervenção pedagógica que visa democratizar a visibilidade da produção acadêmica, cultural e tecnológica da instituição. Cada decisão arquitetural reflete um objetivo educacional e social.
+
+### A Decisão Técnica em Três Camadas: O Sistema de Moderação
+- **Camada Simples (O que acontece):** Quando um aluno cria uma publicação ou um comentário, moderadores voluntários (professores ou servidores) podem revisar esse conteúdo, bloqueando o que for impróprio ou aprovando discussões.
+- **Camada Técnica (Como acontece):** O *back-end* possui uma coleção chamada `atividades_moderacao`. Quando um moderador age, o sistema registra uma auditoria imutável (com *snapshot* dos dados) e usa *middlewares* (`moderatorCheck`) para barrar ações de usuários comuns. O índice de TTL (`excluir_em`) limpa rascunhos antigos automaticamente para poupar armazenamento.
+- **Camada Acadêmica (Por que faz sentido):** Em um ambiente escolar, a segurança digital e o respeito às normas de conduta são inegociáveis. O sistema garante que a rede permaneça um espaço seguro (*Safe Space*) para troca de ideias. Além disso, a conversão automática do tempo de moderação em horas estimadas serve para certificar as "horas complementares" dos servidores, gerando valor institucional.
+
+## 12.2 Trade-offs (Ganhos e Concessões)
+
+- **Polling vs WebSockets**: Optou-se pelo uso de *Polling* para as notificações em tempo real. **Por quê?** Embora *WebSockets* entreguem dados instantaneamente, exigem maior complexidade de infraestrutura e persistência de conexões abertas no servidor. Para o escopo de um TCC e visando estabilidade com baixos custos de _deploy_ em nuvem, o *Polling* mostrou-se um *trade-off* excelente: mantém a interatividade pedagógica intacta sem onerar os recursos da instituição.
+- **Desnormalização de Dados (Bucket Pattern)**: Salvar os contadores (ex: número de curtidas) diretamente no documento da postagem reduz o peso de leitura. Concede-se uma pequena redundância de armazenamento (quebra da forma normal relacional) em troca de um *feed* significativamente mais rápido, vital para a retenção e engajamento dos alunos.
+
+## 12.3 Fluxo Ponta a Ponta: A Jornada da Visibilidade Acadêmica
+
+1. **Entrada**: Um estudante submete seu projeto integrador, texto poético ou arte via interface Next.js.
+2. **Processamento**: A requisição chega à API Express, que valida a autenticidade do JWT e checa regras de negócio (ex: o usuário não está suspenso).
+3. **Persistência e Efeito Social**: O MongoDB salva a postagem e distribui notificações assíncronas aos interessados. O algoritmo híbrido de *Feed* processa visibilidade (`melhores_amigos`, `seguidores`, `todos`).
+4. **Resposta**: O ecossistema acadêmico interage com a publicação em poucos segundos, cumprindo o papel social do IF REDE de conectar as ilhas de conhecimento da instituição.
