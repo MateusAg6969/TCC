@@ -74,8 +74,12 @@ export default function LoginPage() {
         // 401 = Credenciais inválidas (email ou senha errados)
         setErro('Email ou senha incorretos. Verifique suas credenciais acadêmicas.');
       } else if (status === 403) {
-        // 403 = Conta inativa ou suspensa (verificado no backend)
-        setErro('Sua conta está inativa ou suspensa. Entre em contato com a coordenação.');
+        // 403 = Pode ser conta inativa, suspensa, ou e-mail não confirmado.
+        if (msgApi && msgApi.includes('Confirme seu e-mail')) {
+          setErro(msgApi);
+        } else {
+          setErro('Sua conta está inativa ou suspensa. Entre em contato com a coordenação.');
+        }
       } else if (status === 429) {
         // 429 = Rate limit: muitas requisições em pouco tempo
         setErro('Muitas tentativas. Aguarde alguns instantes e tente novamente.');
