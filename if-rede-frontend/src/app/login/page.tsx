@@ -160,7 +160,7 @@ export default function LoginPage() {
                   onClick={async () => {
                     try {
                       setLoading(true);
-                      const { api } = await import('@/lib/axios');
+                      const { api } = await import('@/lib/api');
                       await api.post('/auth/resend-verification', { email });
                       setErro('E-mail reenviado com sucesso! Verifique sua caixa de entrada.');
                     } catch (err: any) {
