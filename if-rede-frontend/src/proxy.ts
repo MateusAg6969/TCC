@@ -6,7 +6,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define as rotas que não exigem login
-  const publicRoutes = ['/login', '/register'];
+  const publicRoutes = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
 
   // Redireciona para o login se tentar acessar rota protegida sem token
