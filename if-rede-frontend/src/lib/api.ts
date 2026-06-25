@@ -49,7 +49,11 @@ api.interceptors.response.use(
           Cookies.remove('ifrede_refresh');
           setAuthHeader(undefined);
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            const publicPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
+            const isPublic = publicPaths.some(p => window.location.pathname.startsWith(p));
+            if (!isPublic) {
+              window.location.href = '/login';
+            }
           }
         }
       } else {
@@ -57,7 +61,11 @@ api.interceptors.response.use(
         Cookies.remove('ifrede_refresh');
         setAuthHeader(undefined);
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          const publicPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
+          const isPublic = publicPaths.some(p => window.location.pathname.startsWith(p));
+          if (!isPublic) {
+            window.location.href = '/login';
+          }
         }
       }
     }
