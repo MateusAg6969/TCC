@@ -152,12 +152,29 @@ export default function LoginPage() {
 
           {/* Exibição de erros — mensagem real da API ou validação local */}
           {erro && (
-            <p
-              role="alert"
-              className="rounded-lg bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm text-rose-300"
-            >
-              {erro}
-            </p>
+            <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm text-rose-300">
+              <p role="alert">{erro}</p>
+              {erro.includes('Confirme seu e-mail') && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      const { api } = await import('@/lib/axios');
+                      await api.post('/auth/resend-verification', { email });
+                      setErro('E-mail reenviado com sucesso! Verifique sua caixa de entrada.');
+                    } catch (err: any) {
+                      setErro(err?.response?.data?.error?.message || 'Erro ao reenviar e-mail.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="mt-2 text-xs font-semibold text-if-olive hover:underline"
+                >
+                  Reenviar e-mail de confirmação
+                </button>
+              )}
+            </div>
           )}
 
           {/* Botão de submissão */}

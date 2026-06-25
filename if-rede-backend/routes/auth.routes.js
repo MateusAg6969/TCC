@@ -280,4 +280,30 @@ router.post('/reset-password', async (req, res, next) => {
   }
 });
 
+router.post('/resend-verification', async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.fail('Informe o e-mail.', 400);
+
+    const usuario = await Usuario.findOne({ 'perfil.email': String(email).toLowerCase() });
+    if (!usuario) {
+      return res.fail('Usuário não encontrado com este e-mail.', 404);
+    }
+
+    if (usuario.email_confirmado) {
+      return res.fail('Este e-mail já está confirmado. Você já pode fazer login.', 400);
+    }
+
+    const tokenVerificacao = crypto.randomBytes(32).toString('hex');
+    usuario.token_verificacao = tokenVerificacao;
+    await usuario.save();
+
+    enviarEmailConfirmacao(usuario.perfil.email, usuario.perfil.nome, tokenVerificacao).catch(err => console.error('Falha ao reenviar e-mail de confirmação:', err));
+
+    return res.success(null, 'E-mail de confirmação reenviado. Verifique sua caixa de entrada.');
+  } catch (error) {
+    return next(error);
+  }
+});
+
 module.exports = router;
