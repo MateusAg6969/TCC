@@ -61,12 +61,15 @@ router.post('/', authMiddleware, uploadPostArquivo.single('arquivo'), async (req
       }
     }
 
+    const { uploadBuffer } = require('../services/cloudinary.service');
+    const resultCloudinary = await uploadBuffer(arquivo.buffer, arquivo.mimetype);
+
     const conteudo = {
-      url: `/uploads/postagens/${arquivo.filename}`,
+      url: resultCloudinary.secure_url,
       texto_longo: tipo === 'texto' ? String(req.body.texto_longo || '').trim() : '',
       arquivo: {
         nome_original: arquivo.originalname,
-        nome_servidor: arquivo.filename,
+        nome_servidor: resultCloudinary.public_id,
         mimetype: arquivo.mimetype,
         tamanho_bytes: arquivo.size,
       },

@@ -29,27 +29,7 @@ const MIME_POR_TIPO = {
   ],
 };
 
-const pastaUpload = path.join(process.cwd(), 'uploads', 'postagens');
-
-if (!fs.existsSync(pastaUpload)) {
-  fs.mkdirSync(pastaUpload, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: function resolveDestination(req, file, cb) {
-    // O que faz: define pasta fisica para persistir o arquivo no servidor.
-    // Por que: manter simplicidade local sem dependencias externas (S3, etc).
-    // Fluxo: multipart -> multer -> grava em uploads/postagens.
-    cb(null, pastaUpload);
-  },
-  filename: function resolveFilename(req, file, cb) {
-    // O que faz: gera nome unico com timestamp para evitar colisao.
-    // Fluxo: nome original -> extrai extensao -> concatena com Date.now/random.
-    const extensao = path.extname(file.originalname || '').toLowerCase();
-    const nomeUnico = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extensao}`;
-    cb(null, nomeUnico);
-  },
-});
+const storage = multer.memoryStorage();
 
 const uploadPostArquivo = multer({
   storage,

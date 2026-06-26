@@ -118,14 +118,17 @@ router.post('/me/midia', authMiddleware, uploadPerfilArquivo.fields([{ name: 'av
 
     const { files } = req;
     let atualizado = false;
+    const { uploadBuffer } = require('../services/cloudinary.service');
 
     if (files && files.avatar && files.avatar[0]) {
-      usuario.customizacao.avatar_url = `/uploads/perfis/${files.avatar[0].filename}`;
+      const result = await uploadBuffer(files.avatar[0].buffer, files.avatar[0].mimetype);
+      usuario.customizacao.avatar_url = result.secure_url;
       atualizado = true;
     }
 
     if (files && files.banner && files.banner[0]) {
-      usuario.customizacao.banner_url = `/uploads/perfis/${files.banner[0].filename}`;
+      const result = await uploadBuffer(files.banner[0].buffer, files.banner[0].mimetype);
+      usuario.customizacao.banner_url = result.secure_url;
       atualizado = true;
     }
 
