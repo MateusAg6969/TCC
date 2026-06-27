@@ -41,7 +41,15 @@ export default function PortfolioCard({ post, isOwner, onUnpin }: PortfolioCardP
       <div className="flex flex-col md:grid md:grid-cols-2 h-full">
         {/* Lado A: Mídia */}
         <div className="relative aspect-square md:aspect-auto h-full overflow-hidden bg-black/20">
-          {isImage ? (
+          {post.capa_url ? (
+            <Image
+              src={resolveAssetUrl(post.capa_url)}
+              alt={post.titulo}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              unoptimized
+            />
+          ) : isImage ? (
             <Image
               src={resolveAssetUrl(post.conteudo.url)}
               alt={post.titulo}
