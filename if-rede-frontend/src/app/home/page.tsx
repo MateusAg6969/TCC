@@ -7,6 +7,11 @@ async function getFeed() {
   return response?.data || [];
 }
 
+async function getDestaques() {
+  const response = await serverGet<ApiSuccess<Post[]>>('/postagens/destaques');
+  return response?.data || [];
+}
+
 type MePayload = {
   id: string;
 };
@@ -17,8 +22,8 @@ async function getMe() {
 }
 
 export default async function HomePage() {
-  const [feed, me] = await Promise.all([getFeed(), getMe()]);
+  const [feed, destaques, me] = await Promise.all([getFeed(), getDestaques(), getMe()]);
   const profileHref = me?.id ? `/profile/${me.id}` : '/home';
 
-  return <HomeFeedClient feed={feed} profileHref={profileHref} />;
+  return <HomeFeedClient feed={feed} destaques={destaques} profileHref={profileHref} />;
 }

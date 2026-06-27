@@ -10,18 +10,17 @@ import type { Post } from '@/types';
 
 type HomeFeedClientProps = {
   feed: Post[];
+  destaques: Post[];
   profileHref: string;
 };
 
-export default function HomeFeedClient({ feed, profileHref }: HomeFeedClientProps) {
+export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFeedClientProps) {
   const { logout, user } = useAuth();
 
   // A Home sempre exibe o feed inicial; a busca agora redireciona para /search.
   const principais = feed.slice(0, 8);
   const artistas = feed.slice(8, 12);
-  const highlights = feed.length
-    ? feed.slice(0, 5)
-    : [];
+  const highlights = destaques;
 
   const semResultados = feed.length === 0;
 
@@ -111,13 +110,16 @@ export default function HomeFeedClient({ feed, profileHref }: HomeFeedClientProp
                   href={`/post/${post._id}`}
                   className="min-w-[240px] rounded-2xl bg-black/20 p-4 border border-white/5 hover:bg-black/30 hover:border-if-olive/30 transition-all group"
                 >
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-if-olive bg-if-olive/10 px-2 py-0.5 rounded">
                       {post.tipo}
                     </span>
+                    <span className="text-[10px] text-red-400 font-bold flex items-center gap-1">
+                      ❤️ {post.stats?.likes || 0}
+                    </span>
                   </div>
                   <p className="line-clamp-1 text-sm font-black group-hover:text-if-olive transition-colors">{post.titulo}</p>
-                  <p className="mt-1 text-[10px] text-if-text/50 font-medium">Curadoria acadêmica do IF REDE</p>
+                  <p className="mt-1 text-[10px] text-if-text/50 font-medium">Postagem Popular da Semana</p>
                 </Link>
               ))}
             </div>

@@ -362,6 +362,35 @@ router.get('/search', optionalAuthMiddleware, async (req, res, next) => {
   }
 });
 
+// ============================================================================
+// GET: Destaques da Semana
+// ============================================================================
+// Retorna as 5 postagens mais curtidas dos últimos 7 dias (mínimo de 10 likes).
+router.get('/destaques', async (req, res, next) => {
+  try {
+    const seteDiasAtras = new Date();
+    seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
+
+    const criterio = {
+      'config.eh_rascunho': false,
+      'denuncias.bloqueado': false,
+      status_moderacao: 'aprovado',
+      'config.visibilidade': 'todos',
+      createdAt: { $gte: seteDiasAtras },
+      'stats.likes': { $gte: 10 }
+    };
+
+    const destaques = await Postagem.find(criterio)
+      .sort({ 'stats.likes': -1, createdAt: -1 })
+      .limit(5)
+      .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position');
+
+    return res.success(destaques, 'Destaques da semana carregados com sucesso.');
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
