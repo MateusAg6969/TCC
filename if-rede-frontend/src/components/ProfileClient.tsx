@@ -176,7 +176,7 @@ export default function ProfileClient({
         {/* Banner e Avatar */}
         <section className="mb-6 overflow-hidden rounded-main bg-if-card shadow-card">
           <div
-            className="h-48 bg-cover transition-all bg-if-purple/20"
+            className="w-full aspect-[3.5/1] bg-cover transition-all bg-if-purple/20"
             style={{
               backgroundImage: profile?.customizacao?.banner_url
                 ? `url(${resolveAssetUrl(profile.customizacao.banner_url)})`

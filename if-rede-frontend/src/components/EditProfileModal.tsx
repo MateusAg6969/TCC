@@ -157,7 +157,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleBannerDrop}
                   onClick={() => bannerInputRef.current?.click()}
-                  className="group relative w-full h-32 rounded-2xl border-2 border-dashed border-white/10 bg-black/20 overflow-hidden cursor-pointer transition-all hover:border-if-olive/50 hover:bg-black/40 flex items-center justify-center bg-cover"
+                  className="group relative w-full aspect-[3.5/1] rounded-2xl border-2 border-dashed border-white/10 bg-black/20 overflow-hidden cursor-pointer transition-all hover:border-if-olive/50 hover:bg-black/40 flex items-center justify-center bg-cover"
                   style={{ 
                     backgroundImage: bannerPreview ? `url(${bannerPreview.startsWith('blob:') ? bannerPreview : resolveAssetUrl(bannerPreview)})` : 'none',
                     backgroundPosition: `center ${bannerPositionY}%`
