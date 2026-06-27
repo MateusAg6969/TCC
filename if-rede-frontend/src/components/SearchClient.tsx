@@ -145,7 +145,7 @@ export default function SearchClient({ initialQuery, initialTipo }: { initialQue
             <h3 className="text-sm font-black uppercase tracking-widest text-if-purple mb-6 flex items-center gap-2">
               <Users size={16} /> Postagens Relacionadas
             </h3>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 animate-in fade-in duration-500">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 items-start animate-in fade-in duration-500">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => <PostSkeleton key={i} />)
               ) : (

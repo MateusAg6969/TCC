@@ -24,7 +24,7 @@ export default function Loading() {
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div>
             <Skeleton width={200} height={24} className="mb-6" baseColor="#3D2B3D" highlightColor="#4D3B4D" />
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 items-start">
               {[1, 2, 3, 4].map((item) => (
                 <PostSkeleton key={item} />
               ))}

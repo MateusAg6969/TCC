@@ -155,7 +155,7 @@ export default function ProfileTabs({
             {isOwner && (
               <div className="mt-12 pt-12 border-t border-white/5">
                 <h3 className="text-xl font-black text-if-purple mb-6 uppercase tracking-tighter">Sua Produção (Para Fixar)</h3>
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-2 items-start">
                   {posts.map((post) => (
                     <PostCard 
                       key={post._id} 
@@ -171,7 +171,7 @@ export default function ProfileTabs({
             )}
           </div>
         ) : active === 'Salvos' ? (
-          <div className="grid gap-6 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <div className="grid gap-6 md:grid-cols-2 items-start animate-in fade-in slide-in-from-bottom-8 duration-700">
             {loadingSaved ? (
               <div className="col-span-full py-10 text-center text-if-text/50 font-medium">
                 Carregando postagens salvas...
@@ -194,7 +194,7 @@ export default function ProfileTabs({
             )}
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <div className="grid gap-6 md:grid-cols-2 items-start animate-in fade-in slide-in-from-bottom-8 duration-700">
             {filteredPosts.map((post) => (
               <PostCard 
                 key={post._id} 

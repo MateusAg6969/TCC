@@ -129,7 +129,7 @@ export default function HomeFeedClient({ feed, profileHref }: HomeFeedClientProp
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div>
             <h3 className="mb-4 text-xl font-semibold">O que achamos que você vai gostar</h3>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 items-start">
               {principais.map((post) => (
                 <PostCard key={post._id} post={post} />
               ))}
