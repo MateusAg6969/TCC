@@ -248,6 +248,18 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
 
+            {post.capa_url && (post.tipo === 'texto' || renderTipo === 'texto') && (
+              <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden mb-8 border border-white/5 shadow-lg">
+                <Image
+                  src={resolveAssetUrl(post.capa_url)}
+                  alt="Imagem de capa"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            )}
+
             {post.tipo === 'texto' && post.conteudo?.texto_longo && (
               <div className="prose prose-invert max-w-none">
                 <div className="rounded-2xl bg-black/20 p-8 border border-white/5 text-lg leading-relaxed whitespace-pre-wrap font-medium">
@@ -258,9 +270,21 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
 
             {renderTipo === 'audio' && arquivoUrl && (
               <div className="rounded-2xl bg-gradient-to-br from-if-purple/10 to-if-olive/10 p-10 border border-white/10 text-center">
-                <div className="mx-auto w-24 h-24 rounded-full bg-if-purple flex items-center justify-center text-white mb-6 shadow-lg shadow-if-purple/40 animate-pulse">
-                  <Tag size={40} />
-                </div>
+                {post.capa_url ? (
+                  <div className="relative mx-auto w-48 h-48 rounded-2xl overflow-hidden mb-6 border border-white/10 shadow-2xl">
+                    <Image 
+                      src={resolveAssetUrl(post.capa_url)} 
+                      alt="Capa do áudio" 
+                      fill 
+                      className="object-cover" 
+                      unoptimized 
+                    />
+                  </div>
+                ) : (
+                  <div className="mx-auto w-24 h-24 rounded-full bg-if-purple flex items-center justify-center text-white mb-6 shadow-lg shadow-if-purple/40 animate-pulse">
+                    <Tag size={40} />
+                  </div>
+                )}
                 <h4 className="text-2xl font-black text-if-purple mb-2">{post.subtipo || 'Produção Sonora'}</h4>
                 <p className="text-sm text-if-text/50 mb-8 font-medium">Player Acadêmico IF REDE</p>
                 <audio className="w-full h-14" controls src={arquivoUrl}>

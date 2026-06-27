@@ -121,6 +121,7 @@ if-rede-backend/
 | **denuncias**        | Sub‑documento                | `total`, `motivos[]` (usuario_id, motivo, data), `bloqueado`, `motivo_bloqueio`.                                                                                                  | -                    |
 | **status_moderacao** | `String` (enum)              | `pendente`, `aprovado`, `rejeitado`, `em_revisao`.                                                                                                                                | -                    |
 | **moderado_por**     | `ObjectId` → `Usuario`       | Moderador que aprovou/rejeitou.                                                                                                                                                   | -                    |
+| **capa_url**         | `String`                     | URL da imagem de capa personalizada (opcional).                                                                                                                                   | -                    |
 | **timestamps**       | –                            | `createdAt`, `updatedAt`.                                                                                                                                                         | -                    |
 
 #### Índices críticos (criados em `db/connection.js`)

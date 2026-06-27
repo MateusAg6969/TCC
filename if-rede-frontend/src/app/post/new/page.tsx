@@ -22,6 +22,7 @@ export default function NewPostPage() {
   const router = useRouter();
   const { token } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const capaInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormState>({
     titulo: '',
@@ -32,6 +33,7 @@ export default function NewPostPage() {
   });
 
   const [arquivo, setArquivo] = useState<File | null>(null);
+  const [capa, setCapa] = useState<File | null>(null);
   const [tags, setTags] = useState<TagSubtipo[]>([]);
   
   const [showTagForm, setShowTagForm] = useState(false);
@@ -143,6 +145,9 @@ export default function NewPostPage() {
       payload.append('texto_longo', form.tipo === 'texto' ? form.texto_longo.trim() : '');
       payload.append('subtipo_tag_id', form.subtipo_tag_id || '');
       payload.append('arquivo', arquivo);
+      if (capa) {
+        payload.append('capa', capa);
+      }
 
       await api.post('/postagens', payload);
 
@@ -283,6 +288,76 @@ export default function NewPostPage() {
                       </div>
                       <p className="font-bold text-white">Clique ou Arraste um arquivo</p>
                       <p className="mt-1 text-xs text-if-text/50">Até 25MB (Imagens, Vídeos, Áudios ou PDFs)</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* AREA DE UPLOAD DA CAPA */}
+            <div className="rounded-3xl bg-if-card/50 backdrop-blur-md border border-white/5 p-6 shadow-2xl">
+              <label className="mb-3 block text-sm font-bold text-if-text/80">Capa da Postagem (Opcional)</label>
+              
+              <div 
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && file.type.startsWith('image/')) setCapa(file);
+                }}
+                onClick={() => !capa && capaInputRef.current?.click()}
+                className={`relative flex flex-col items-center justify-center w-full min-h-[160px] rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden
+                  ${capa ? 'border-if-purple bg-if-purple/5' : 'border-white/20 hover:border-if-purple hover:bg-if-purple/5'}`}
+              >
+                <input
+                  type="file"
+                  ref={capaInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) setCapa(e.target.files[0]);
+                  }}
+                />
+                
+                <AnimatePresence mode="wait">
+                  {capa ? (
+                    <motion.div 
+                      key="capa-file"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      className="flex flex-col items-center p-4 text-center"
+                    >
+                      <div className="h-12 w-12 rounded-xl bg-if-purple/20 text-if-purple flex items-center justify-center mb-2">
+                        <UploadCloud size={24} />
+                      </div>
+                      <p className="font-bold text-white text-sm line-clamp-1 break-all px-4">{capa.name}</p>
+                      <p className="mt-1 text-[10px] text-if-text/50">{(capa.size / 1024 / 1024).toFixed(2)} MB</p>
+                      
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCapa(null);
+                        }}
+                        className="mt-4 rounded-full bg-red-500/20 px-3 py-1.5 text-[10px] font-bold text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1"
+                      >
+                        <X size={12} /> Remover capa
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="capa-empty"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      className="flex flex-col items-center p-4 text-center"
+                    >
+                      <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-2 text-white/50 group-hover:text-if-purple group-hover:bg-if-purple/10 transition-all">
+                        <UploadCloud size={24} />
+                      </div>
+                      <p className="font-bold text-white text-sm">Adicionar capa personalizada</p>
+                      <p className="mt-1 text-[10px] text-if-text/50">Apenas imagens (até 5MB)</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

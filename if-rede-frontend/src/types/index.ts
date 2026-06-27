@@ -48,6 +48,7 @@ export interface Post {
   descricao?: string;
   tipo: PostType;
   subtipo?: string;
+  capa_url?: string;
   conteudo: {
     texto_longo?: string;
     url?: string;

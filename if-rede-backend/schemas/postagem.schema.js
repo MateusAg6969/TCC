@@ -390,6 +390,11 @@ const postagemSchema = new mongoose.Schema(
       default: null,
     },
 
+    capa_url: {
+      type: String,
+      default: '',
+    },
+
     // Data/hora de criação e atualização
   },
   {

@@ -44,6 +44,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletando, setDeletando] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [revelado, setRevelado] = useState(false);
 
   const salvo = user?.postagens_salvas?.includes(post._id) || false;
 
@@ -275,75 +276,170 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
         </div>
       </header>
 
-      {/* Área de Conteúdo */}
       <Link href={`/post/${post._id}`} className="block p-3 sm:p-4 group-hover:bg-white/5 transition-colors">
         {renderTipo === 'texto' && (
-          <div className="rounded-xl bg-if-bg/50 p-4 border border-if-purple/5">
-            <p className="leading-relaxed text-if-text/90 italic">
-              "{textPreview(post.conteudo?.texto_longo)}"
-            </p>
+          <div className="rounded-xl bg-if-bg/50 overflow-hidden border border-if-purple/5">
+            {post.capa_url && (
+              <div className="relative h-40 w-full border-b border-white/5 bg-black/20">
+                <Image
+                  src={resolveAssetUrl(post.capa_url)}
+                  alt="Capa do texto"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            )}
+            <div className="p-4">
+              <p className="leading-relaxed text-if-text/90 italic">
+                "{textPreview(post.conteudo?.texto_longo)}"
+              </p>
+            </div>
           </div>
         )}
 
         {renderTipo === 'imagem' && arquivoUrl && (
-          <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-if-purple/10">
-            <Image
-              src={arquivoUrl}
-              alt={post.titulo}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-110"
-              unoptimized
-            />
+          <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-if-purple/10 bg-black">
+            {post.capa_url && !revelado ? (
+              <div className="relative w-full h-full">
+                <Image
+                  src={resolveAssetUrl(post.capa_url)}
+                  alt="Capa de spoiler"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center gap-2 p-4">
+                  <span className="text-xs font-black uppercase tracking-widest text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-full">
+                    ⚠️ Prévia / Spoiler
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setRevelado(true);
+                    }}
+                    className="mt-2 rounded-xl bg-if-olive px-4 py-2 text-xs font-bold text-if-bg hover:scale-105 active:scale-95 transition-all shadow-lg"
+                  >
+                    Revelar Imagem
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Image
+                src={arquivoUrl}
+                alt={post.titulo}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                unoptimized
+              />
+            )}
           </div>
         )}
 
         {renderTipo === 'audio' && arquivoUrl && (
-          <div className="rounded-xl bg-if-purple/5 p-4 border border-if-purple/10">
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-if-purple text-white animate-pulse">
-                <Sparkles size={20} />
+          <div className="rounded-xl bg-if-purple/5 overflow-hidden border border-if-purple/10">
+            {post.capa_url ? (
+              <div className="relative aspect-video sm:aspect-[16/10] w-full bg-black/40">
+                <Image
+                  src={resolveAssetUrl(post.capa_url)}
+                  alt="Capa do áudio"
+                  fill
+                  className="object-cover opacity-80"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-if-purple text-white shadow-lg">
+                      <Sparkles size={20} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{post.subtipo || 'Produção Sonora'}</p>
+                      <p className="text-[10px] text-white/60">Áudio personalizado</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-bold text-if-purple">{post.subtipo || 'Produção Sonora'}</p>
-                <p className="text-[10px] text-gray-500">Streaming via Servidor IF REDE</p>
+            ) : (
+              <div className="p-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-if-purple text-white animate-pulse">
+                  <Sparkles size={20} />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-if-purple">{post.subtipo || 'Produção Sonora'}</p>
+                  <p className="text-[10px] text-gray-500">Streaming via Servidor IF REDE</p>
+                </div>
               </div>
+            )}
+            <div className="p-3 bg-black/20 border-t border-white/5">
+              <audio
+                className="w-full h-10"
+                controls
+                src={arquivoUrl}
+                onClick={(e) => e.preventDefault()}
+              >
+                Seu navegador não suporta áudio.
+              </audio>
             </div>
-            <audio
-              className="w-full h-10 mt-2"
-              controls
-              src={arquivoUrl}
-              onClick={(e) => e.preventDefault()} // impede clique de ir para a página do post
-            >
-              Seu navegador não suporta áudio.
-            </audio>
           </div>
         )}
 
         {renderTipo === 'video' && arquivoUrl && (
-          <div className="relative aspect-video overflow-hidden rounded-xl border border-if-purple/10 bg-black flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-            <video
-              src={arquivoUrl}
-              className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-              muted
-              loop
-              playsInline
-              onMouseEnter={(e) => {
-                const v = e.target as HTMLVideoElement;
-                const promise = v.play();
-                if (promise !== undefined) {
-                  promise.catch(err => console.warn('Autoplay prevented or unsupported:', err));
-                }
-              }}
-              onMouseLeave={(e) => {
-                const v = e.target as HTMLVideoElement;
-                v.pause();
-                v.currentTime = 0;
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
-            <div className="z-20 flex h-12 w-12 items-center justify-center rounded-full bg-if-olive text-if-bg shadow-xl group-hover:scale-110 transition-transform pointer-events-none">
-              <Sparkles size={24} />
-            </div>
+          <div className="relative aspect-video overflow-hidden rounded-xl border border-if-purple/10 bg-black flex items-center justify-center">
+            {post.capa_url && !revelado ? (
+              <div className="relative w-full h-full">
+                <Image
+                  src={resolveAssetUrl(post.capa_url)}
+                  alt="Capa de spoiler"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center gap-2 p-4">
+                  <span className="text-xs font-black uppercase tracking-widest text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-full">
+                    ⚠️ Prévia / Spoiler
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setRevelado(true);
+                    }}
+                    className="mt-2 rounded-xl bg-if-olive px-4 py-2 text-xs font-bold text-if-bg hover:scale-105 active:scale-95 transition-all shadow-lg"
+                  >
+                    Revelar Vídeo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <video
+                  src={arquivoUrl}
+                  className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                  muted
+                  loop
+                  playsInline
+                  onMouseEnter={(e) => {
+                    const v = e.target as HTMLVideoElement;
+                    const promise = v.play();
+                    if (promise !== undefined) {
+                      promise.catch(err => console.warn('Autoplay prevented or unsupported:', err));
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const v = e.target as HTMLVideoElement;
+                    v.pause();
+                    v.currentTime = 0;
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
+                <div className="z-20 flex h-12 w-12 items-center justify-center rounded-full bg-if-olive text-if-bg shadow-xl group-hover:scale-110 transition-transform pointer-events-none">
+                  <Sparkles size={24} />
+                </div>
+              </>
+            )}
           </div>
         )}
       </Link>
