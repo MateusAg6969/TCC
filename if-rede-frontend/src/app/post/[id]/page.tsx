@@ -10,6 +10,7 @@ import DiscussionSection from '@/components/DiscussionSection';
 import ContadorAlcance from '@/components/ContadorAlcance';
 import api, { resolveAssetUrl } from '@/lib/api';
 import ConfirmModal from '@/components/ConfirmModal';
+import CustomAudioPlayer from '@/components/CustomAudioPlayer';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { useEffect, useRef, useState, use } from 'react';
@@ -286,10 +287,9 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                   </div>
                 )}
                 <h4 className="text-2xl font-black text-if-purple mb-2">{post.subtipo || 'Produção Sonora'}</h4>
-                <p className="text-sm text-if-text/50 mb-8 font-medium">Player Acadêmico IF REDE</p>
-                <audio className="w-full h-14" controls src={arquivoUrl}>
-                  Seu navegador não suporta áudio.
-                </audio>
+                <div className="mt-4">
+                  <CustomAudioPlayer src={post.conteudo?.url || ''} />
+                </div>
               </div>
             )}
 

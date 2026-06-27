@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import api, { resolveAssetUrl } from '@/lib/api';
 import ContadorAlcance from './ContadorAlcance';
 import ConfirmModal from './ConfirmModal';
+import CustomAudioPlayer from './CustomAudioPlayer';
 
 /**
  * ============================================================================
@@ -361,15 +362,8 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
                 </div>
               </div>
             )}
-            <div className="p-3 bg-black/20 border-t border-white/5">
-              <audio
-                className="w-full h-10"
-                controls
-                src={arquivoUrl}
-                onClick={(e) => e.preventDefault()}
-              >
-                Seu navegador não suporta áudio.
-              </audio>
+            <div className="p-2 bg-black/20 border-t border-white/5">
+              <CustomAudioPlayer src={post.conteudo?.url || ''} />
             </div>
           </div>
         )}
