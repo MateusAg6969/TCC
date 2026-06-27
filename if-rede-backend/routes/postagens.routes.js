@@ -192,7 +192,7 @@ router.get('/feed', authMiddleware, async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.banner_url');
+      .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position');
 
     // 4. Modo de Descoberta (Fase 2: Fallback para Populares)
     // Se o usuário não segue ninguém ou já viu o conteúdo dos seguidos na página atual.
@@ -211,7 +211,7 @@ router.get('/feed', authMiddleware, async (req, res, next) => {
       const postsPopulares = await Postagem.find(criterioPopulares)
         .sort({ 'stats.likes': -1, 'stats.visualizacoes': -1, createdAt: -1 })
         .limit(limiteRestante)
-        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.banner_url');
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position');
 
       items = [...items, ...postsPopulares];
     }
@@ -275,7 +275,7 @@ router.get('/usuario/:usuarioId', optionalAuthMiddleware, async (req, res, next)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url'),
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position'),
       Postagem.countDocuments(criterio),
     ]);
 
@@ -307,7 +307,7 @@ router.get('/search', optionalAuthMiddleware, async (req, res, next) => {
         { 'perfil.email': regex }
       ]
     })
-    .select('perfil.nome perfil.bio customizacao.avatar_url customizacao.banner_url')
+    .select('perfil.nome perfil.bio customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position')
     .limit(10);
 
     // Pegar IDs dos usuários encontrados para buscar postagens deles também
@@ -340,7 +340,7 @@ router.get('/search', optionalAuthMiddleware, async (req, res, next) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url'),
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position'),
       Postagem.countDocuments(queryPostagens)
     ]);
 
@@ -370,7 +370,7 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
 
     const post = await Postagem.findById(req.params.id).populate(
       'autor_id',
-      'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url'
+      'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position'
     );
 
     if (!post) {

@@ -22,7 +22,7 @@ const moderacaoController = {
 
       const pendentes = await Postagem.find(criterio)
         .sort({ createdAt: 1 })
-        .populate('autor_id', 'perfil.nome customizacao.avatar_url');
+        .populate('autor_id', 'perfil.nome customizacao.avatar_url customizacao.avatar_position');
 
       return res.success(pendentes, 'Fila de moderação carregada.');
     } catch (error) {

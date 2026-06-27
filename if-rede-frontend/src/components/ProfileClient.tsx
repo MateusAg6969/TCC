@@ -181,7 +181,7 @@ export default function ProfileClient({
               backgroundImage: profile?.customizacao?.banner_url
                 ? `url(${resolveAssetUrl(profile.customizacao.banner_url)})`
                 : 'linear-gradient(120deg, #442844, #2d1b2d)',
-              backgroundPosition: profile?.customizacao?.banner_position || 'center',
+              backgroundPosition: profile?.customizacao?.banner_position ? `center ${profile.customizacao.banner_position}` : 'center',
             }}
           />
           <div className="p-6 pb-10">
