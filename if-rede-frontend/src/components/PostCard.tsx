@@ -342,7 +342,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
         {renderTipo === 'audio' && arquivoUrl && (
           <div className="rounded-xl bg-if-purple/5 overflow-hidden border border-if-purple/10">
             {post.capa_url ? (
-              <div className="relative aspect-video sm:aspect-[16/10] w-full bg-black/20">
+              <div className="relative aspect-square w-full bg-black/20">
                 <Image
                   src={resolveAssetUrl(post.capa_url)}
                   alt="Capa do áudio"
