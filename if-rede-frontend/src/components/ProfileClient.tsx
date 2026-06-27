@@ -234,7 +234,7 @@ export default function ProfileClient({
               </div>
 
               {/* Ações Sociais */}
-              <div className="mb-2">
+              <div className="mb-6 sm:mb-10">
                 {ehProprioPerfil ? (
                   <button
                     onClick={() => setOpenModal(true)}
