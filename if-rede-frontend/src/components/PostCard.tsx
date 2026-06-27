@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown, MoreHorizontal, Trash2, Link as LinkIcon, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown, MoreHorizontal, Trash2, Link as LinkIcon, Bookmark, Music, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import type { Post } from '@/types';
@@ -352,7 +352,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-if-purple text-white shadow-lg">
-                      <Sparkles size={20} />
+                      <Music size={20} />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-white truncate">{post.subtipo || 'Produção Sonora'}</p>
@@ -364,7 +364,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
             ) : (
               <div className="p-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-if-purple text-white animate-pulse">
-                  <Sparkles size={20} />
+                  <Music size={20} />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-if-purple">{post.subtipo || 'Produção Sonora'}</p>
@@ -436,7 +436,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
                 <div className="z-20 flex h-12 w-12 items-center justify-center rounded-full bg-if-olive text-if-bg shadow-xl group-hover:scale-110 transition-transform pointer-events-none">
-                  <Sparkles size={24} />
+                  <Play size={24} className="fill-current ml-1" />
                 </div>
               </>
             )}
@@ -511,23 +511,4 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
   );
 }
 
-// Helper icon for audio
-function Sparkles({ size, className }: { size: number; className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-      <path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" />
-    </svg>
-  );
-}
+
