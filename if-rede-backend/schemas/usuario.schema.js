@@ -138,6 +138,16 @@ const customizacaoSchema = new mongoose.Schema(
       default: '',
     },
 
+    avatar_position: {
+      type: String,
+      default: '50% 50%',
+    },
+
+    banner_position: {
+      type: String,
+      default: '50%',
+    },
+
     // Medalhas conquistadas (referências a IDs de medalhas)
     medalhas: {
       type: [mongoose.Schema.Types.ObjectId],

@@ -152,8 +152,11 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
               <div className="flex items-center gap-4">
                 <Link 
                   href={`/profile/${autorId}`}
-                  className="h-14 w-14 rounded-2xl bg-if-purple/20 flex items-center justify-center font-black text-xl border-2 border-if-purple/20 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-cover bg-center"
-                  style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : {}}
+                  className="h-14 w-14 rounded-2xl bg-if-purple/20 flex items-center justify-center font-black text-xl border-2 border-if-purple/20 overflow-hidden transition-all hover:scale-105 active:scale-95 bg-cover"
+                  style={avatarUrl ? { 
+                    backgroundImage: `url(${avatarUrl})`,
+                    backgroundPosition: (post.autor_id as any)?.customizacao?.avatar_position || 'center'
+                  } : {}}
                 >
                   {!avatarUrl && (post.autor_id?.perfil?.apelido || post.autor_id?.perfil?.nome || 'U').charAt(0).toUpperCase()}
                 </Link>

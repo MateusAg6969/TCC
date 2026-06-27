@@ -92,6 +92,8 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
       if (customizacao.cor_botoes) usuario.customizacao.cor_botoes = customizacao.cor_botoes;
       if (customizacao.avatar_url !== undefined) usuario.customizacao.avatar_url = customizacao.avatar_url;
       if (customizacao.banner_url !== undefined) usuario.customizacao.banner_url = customizacao.banner_url;
+      if (customizacao.avatar_position !== undefined) usuario.customizacao.avatar_position = customizacao.avatar_position;
+      if (customizacao.banner_position !== undefined) usuario.customizacao.banner_position = customizacao.banner_position;
     }
 
     await usuario.save();

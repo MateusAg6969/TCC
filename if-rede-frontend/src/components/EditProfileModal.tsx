@@ -18,6 +18,8 @@ type Props = {
     privacidade: string;
     avatar_url: string;
     banner_url: string;
+    avatar_position?: string;
+    banner_position?: string;
   };
 };
 
@@ -39,6 +41,28 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
+  // Parser para as posições salvas
+  const parseAvatarPosition = (pos?: string) => {
+    if (!pos) return { x: 50, y: 50 };
+    const parts = pos.split(' ');
+    const x = Number(parts[0]?.replace('%', '')) ?? 50;
+    const y = Number(parts[1]?.replace('%', '')) ?? 50;
+    return { x: isNaN(x) ? 50 : x, y: isNaN(y) ? 50 : y };
+  };
+
+  const parseBannerPosition = (pos?: string) => {
+    if (!pos) return 50;
+    const y = Number(pos.replace('%', '')) ?? 50;
+    return isNaN(y) ? 50 : y;
+  };
+
+  const initialAvatar = parseAvatarPosition(defaultData.avatar_position);
+  const initialBanner = parseBannerPosition(defaultData.banner_position);
+
+  const [avatarPositionX, setAvatarPositionX] = useState(initialAvatar.x);
+  const [avatarPositionY, setAvatarPositionY] = useState(initialAvatar.y);
+  const [bannerPositionY, setBannerPositionY] = useState(initialBanner);
+
   const handleSalvar = async () => {
     setCarregando(true);
     setErro('');
@@ -53,10 +77,13 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
 
       const payload = {
         perfil: { nome, apelido, bio, privacidade },
-        customizacao: {}, 
+        customizacao: {
+          avatar_position: `${avatarPositionX}% ${avatarPositionY}%`,
+          banner_position: `${bannerPositionY}%`
+        }, 
       };
       const res = await api.patch('/usuarios/me', payload);
-      toast.success('Perfil atualizado com sucesso!');
+      toast.success('Perfil updated com sucesso!');
       onSave(res.data.data);
       onClose();
     } catch (err: any) {
@@ -130,8 +157,11 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleBannerDrop}
                   onClick={() => bannerInputRef.current?.click()}
-                  className="group relative w-full h-32 rounded-2xl border-2 border-dashed border-white/10 bg-black/20 overflow-hidden cursor-pointer transition-all hover:border-if-olive/50 hover:bg-black/40 flex items-center justify-center bg-cover bg-center"
-                  style={{ backgroundImage: bannerPreview ? `url(${bannerPreview.startsWith('blob:') ? bannerPreview : resolveAssetUrl(bannerPreview)})` : 'none' }}
+                  className="group relative w-full h-32 rounded-2xl border-2 border-dashed border-white/10 bg-black/20 overflow-hidden cursor-pointer transition-all hover:border-if-olive/50 hover:bg-black/40 flex items-center justify-center bg-cover"
+                  style={{ 
+                    backgroundImage: bannerPreview ? `url(${bannerPreview.startsWith('blob:') ? bannerPreview : resolveAssetUrl(bannerPreview)})` : 'none',
+                    backgroundPosition: `center ${bannerPositionY}%`
+                  }}
                 >
                   <input 
                     type="file" 
@@ -153,34 +183,93 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
                     <span className="text-xs font-bold text-white">Alterar Capa</span>
                   </div>
                 </div>
+
+                {bannerPreview && (
+                  <div className="bg-black/20 p-3 rounded-2xl border border-white/5 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div className="flex items-center justify-between mb-1 select-none">
+                      <span className="text-xs font-bold text-if-text/60">Enquadramento Vertical da Capa</span>
+                      <span className="text-xs font-mono text-if-olive font-bold">{bannerPositionY}%</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      value={bannerPositionY}
+                      onChange={(e) => setBannerPositionY(Number(e.target.value))}
+                      className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-if-olive focus:outline-none"
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* AREA DO AVATAR */}
-              <div className="flex flex-col gap-2 -mt-12 relative z-10 pl-4">
-                <div 
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={handleAvatarDrop}
-                  onClick={() => avatarInputRef.current?.click()}
-                  className="group relative w-24 h-24 rounded-3xl border-4 border-if-card bg-black/40 border-dashed overflow-hidden cursor-pointer transition-all hover:border-if-olive/50 bg-cover bg-center shadow-xl"
-                  style={{ backgroundImage: avatarPreview ? `url(${avatarPreview.startsWith('blob:') ? avatarPreview : resolveAssetUrl(avatarPreview)})` : 'none' }}
-                >
-                  <input 
-                    type="file" 
-                    accept="image/*"
-                    ref={avatarInputRef}
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setAvatarFile(file);
-                        setAvatarPreview(URL.createObjectURL(file));
-                      }
+              {/* AREA DO AVATAR E SEUS AJUSTES */}
+              <div className="flex flex-col sm:flex-row gap-4 items-start bg-black/5 p-4 rounded-2xl border border-white/5">
+                <div className="flex flex-col gap-2 shrink-0">
+                  <span className="text-sm font-bold text-if-text/70">Foto de Perfil</span>
+                  <div 
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleAvatarDrop}
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="group relative w-24 h-24 rounded-3xl border-4 border-if-card bg-black/40 border-dashed overflow-hidden cursor-pointer transition-all hover:border-if-olive/50 bg-cover shadow-xl"
+                    style={{ 
+                      backgroundImage: avatarPreview ? `url(${avatarPreview.startsWith('blob:') ? avatarPreview : resolveAssetUrl(avatarPreview)})` : 'none',
+                      backgroundPosition: `${avatarPositionX}% ${avatarPositionY}%`
                     }}
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                    <UploadCloud size={24} className="text-if-olive" />
+                  >
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      ref={avatarInputRef}
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setAvatarFile(file);
+                          setAvatarPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                      <UploadCloud size={24} className="text-if-olive" />
+                    </div>
                   </div>
                 </div>
+
+                {avatarPreview && (
+                  <div className="flex-1 w-full space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <span className="text-xs font-bold text-if-text/70 block uppercase tracking-wider select-none">Enquadramento da Foto</span>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="flex items-center justify-between mb-1 select-none">
+                          <span className="text-[10px] font-bold text-if-text/50">Ajuste Horizontal (Esq. / Dir.)</span>
+                          <span className="text-[10px] font-mono text-if-olive font-bold">{avatarPositionX}%</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          value={avatarPositionX}
+                          onChange={(e) => setAvatarPositionX(Number(e.target.value))}
+                          className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-if-olive focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-1 select-none">
+                          <span className="text-[10px] font-bold text-if-text/50">Ajuste Vertical (Cima / Baixo)</span>
+                          <span className="text-[10px] font-mono text-if-olive font-bold">{avatarPositionY}%</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          value={avatarPositionY}
+                          onChange={(e) => setAvatarPositionY(Number(e.target.value))}
+                          className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-if-olive focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* DADOS TEXTUAIS */}

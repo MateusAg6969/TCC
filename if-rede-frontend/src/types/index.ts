@@ -26,6 +26,8 @@ export interface Customizacao {
   cor_botoes?: string;
   avatar_url?: string;
   banner_url?: string;
+  avatar_position?: string;
+  banner_position?: string;
   medalhas?: Medalha[];
   portfolio?: PortfolioItem[];
   tema?: 'light' | 'dark';

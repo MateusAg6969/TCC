@@ -25,6 +25,8 @@ type ProfilePayload = {
     cor_botoes?: string;
     avatar_url?: string;
     banner_url?: string;
+    avatar_position?: string;
+    banner_position?: string;
     medalhas?: Medalha[];
     portfolio?: PortfolioItem[];
   };
@@ -174,19 +176,23 @@ export default function ProfileClient({
         {/* Banner e Avatar */}
         <section className="mb-6 overflow-hidden rounded-main bg-if-card shadow-card">
           <div
-            className="h-48 bg-cover bg-center transition-all bg-if-purple/20"
+            className="h-48 bg-cover transition-all bg-if-purple/20"
             style={{
               backgroundImage: profile?.customizacao?.banner_url
                 ? `url(${resolveAssetUrl(profile.customizacao.banner_url)})`
                 : 'linear-gradient(120deg, #442844, #2d1b2d)',
+              backgroundPosition: profile?.customizacao?.banner_position || 'center',
             }}
           />
           <div className="p-6 pb-10">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <div className="flex flex-wrap items-end gap-6">
                 <div className="relative group -mt-16 z-10">
-                  <div className="grid h-32 w-32 place-items-center rounded-3xl border-4 border-if-card bg-gradient-to-br from-if-purple to-if-olive overflow-hidden shadow-2xl bg-cover bg-center"
-                       style={profile?.customizacao?.avatar_url ? { backgroundImage: `url(${resolveAssetUrl(profile.customizacao.avatar_url)})` } : {}}>
+                  <div className="grid h-32 w-32 place-items-center rounded-3xl border-4 border-if-card bg-gradient-to-br from-if-purple to-if-olive overflow-hidden shadow-2xl bg-cover"
+                       style={profile?.customizacao?.avatar_url ? { 
+                         backgroundImage: `url(${resolveAssetUrl(profile.customizacao.avatar_url)})`,
+                         backgroundPosition: profile?.customizacao?.avatar_position || 'center'
+                       } : {}}>
                     {!profile?.customizacao?.avatar_url && (
                       <span className="text-5xl font-black text-white">
                         {(profile?.perfil?.nome || 'U').charAt(0).toUpperCase()}
@@ -313,6 +319,8 @@ export default function ProfileClient({
           privacidade: profile?.perfil?.privacidade || 'publico',
           avatar_url: profile?.customizacao?.avatar_url || '',
           banner_url: profile?.customizacao?.banner_url || '',
+          avatar_position: profile?.customizacao?.avatar_position || '50% 50%',
+          banner_position: profile?.customizacao?.banner_position || '50%',
         }}
       />
 
