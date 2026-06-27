@@ -184,17 +184,17 @@ export default function ProfileClient({
               backgroundPosition: profile?.customizacao?.banner_position ? `center ${profile.customizacao.banner_position}` : 'center',
             }}
           />
-          <div className="p-6 pb-10">
+          <div className="p-6 sm:p-8 pb-10">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <div className="flex flex-wrap items-end gap-6">
-                <div className="relative group -mt-16 z-10">
-                  <div className="grid h-32 w-32 place-items-center rounded-3xl border-4 border-if-card bg-gradient-to-br from-if-purple to-if-olive overflow-hidden shadow-2xl bg-cover"
+                <div className="relative group -mt-16 sm:-mt-20 z-10">
+                  <div className="grid h-32 w-32 sm:h-40 sm:w-40 place-items-center rounded-3xl border-4 border-if-card bg-gradient-to-br from-if-purple to-if-olive overflow-hidden shadow-2xl bg-cover"
                        style={profile?.customizacao?.avatar_url ? { 
                          backgroundImage: `url(${resolveAssetUrl(profile.customizacao.avatar_url)})`,
                          backgroundPosition: profile?.customizacao?.avatar_position || 'center'
                        } : {}}>
                     {!profile?.customizacao?.avatar_url && (
-                      <span className="text-5xl font-black text-white">
+                      <span className="text-5xl sm:text-6xl font-black text-white">
                         {(profile?.perfil?.nome || 'U').charAt(0).toUpperCase()}
                       </span>
                     )}
@@ -202,7 +202,7 @@ export default function ProfileClient({
                 </div>
                 <div className="mb-2">
                   <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
+                    <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
                   </div>
                   {profile?.perfil?.apelido && (
                     <div className="inline-block mt-1 px-3 py-0.5 rounded-full bg-if-olive/10 border border-if-olive/20 text-if-olive text-sm font-bold tracking-wide">
@@ -214,19 +214,19 @@ export default function ProfileClient({
                   </p>
                   
                   {/* Botões de Seguidores/Seguindo - Painel Lateral */}
-                  <div className="mt-4 flex gap-4">
+                  <div className="mt-4 flex gap-6">
                     <button 
                       onClick={() => setActiveSocialPanel('followers')}
                       className="text-sm hover:text-if-purple transition-colors flex items-center gap-2 group"
                     >
-                      <span className="font-black text-lg group-hover:scale-110 transition-transform">{profile?.stats?.total_seguidores || 0}</span>
+                      <span className="font-black text-lg sm:text-xl group-hover:scale-110 transition-transform">{profile?.stats?.total_seguidores || 0}</span>
                       <span className="font-bold text-if-text/50">seguidores</span>
                     </button>
                     <button 
                       onClick={() => setActiveSocialPanel('following')}
                       className="text-sm hover:text-if-purple transition-colors flex items-center gap-2 group"
                     >
-                      <span className="font-black text-lg group-hover:scale-110 transition-transform">{profile?.stats?.total_seguindo || 0}</span>
+                      <span className="font-black text-lg sm:text-xl group-hover:scale-110 transition-transform">{profile?.stats?.total_seguindo || 0}</span>
                       <span className="font-bold text-if-text/50">seguindo</span>
                     </button>
                   </div>
@@ -238,7 +238,7 @@ export default function ProfileClient({
                 {ehProprioPerfil ? (
                   <button
                     onClick={() => setOpenModal(true)}
-                    className="rounded-2xl border-2 border-if-olive/20 bg-if-olive/10 px-8 py-3 text-sm font-bold text-if-olive shadow-xl hover:bg-if-olive hover:text-if-bg active:scale-95 transition-all"
+                    className="rounded-2xl border-2 border-if-olive/20 bg-if-olive/10 px-8 py-3.5 sm:px-10 sm:py-4 text-sm sm:text-base font-bold text-if-olive shadow-xl hover:bg-if-olive hover:text-if-bg active:scale-95 transition-all"
                   >
                     Editar Perfil
                   </button>
@@ -246,7 +246,7 @@ export default function ProfileClient({
                   <button
                     onClick={alternarSeguir}
                     disabled={carregandoSeguir}
-                    className={`rounded-2xl px-10 py-3 text-sm font-black shadow-xl transition-all active:scale-95 flex items-center gap-2 ${
+                    className={`rounded-2xl px-10 py-3.5 sm:px-12 sm:py-4 text-sm sm:text-base font-black shadow-xl transition-all active:scale-95 flex items-center gap-2 ${
                       profile?.seguindo 
                         ? 'bg-if-purple/10 text-if-purple border-2 border-if-purple/20 hover:bg-red-500 hover:text-white hover:border-red-500' 
                         : 'bg-if-purple/10 text-if-purple border-2 border-if-purple/20 hover:bg-if-purple hover:text-white'
