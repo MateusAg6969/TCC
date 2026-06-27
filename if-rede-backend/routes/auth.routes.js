@@ -115,6 +115,8 @@ router.post('/login', async (req, res, next) => {
           email: usuario.perfil.email,
           status_vinculo: usuario.perfil.status_vinculo,
           mod_voluntario: Boolean(usuario.configuracoes?.mod_voluntario),
+          admin: Boolean(usuario.configuracoes?.admin),
+          postagens_salvas: usuario.postagens_salvas || [],
         },
         tokens: { accessToken, refreshToken },
       },

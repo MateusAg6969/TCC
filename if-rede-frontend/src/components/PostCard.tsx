@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown, MoreHorizontal, Trash2, Link as LinkIcon } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share2, Pin, ChevronDown, MoreHorizontal, Trash2, Link as LinkIcon, Bookmark } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import type { Post } from '@/types';
@@ -35,7 +35,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: PostCardProps) {
-  const { user } = useAuth();
+  const { user, toggleSavePost } = useAuth();
   const [curtido, setCurtido] = useState(false);
   const [totalLikes, setTotalLikes] = useState(post.stats?.likes || 0);
   const [carregando, setCarregando] = useState(false);
@@ -43,6 +43,28 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
   const [showOptions, setShowOptions] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletando, setDeletando] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+
+  const salvo = user?.postagens_salvas?.includes(post._id) || false;
+
+  const handleSave = async () => {
+    if (!user || salvando) return;
+
+    setSalvando(true);
+    toggleSavePost(post._id);
+
+    try {
+      const res = await api.post(`/usuarios/me/salvas/${post._id}`);
+      const isNowSaved = res.data?.data?.salvo;
+      toast.success(isNowSaved ? 'Postagem salva!' : 'Postagem removida dos salvos.');
+    } catch (error) {
+      console.error('Erro ao salvar postagem:', error);
+      toast.error('Não foi possível salvar a postagem. Tente novamente.');
+      toggleSavePost(post._id);
+    } finally {
+      setSalvando(false);
+    }
+  };
 
   // Efeito: Inicializa o estado de 'curtido' com base nos dados do usuário logado.
   useEffect(() => {
@@ -357,6 +379,15 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
             className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-if-purple transition-colors"
           >
             <Repeat2 size={20} /> {post.stats?.shares || 0}
+          </button>
+
+          <button
+            onClick={handleSave}
+            disabled={!user || salvando}
+            aria-label={salvo ? 'Remover dos salvos' : 'Salvar postagem'}
+            className={`flex items-center gap-2 text-sm font-bold transition-colors duration-300 ${salvo ? 'text-if-olive' : 'text-gray-500 hover:text-if-purple'}`}
+          >
+            <Bookmark size={20} className={salvo ? 'fill-current' : ''} />
           </button>
         </div>
 

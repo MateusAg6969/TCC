@@ -4,12 +4,12 @@ import { useMemo, useState } from 'react';
 import type { Post, PortfolioItem } from '@/types';
 import PostCard from './PostCard';
 import PortfolioCard from './PortfolioCard';
-import { Briefcase, LayoutGrid, Music, FileText, Image as ImageIcon } from 'lucide-react';
+import { Briefcase, LayoutGrid, Music, FileText, Image as ImageIcon, Bookmark } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
-const tabs = ['Portfólio', 'Postagens', 'Msc', 'Text', 'Img'] as const;
-type Tab = (typeof tabs)[number];
+type Tab = 'Portfólio' | 'Postagens' | 'Msc' | 'Text' | 'Img' | 'Salvos';
 
 interface ProfileTabsProps {
   posts: Post[];
@@ -26,8 +26,20 @@ export default function ProfileTabs({
   initialPortfolio = [],
   onPostDelete
 }: ProfileTabsProps) {
+  const { user } = useAuth();
   const [active, setActive] = useState<Tab>('Portfólio');
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>(initialPortfolio);
+  const [savedPosts, setSavedPosts] = useState<Post[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [hasLoadedSaved, setHasLoadedSaved] = useState(false);
+
+  const availableTabs = useMemo(() => {
+    const list: Tab[] = ['Portfólio', 'Postagens', 'Msc', 'Text', 'Img'];
+    if (isOwner) {
+      list.push('Salvos');
+    }
+    return list;
+  }, [isOwner]);
 
   const filteredPosts = useMemo(() => {
     if (active === 'Postagens') return posts;
@@ -36,6 +48,28 @@ export default function ProfileTabs({
     if (active === 'Img') return posts.filter((p) => p.tipo === 'imagem');
     return [];
   }, [active, posts]);
+
+  const displayedSavedPosts = useMemo(() => {
+    if (!user) return [];
+    return savedPosts.filter((p) => user.postagens_salvas.includes(p._id));
+  }, [savedPosts, user?.postagens_salvas]);
+
+  const handleTabChange = async (tab: Tab) => {
+    setActive(tab);
+    if (tab === 'Salvos' && !hasLoadedSaved) {
+      setLoadingSaved(true);
+      try {
+        const res = await api.get('/usuarios/me/salvas');
+        setSavedPosts(res.data?.data || []);
+        setHasLoadedSaved(true);
+      } catch (error) {
+        console.error('Erro ao buscar postagens salvas:', error);
+        toast.error('Erro ao carregar postagens salvas.');
+      } finally {
+        setLoadingSaved(false);
+      }
+    }
+  };
 
   const handlePin = async (postId: string, position: number) => {
     try {
@@ -66,16 +100,17 @@ export default function ProfileTabs({
       case 'Msc': return <Music size={16} />;
       case 'Text': return <FileText size={16} />;
       case 'Img': return <ImageIcon size={16} />;
+      case 'Salvos': return <Bookmark size={16} />;
     }
   };
 
   return (
     <section>
       <div className="mb-8 flex flex-wrap gap-3 border-b border-white/5 pb-6">
-        {tabs.map((tab) => (
+        {availableTabs.map((tab) => (
           <button
             key={tab}
-            onClick={() => setActive(tab)}
+            onClick={() => handleTabChange(tab)}
             className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-black transition-all ${
               active === tab 
                 ? 'bg-if-purple text-white shadow-xl shadow-if-purple/20 scale-105' 
@@ -132,6 +167,29 @@ export default function ProfileTabs({
                     />
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+        ) : active === 'Salvos' ? (
+          <div className="grid gap-6 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            {loadingSaved ? (
+              <div className="col-span-full py-10 text-center text-if-text/50 font-medium">
+                Carregando postagens salvas...
+              </div>
+            ) : displayedSavedPosts.length > 0 ? (
+              displayedSavedPosts.map((post) => (
+                <PostCard 
+                  key={post._id} 
+                  post={post} 
+                  isOwner={isOwner}
+                  isPinned={portfolio.some(p => p._id === post._id)}
+                  onPin={(pos) => handlePin(post._id, pos)}
+                  onDelete={onPostDelete}
+                />
+              ))
+            ) : (
+              <div className="col-span-full rounded-[40px] bg-if-card/50 p-20 text-center text-if-text/50 font-medium italic border-2 border-dashed border-white/5">
+                Nenhuma postagem salva ainda. Salve postagens interessantes no seu feed para ler depois!
               </div>
             )}
           </div>

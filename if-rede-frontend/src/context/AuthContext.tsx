@@ -20,6 +20,7 @@ type AuthUser = {
   status_vinculo: string;
   mod_voluntario?: boolean;
   admin?: boolean;
+  postagens_salvas: string[];
 };
 
 type AuthContextValue = {
@@ -35,6 +36,7 @@ type AuthContextValue = {
   }) => Promise<void>;
   logout: () => void;
   loading: boolean;
+  toggleSavePost: (postId: string) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -78,11 +80,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           nome: data.perfil?.nome,
           email: data.perfil?.email,
           status_vinculo: data.perfil?.status_vinculo,
-          // Este campo e usado para liberar UI de moderacao (filtro de palavras).
-          // Entrada: resposta de /usuarios/me contendo configuracoes do usuario.
-          // Saida: estado de sessao no contexto de autenticacao.
           mod_voluntario: Boolean(data.configuracoes?.mod_voluntario),
           admin: Boolean(data.configuracoes?.admin),
+          postagens_salvas: data.postagens_salvas || [],
         });
       } catch {
         if (!active) return;
@@ -175,8 +175,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const toggleSavePost = (postId: string) => {
+    if (!user) return;
+    const jaSalva = user.postagens_salvas.includes(postId);
+    const novasSalvas = jaSalva
+      ? user.postagens_salvas.filter((id) => id !== postId)
+      : [...user.postagens_salvas, postId];
+    setUser({ ...user, postagens_salvas: novasSalvas });
+  };
+
   const value = useMemo(
-    () => ({ user, token, login, register, logout, loading }),
+    () => ({ user, token, login, register, logout, loading, toggleSavePost }),
     [user, token, loading]
   );
 

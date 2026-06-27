@@ -60,6 +60,7 @@ router.get('/me', authMiddleware, async (req, res, next) => {
           total_seguidores: rel.seguidores,
           total_seguindo: rel.seguindo,
         },
+        postagens_salvas: usuario.postagens_salvas || [],
       },
       'Perfil carregado com sucesso.'
     );
@@ -143,6 +144,87 @@ router.post('/me/midia', authMiddleware, uploadPerfilArquivo.fields([{ name: 'av
         customizacao: usuario.customizacao,
       },
       'Mídia atualizada com sucesso.'
+    );
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/me/salvas/:id', authMiddleware, async (req, res, next) => {
+  try {
+    const postId = req.params.id;
+    const usuarioId = req.usuario.id;
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.fail('ID de postagem inválido.', 400);
+    }
+
+    const post = await require('../models').Postagem.findById(postId);
+    if (!post) {
+      return res.fail('Postagem não encontrada.', 404);
+    }
+
+    const usuario = await Usuario.findById(usuarioId);
+    if (!usuario) {
+      return res.fail('Usuário não encontrado.', 404);
+    }
+
+    if (!usuario.postagens_salvas) {
+      usuario.postagens_salvas = [];
+    }
+
+    const jaSalva = usuario.postagens_salvas.includes(postId);
+    let salvo = false;
+
+    if (jaSalva) {
+      usuario.postagens_salvas.pull(postId);
+    } else {
+      usuario.postagens_salvas.push(postId);
+      salvo = true;
+    }
+
+    await usuario.save();
+
+    return res.success(
+      { salvo },
+      salvo ? 'Postagem salva com sucesso.' : 'Postagem removida dos salvos.'
+    );
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/me/salvas', authMiddleware, async (req, res, next) => {
+  try {
+    const usuarioId = req.usuario.id;
+    const page = Math.max(Number(req.query.page || 1), 1);
+    const limit = Math.min(Math.max(Number(req.query.limit || 10), 1), 100);
+    const skip = (page - 1) * limit;
+
+    const usuario = await Usuario.findById(usuarioId);
+    if (!usuario) {
+      return res.fail('Usuário não encontrado.', 404);
+    }
+
+    const total = usuario.postagens_salvas ? usuario.postagens_salvas.length : 0;
+
+    const postagens = await require('../models').Postagem.find({
+      _id: { $in: usuario.postagens_salvas || [] }
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('autor_id', 'perfil.nome perfil.apelido customizacao.avatar_url');
+
+    return res.success(
+      postagens,
+      'Postagens salvas carregadas com sucesso.',
+      {
+        total,
+        pagina: page,
+        limite: limit,
+        paginas: Math.ceil(total / limit)
+      }
     );
   } catch (error) {
     return next(error);
