@@ -341,25 +341,14 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
         {renderTipo === 'audio' && arquivoUrl && (
           <div className="rounded-xl bg-if-purple/5 overflow-hidden border border-if-purple/10">
             {post.capa_url ? (
-              <div className="relative aspect-video sm:aspect-[16/10] w-full bg-black/40">
+              <div className="relative aspect-video sm:aspect-[16/10] w-full bg-black/20">
                 <Image
                   src={resolveAssetUrl(post.capa_url)}
                   alt="Capa do áudio"
                   fill
-                  className="object-cover opacity-80"
+                  className="object-cover"
                   unoptimized
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-if-purple text-white shadow-lg">
-                      <Music size={20} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-white truncate">{post.subtipo || 'Produção Sonora'}</p>
-                      <p className="text-[10px] text-white/60">Áudio personalizado</p>
-                    </div>
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="p-4 flex items-center gap-3">
