@@ -179,21 +179,21 @@ if-rede-backend/
 | **moderador_nome**            | `String`                                                  | Snapshot do nome (imutável).                                                         | required.           |
 | **moderador_matricula**       | `String`                                                  | Snapshot da matrícula (imutável).                                                    | required.           |
 | **tipo_acao**                 | `String` (enum)                                           | Tipo de ação (ex.: `comentario_aprovado`, `postagem_bloqueada`, `usuario_suspenso`). | required, imutável. |
-| **descricao**                 | \`String\`                                                  | Texto livre (≤ 500 caract., imutável).                                               | -                   |
-| **objeto_tipo**               | \`String\` (enum: \`postagem\`, \`comentario\`, \`usuario\`)      | Tipo do objeto afetado.                                                              | -                   |
-| **objeto_id**                 | \`ObjectId\`                                                | ID do objeto afetado.                                                                | -                   |
-| **objeto_snapshot**           | \`Mixed\`                                                   | Dados do objeto no momento da ação (imutável).                                       | -                   |
-| **tempo_estimado_minutos**    | \`Number\`                                                  | Tempo previsto (1‑120 min). Valor default automático por \`tipo_acao\`.                | -                   |
-| **horas**                     | \`Number\` (getter)                                         | \`tempo_estimado_minutos / 60\` (2 decimais).                                          | -                   |
-| **resultado**                 | \`String\` (enum: \`sucesso\`, \`parcial\`, \`erro\`, \`sem_acao\`) | Resultado da ação.                                                                   | -                   |
-| **motivo_rejeicao**           | `String`                                                  | Motivo da rejeição/bloqueio (≤ 300 caract.).                                         |
-| **tags**                      | `[String]` (enum)                                         | Categorias (spam, discurso-odio, direitos-autorais, etc.).                           |
-| **data_acao**                 | `Date`                                                    | Data/hora da ação (default = now).                                                   |
-| **ip_origem**, **user_agent** | `String`                                                  | Dados opcionais de auditoria.                                                        |
-| **revisado**                  | `Boolean`                                                 | Flag de revisão.                                                                     |
-| **revisado_por**              | `ObjectId` → `Usuario`                                    | Moderador que revisou.                                                               |
-| **resultado_revisao**         | `String` (enum: `confirmado`, `revertido`, `escalado`)    | Resultado da revisão.                                                                |
-| **comentario_revisao**        | `String`                                                  | Texto da revisão (≤ 500 caract.).                                                    |
+| **descricao**                 | `String`                                                  | Texto livre (≤ 500 caract., imutável).                                               | -                   |
+| **objeto_tipo**               | `String` (enum: `postagem`, `comentario`, `usuario`)      | Tipo do objeto afetado.                                                              | -                   |
+| **objeto_id**                 | `ObjectId`                                                | ID do objeto afetado.                                                                | -                   |
+| **objeto_snapshot**           | `Mixed`                                                   | Dados do objeto no momento da ação (imutável).                                       | -                   |
+| **tempo_estimado_minutos**    | `Number`                                                  | Tempo previsto (1‑120 min). Valor default automático por `tipo_acao`.                | -                   |
+| **horas**                     | `Number` (getter)                                         | `tempo_estimado_minutos / 60` (2 decimais).                                          | -                   |
+| **resultado**                 | `String` (enum: `sucesso`, `parcial`, `erro`, `sem_acao`) | Resultado da ação.                                                                   | -                   |
+| **motivo_rejeicao**           | `String`                                                  | Motivo da rejeição/bloqueio (≤ 300 caract.).                                         | -                   |
+| **tags**                      | `[String]` (enum)                                         | Categorias (spam, discurso-odio, direitos-autorais, etc.).                           | -                   |
+| **data_acao**                 | `Date`                                                    | Data/hora da ação (default = now).                                                   | -                   |
+| **ip_origem**, **user_agent** | `String`                                                  | Dados opcionais de auditoria.                                                        | -                   |
+| **revisado**                  | `Boolean`                                                 | Flag de revisão.                                                                     | -                   |
+| **revisado_por**              | `ObjectId` → `Usuario`                                    | Moderador que revisou.                                                               | -                   |
+| **resultado_revisao**         | `String` (enum: `confirmado`, `revertido`, `escalado`)    | Resultado da revisão.                                                                | -                   |
+| **comentario_revisao**        | `String`                                                  | Texto da revisão (≤ 500 caract.).                                                    | -                   |
 
 #### Índices (performance de relatórios)
 
