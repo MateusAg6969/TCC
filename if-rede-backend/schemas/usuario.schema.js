@@ -155,11 +155,15 @@ const customizacaoSchema = new mongoose.Schema(
       default: [],
     },
 
-    // Tema: light ou dark (futuro)
+    // Tema selecionado
     tema: {
       type: String,
-      enum: ['light', 'dark'],
-      default: 'light',
+      default: 'default',
+    },
+    // Valores customizados do tema (em caso de tema custom)
+    tema_valores_customizados: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
   },
   { _id: false }

@@ -21,6 +21,10 @@ type AuthUser = {
   mod_voluntario?: boolean;
   admin?: boolean;
   postagens_salvas: string[];
+  customizacao?: {
+    tema?: string;
+    tema_valores_customizados?: Record<string, string>;
+  };
 };
 
 type AuthContextValue = {
@@ -83,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           mod_voluntario: Boolean(data.configuracoes?.mod_voluntario),
           admin: Boolean(data.configuracoes?.admin),
           postagens_salvas: data.postagens_salvas || [],
+          customizacao: data.customizacao,
         });
       } catch {
         if (!active) return;
@@ -130,7 +135,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // 3. Persistência em Memória: Atualiza o estado global do React.
       setToken(accessToken);
-      setUser(usuarioLogado);
+      setUser({
+        id: usuarioLogado.id || usuarioLogado._id,
+        nome: usuarioLogado.perfil?.nome,
+        email: usuarioLogado.perfil?.email,
+        status_vinculo: usuarioLogado.perfil?.status_vinculo,
+        mod_voluntario: Boolean(usuarioLogado.configuracoes?.mod_voluntario),
+        admin: Boolean(usuarioLogado.configuracoes?.admin),
+        postagens_salvas: usuarioLogado.postagens_salvas || [],
+        customizacao: usuarioLogado.customizacao,
+      });
 
       // 4. Fluxo de Navegação: Leva o usuário para a área restrita.
       router.push('/home');

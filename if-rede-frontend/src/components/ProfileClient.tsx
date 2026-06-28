@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Award, House, Settings, PlusSquare, Search, Users } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,6 +29,8 @@ type ProfilePayload = {
     banner_position?: string;
     medalhas?: Medalha[];
     portfolio?: PortfolioItem[];
+    tema?: string;
+    tema_valores_customizados?: Record<string, string>;
   };
   stats?: {
     total_seguidores?: number;
@@ -120,6 +122,73 @@ export default function ProfileClient({
       setCarregandoSeguir(false);
     }
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const visitorTheme = localStorage.getItem('user-theme') || 'default';
+    const visitorCustom = localStorage.getItem('user-theme-custom-values');
+
+    // Apply Profile owner's theme
+    const profileTheme = profile?.customizacao?.tema || 'default';
+    const profileCustom = profile?.customizacao?.tema_valores_customizados || {};
+
+    const html = document.documentElement;
+    
+    // Helper to calculate contrast
+    const getContrastColor = (hex: string) => {
+      if (!hex) return '#ffffff';
+      const cleanHex = hex.replace('#', '');
+      let r = 0, g = 0, b = 0;
+      if (cleanHex.length === 3) {
+        r = parseInt(cleanHex[0] + cleanHex[0], 16);
+        g = parseInt(cleanHex[1] + cleanHex[1], 16);
+        b = parseInt(cleanHex[2] + cleanHex[2], 16);
+      } else {
+        r = parseInt(cleanHex.substring(0, 2), 16);
+        g = parseInt(cleanHex.substring(2, 4), 16);
+        b = parseInt(cleanHex.substring(4, 6), 16);
+      }
+      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return yiq >= 128 ? '#000000' : '#ffffff';
+    };
+
+    const applyTheme = (themeName: string, customVals: Record<string, string>) => {
+      // Remove any existing theme class
+      const classes = html.className.split(' ');
+      const cleanClasses = classes.filter(c => !c.startsWith('theme-'));
+      cleanClasses.push(`theme-${themeName}`);
+      html.className = cleanClasses.join(' ').trim();
+
+      if (themeName === 'custom') {
+        Object.entries(customVals).forEach(([key, val]) => {
+          html.style.setProperty(key, val);
+        });
+        html.style.setProperty('--brand-highlight-text', getContrastColor(customVals['--brand-highlight'] || '#ADCC5A'));
+        html.style.setProperty('--brand-card-text', getContrastColor(customVals['--brand-title-background'] || '#2A172B'));
+      } else {
+        // Clear custom styles
+        Object.keys(customVals).forEach((key) => {
+          html.style.removeProperty(key);
+        });
+        html.style.removeProperty('--brand-highlight-text');
+        html.style.removeProperty('--brand-card-text');
+      }
+    };
+
+    applyTheme(profileTheme, profileCustom);
+
+    // Revert to visitor theme when unmounting or when profile changes
+    return () => {
+      let parsedVisitorCustom = {};
+      if (visitorCustom) {
+        try {
+          parsedVisitorCustom = JSON.parse(visitorCustom);
+        } catch (e) {}
+      }
+      applyTheme(visitorTheme, parsedVisitorCustom);
+    };
+  }, [profile]);
 
   const styleVars = useMemo(() => {
     const primary = profile?.customizacao?.cor_botoes || '#8F9972';

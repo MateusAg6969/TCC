@@ -94,6 +94,11 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
       if (customizacao.banner_url !== undefined) usuario.customizacao.banner_url = customizacao.banner_url;
       if (customizacao.avatar_position !== undefined) usuario.customizacao.avatar_position = customizacao.avatar_position;
       if (customizacao.banner_position !== undefined) usuario.customizacao.banner_position = customizacao.banner_position;
+      if (customizacao.tema !== undefined) usuario.customizacao.tema = customizacao.tema;
+      if (customizacao.tema_valores_customizados !== undefined) {
+        usuario.customizacao.tema_valores_customizados = customizacao.tema_valores_customizados;
+        usuario.markModified('customizacao.tema_valores_customizados');
+      }
     }
 
     await usuario.save();

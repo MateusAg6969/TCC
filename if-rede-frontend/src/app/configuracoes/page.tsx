@@ -7,6 +7,8 @@ import { LogOut, User, Lock, Bell, Palette, ArrowLeft, ChevronRight } from 'luci
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomSelect from '@/components/CustomSelect';
+import api from '@/lib/api';
+import { toast } from 'sonner';
 
 type Tab = 'perfil' | 'privacidade' | 'notificacoes' | 'aparencia';
 
@@ -112,6 +114,8 @@ export default function ConfiguracoesPage() {
     return yiq >= 128 ? '#000000' : '#ffffff';
   };
 
+  const [salvandoCores, setSalvandoCores] = useState(false);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('user-theme') || 'default';
@@ -135,7 +139,32 @@ export default function ConfiguracoesPage() {
     }
   }, []);
 
-  const changeTheme = (themeName: string) => {
+  // Sync theme from database profile when logged in user details load
+  useEffect(() => {
+    if (user?.customizacao?.tema) {
+      const dbTheme = user.customizacao.tema;
+      setCurrentTheme(dbTheme);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user-theme', dbTheme);
+      }
+
+      if (dbTheme === 'custom' && user.customizacao.tema_valores_customizados) {
+        const dbCustom = user.customizacao.tema_valores_customizados;
+        setCustomValues(dbCustom);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user-theme-custom-values', JSON.stringify(dbCustom));
+          const html = document.documentElement;
+          Object.entries(dbCustom).forEach(([key, val]) => {
+            html.style.setProperty(key, val as string);
+          });
+          html.style.setProperty('--brand-highlight-text', getContrastColor((dbCustom['--brand-highlight'] || '#ADCC5A') as string));
+          html.style.setProperty('--brand-card-text', getContrastColor((dbCustom['--brand-title-background'] || '#2A172B') as string));
+        }
+      }
+    }
+  }, [user]);
+
+  const changeTheme = async (themeName: string) => {
     setCurrentTheme(themeName);
     if (typeof window === 'undefined') return;
 
@@ -163,6 +192,19 @@ export default function ConfiguracoesPage() {
       html.style.removeProperty('--brand-highlight-text');
       html.style.removeProperty('--brand-card-text');
     }
+
+    try {
+      await api.patch('/usuarios/me', {
+        customizacao: {
+          tema: themeName,
+          tema_valores_customizados: themeName === 'custom' ? customValues : {}
+        }
+      });
+      toast.success('Tema atualizado no seu perfil!');
+    } catch (e) {
+      console.error(e);
+      toast.error('Erro ao salvar preferência de tema.');
+    }
   };
 
   const updateCustomValue = (key: string, value: string) => {
@@ -178,6 +220,24 @@ export default function ConfiguracoesPage() {
       if (key === '--brand-title-background') {
         document.documentElement.style.setProperty('--brand-card-text', getContrastColor(value));
       }
+    }
+  };
+
+  const salvarCoresCustomizadas = async () => {
+    setSalvandoCores(true);
+    try {
+      await api.patch('/usuarios/me', {
+        customizacao: {
+          tema: 'custom',
+          tema_valores_customizados: customValues
+        }
+      });
+      toast.success('Cores personalizadas salvas no seu perfil!');
+    } catch (e) {
+      console.error(e);
+      toast.error('Erro ao salvar cores customizadas no servidor.');
+    } finally {
+      setSalvandoCores(false);
     }
   };
 
@@ -428,6 +488,17 @@ export default function ConfiguracoesPage() {
                             </div>
                           </div>
                         ))}
+                      </div>
+
+                      <div className="flex justify-end pt-4">
+                        <button
+                          type="button"
+                          onClick={salvarCoresCustomizadas}
+                          disabled={salvandoCores}
+                          className="px-6 py-2.5 rounded-full bg-if-olive text-if-olive-contrast font-bold text-sm hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
+                        >
+                          {salvandoCores ? 'Salvando...' : 'Salvar Cores Personalizadas'}
+                        </button>
                       </div>
                     </motion.div>
                   )}

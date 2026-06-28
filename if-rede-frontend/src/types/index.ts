@@ -30,7 +30,8 @@ export interface Customizacao {
   banner_position?: string;
   medalhas?: Medalha[];
   portfolio?: PortfolioItem[];
-  tema?: 'light' | 'dark';
+  tema?: string;
+  tema_valores_customizados?: Record<string, string>;
 }
 
 export interface Usuario {
