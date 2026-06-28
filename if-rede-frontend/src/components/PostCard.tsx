@@ -240,7 +240,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
               </div>
             )}
             <span className="rounded-full bg-if-purple/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-if-purple border border-if-purple/20">
-              {tipo}
+              {tipo}{post.subtipo ? ` • ${post.subtipo}` : ''}
             </span>
             <div className="relative">
               <button

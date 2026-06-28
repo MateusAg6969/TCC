@@ -14,15 +14,21 @@ type HomeFeedClientProps = {
   profileHref: string;
 };
 
+import React, { useState } from 'react';
+
 export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFeedClientProps) {
   const { logout, user } = useAuth();
+  const [filtro, setFiltro] = useState<string>('Todos');
 
   // A Home sempre exibe o feed inicial; a busca agora redireciona para /search.
-  const principais = feed.slice(0, 8);
-  const artistas = feed.slice(8, 12);
+  const postsFiltrados = filtro === 'Todos' ? feed : feed.filter(p => p.subtipo === filtro);
+  const principais = postsFiltrados.slice(0, 8);
+  const artistas = postsFiltrados.slice(8, 12);
   const highlights = destaques;
 
-  const semResultados = feed.length === 0;
+  const subtiposUnicos = Array.from(new Set(feed.map(p => p.subtipo).filter(Boolean))) as string[];
+
+  const semResultados = postsFiltrados.length === 0;
 
   return (
     <main className="min-h-screen bg-if-bg text-if-text">
@@ -96,6 +102,34 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
             </Link>
           )}
         </header>
+
+        {subtiposUnicos.length > 0 && (
+          <div className="mb-6 flex gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x">
+            <button
+              onClick={() => setFiltro('Todos')}
+              className={`snap-start whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
+                filtro === 'Todos'
+                  ? 'bg-if-purple text-white shadow-lg shadow-if-purple/20'
+                  : 'bg-if-card text-if-text/60 border border-white/5 hover:bg-if-purple/20 hover:text-if-purple'
+              }`}
+            >
+              Todos
+            </button>
+            {subtiposUnicos.map((sub) => (
+              <button
+                key={sub}
+                onClick={() => setFiltro(sub)}
+                className={`snap-start whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
+                  filtro === sub
+                    ? 'bg-if-purple text-white shadow-lg shadow-if-purple/20'
+                    : 'bg-if-card text-if-text/60 border border-white/5 hover:bg-if-purple/20 hover:text-if-purple'
+                }`}
+              >
+                {sub}
+              </button>
+            ))}
+          </div>
+        )}
 
         <section className="mb-6 rounded-main bg-gradient-to-r from-if-card via-if-card to-if-olive/25 p-5 shadow-card">
           <div className="mb-3 flex items-center gap-2 text-if-olive">

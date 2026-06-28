@@ -175,7 +175,9 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                       isAutor={user?.id === autorId} 
                     />
                     <span className="h-1 w-1 rounded-full bg-if-text/20" />
-                    <span className="flex items-center gap-1 uppercase tracking-wider text-[10px] bg-if-purple/10 px-2 py-0.5 rounded text-if-purple border border-if-purple/20">{post.tipo}</span>
+                    <Link href={`/search?q=${post.subtipo || post.tipo}`} className="flex items-center gap-1 uppercase tracking-wider text-[10px] bg-if-purple/10 px-2 py-0.5 rounded text-if-purple border border-if-purple/20 hover:bg-if-purple hover:text-white transition-colors">
+                      {post.tipo}{post.subtipo ? ` • ${post.subtipo}` : ''}
+                    </Link>
                   </div>
                 </div>
               </div>
