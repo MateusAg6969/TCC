@@ -59,17 +59,40 @@ async function enviarEmailConfirmacao(email, nome, token) {
 
   const subject = 'IF REDE - Confirme seu e-mail';
   const htmlContent = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-      <h2 style="color: #1E40AF; text-align: center;">Bem-vindo ao IF REDE, ${nome}!</h2>
-      <p style="font-size: 16px; color: #333;">Estamos muito felizes em ter você na nossa rede acadêmica.</p>
-      <p style="font-size: 16px; color: #333;">Para começar a usar sua conta, por favor, confirme seu e-mail clicando no botão abaixo:</p>
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="${urlConfirmacao}" style="background-color: #1E40AF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;">Confirmar Meu E-mail</a>
+    <div style="background-color: #000000; color: #e5e5e5; padding: 40px 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #262626; border-radius: 12px; overflow: hidden;">
+        <!-- Cabeçalho -->
+        <div style="background-color: #1E40AF; padding: 30px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 2px;">IF REDE</h1>
+        </div>
+        
+        <!-- Corpo -->
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #ffffff; font-size: 20px; margin-top: 0;">Bem-vindo à rede acadêmica, ${nome}!</h2>
+          <p style="font-size: 16px; line-height: 1.6; color: #a3a3a3;">
+            Estamos muito felizes em ter você conosco. Para garantir a segurança da sua conta e liberar seu acesso completo à plataforma, precisamos que confirme seu endereço de e-mail.
+          </p>
+          
+          <div style="text-align: center; margin: 40px 0;">
+            <a href="${urlConfirmacao}" style="display: inline-block; background-color: #4D7C0F; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; transition: background-color 0.3s;">
+              Confirmar Meu E-mail
+            </a>
+          </div>
+          
+          <p style="font-size: 14px; color: #737373; margin-bottom: 5px;">Se o botão não funcionar, copie e cole este link no seu navegador:</p>
+          <p style="font-size: 14px; color: #4D7C0F; word-break: break-all; margin-top: 0;">
+            <a href="${urlConfirmacao}" style="color: #4D7C0F; text-decoration: underline;">${urlConfirmacao}</a>
+          </p>
+        </div>
+        
+        <!-- Rodapé -->
+        <div style="background-color: #050505; padding: 20px; text-align: center; border-top: 1px solid #262626;">
+          <p style="font-size: 12px; color: #525252; margin: 0;">
+            IF REDE - Rede Social Acadêmica<br>
+            Este é um e-mail automático, por favor, não responda.
+          </p>
+        </div>
       </div>
-      <p style="font-size: 14px; color: #666;">Se o botão não funcionar, copie e cole o link abaixo no seu navegador:</p>
-      <p style="font-size: 14px; color: #1E40AF; word-break: break-all;">${urlConfirmacao}</p>
-      <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-      <p style="font-size: 12px; color: #999; text-align: center;">Este é um e-mail automático, por favor, não responda.</p>
     </div>
   `;
 
@@ -95,18 +118,46 @@ async function enviarEmailRecuperacao(email, nome, token) {
 
   const subject = 'IF REDE - Recuperação de Senha';
   const htmlContent = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-      <h2 style="color: #1E40AF; text-align: center;">Recuperação de Senha</h2>
-      <p style="font-size: 16px; color: #333;">Olá, ${nome}!</p>
-      <p style="font-size: 16px; color: #333;">Recebemos uma solicitação para redefinir a senha da sua conta no IF REDE.</p>
-      <p style="font-size: 16px; color: #333;">Se foi você, clique no botão abaixo para criar uma nova senha:</p>
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="${urlRecuperacao}" style="background-color: #1E40AF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;">Redefinir Senha</a>
+    <div style="background-color: #000000; color: #e5e5e5; padding: 40px 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #0a0a0a; border: 1px solid #262626; border-radius: 12px; overflow: hidden;">
+        <!-- Cabeçalho -->
+        <div style="background-color: #1E40AF; padding: 30px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 2px;">IF REDE</h1>
+        </div>
+        
+        <!-- Corpo -->
+        <div style="padding: 40px 30px;">
+          <h2 style="color: #ffffff; font-size: 20px; margin-top: 0;">Recuperação de Senha</h2>
+          <p style="font-size: 16px; line-height: 1.6; color: #a3a3a3;">
+            Olá, ${nome}! Recebemos uma solicitação para redefinir a senha da sua conta.
+          </p>
+          <p style="font-size: 16px; line-height: 1.6; color: #a3a3a3;">
+            Se foi você que solicitou, basta clicar no botão abaixo para criar uma nova senha com segurança.
+          </p>
+          
+          <div style="text-align: center; margin: 40px 0;">
+            <a href="${urlRecuperacao}" style="display: inline-block; background-color: #4D7C0F; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; transition: background-color 0.3s;">
+              Redefinir Minha Senha
+            </a>
+          </div>
+          
+          <p style="font-size: 14px; color: #ef4444; margin-bottom: 20px;">
+            ⚠️ Este link é válido por apenas 1 hora.
+          </p>
+          
+          <p style="font-size: 14px; color: #737373;">
+            Se você não solicitou a recuperação, pode ignorar este e-mail. Nenhuma alteração será feita na sua conta.
+          </p>
+        </div>
+        
+        <!-- Rodapé -->
+        <div style="background-color: #050505; padding: 20px; text-align: center; border-top: 1px solid #262626;">
+          <p style="font-size: 12px; color: #525252; margin: 0;">
+            IF REDE - Rede Social Acadêmica<br>
+            Este é um e-mail automático, por favor, não responda.
+          </p>
+        </div>
       </div>
-      <p style="font-size: 14px; color: #666;">Este link expira em 1 hora.</p>
-      <p style="font-size: 14px; color: #666;">Se você não solicitou a recuperação, pode ignorar este e-mail em segurança.</p>
-      <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-      <p style="font-size: 12px; color: #999; text-align: center;">Este é um e-mail automático, por favor, não responda.</p>
     </div>
   `;
 
