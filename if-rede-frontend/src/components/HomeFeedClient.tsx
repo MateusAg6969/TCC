@@ -165,14 +165,19 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
           <div>
             <h3 className="mb-4 text-xl font-semibold">O que achamos que você vai gostar</h3>
-            <div className="columns-1 md:columns-2 gap-4">
-              {principais.map((post) => (
-                <div key={post._id} className="break-inside-avoid mb-4">
-                  <PostCard post={post} />
-                </div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              <div className="flex flex-col gap-4">
+                {principais.filter((_, i) => i % 2 === 0).map((post) => (
+                  <PostCard key={post._id} post={post} />
+                ))}
+              </div>
+              <div className="flex flex-col gap-4">
+                {principais.filter((_, i) => i % 2 !== 0).map((post) => (
+                  <PostCard key={post._id} post={post} />
+                ))}
+              </div>
               {semResultados && (
-                <div className="rounded-main bg-if-card p-6 text-if-text/70 break-inside-avoid mb-4">Nao ha resultados.</div>
+                <div className="col-span-full rounded-main bg-if-card p-6 text-if-text/70">Nao ha resultados.</div>
               )}
             </div>
           </div>
