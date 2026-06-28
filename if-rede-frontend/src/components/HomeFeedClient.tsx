@@ -162,7 +162,7 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
           )}
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] items-start">
           <div>
             <h3 className="mb-4 text-xl font-semibold">O que achamos que você vai gostar</h3>
             <div className="columns-1 md:columns-2 gap-4">
