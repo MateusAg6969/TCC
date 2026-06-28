@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { Usuario, Seguidor, UsuarioMedalha, PortfolioItem } = require('../models');
+const { Usuario, Seguidor, UsuarioMedalha, PortfolioItem, Postagem } = require('../models');
 const { authMiddleware, optionalAuthMiddleware } = require('../middleware/auth.middleware');
 const { notificarNovoSeguidor } = require('../services/notificacoes.service');
 const { uploadPerfilArquivo } = require('../middleware/upload-perfil.middleware');
@@ -229,6 +229,100 @@ router.get('/me/salvas', authMiddleware, async (req, res, next) => {
       }
     );
   } catch (error) {
+    return next(error);
+  }
+});
+
+// ============================================================================
+// GET: Ranking de Artistas da Semana
+// ============================================================================
+// Retorna o Top 10 artistas com base na soma de likes das suas 3 melhores postagens nos últimos 7 dias.
+router.get('/ranking/semana', async (req, res, next) => {
+  try {
+    const seteDiasAtras = new Date();
+    seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
+
+    const pipeline = [
+      // 1. Filtrar postagens públicas, aprovadas e dos últimos 7 dias
+      {
+        $match: {
+          createdAt: { $gte: seteDiasAtras },
+          'config.eh_rascunho': false,
+          'denuncias.bloqueado': false,
+          status_moderacao: 'aprovado',
+          'config.visibilidade': 'todos',
+        },
+      },
+      // 2. Ordenar por curtidas decrescente (para que o push pegue os melhores primeiro)
+      {
+        $sort: { 'stats.likes': -1, createdAt: -1 },
+      },
+      // 3. Agrupar por autor
+      {
+        $group: {
+          _id: '$autor_id',
+          todasPostagens: { $push: '$$ROOT' },
+        },
+      },
+      // 4. Selecionar apenas as Top 3 postagens
+      {
+        $project: {
+          _id: 1,
+          top3Postagens: { $slice: ['$todasPostagens', 3] },
+        },
+      },
+      // 5. Calcular a pontuação somando os likes das Top 3
+      {
+        $addFields: {
+          pontuacao: {
+            $reduce: {
+              input: '$top3Postagens',
+              initialValue: 0,
+              in: { $add: ['$$value', '$$this.stats.likes'] },
+            },
+          },
+        },
+      },
+      // 6. Ordenar pela pontuação calculada
+      {
+        $sort: { pontuacao: -1 },
+      },
+      // 7. Limitar aos 10 melhores artistas
+      {
+        $limit: 10,
+      },
+    ];
+
+    const rankingBruto = await Postagem.aggregate(pipeline);
+
+    // 8. Buscar os dados completos do usuário para os autores do ranking
+    const ranking = await Usuario.populate(rankingBruto, {
+      path: '_id',
+      select: 'perfil.nome perfil.apelido customizacao.avatar_url customizacao.banner_url',
+    });
+
+    // Formatar o retorno
+    const resultadoFormatado = ranking
+      .filter((item) => item._id != null) // Filtra caso o usuário tenha sido deletado
+      .map((item, index) => ({
+        posicao: index + 1,
+        usuario: item._id,
+        pontuacao: item.pontuacao,
+        postagens_destaque: item.top3Postagens.map((p) => ({
+          id: p._id,
+          titulo: p.titulo,
+          capa_url: p.capa_url,
+          url: p.conteudo?.url,
+          likes: p.stats.likes,
+        })),
+      }));
+
+    return res.success(
+      resultadoFormatado,
+      'Ranking de artistas da semana carregado com sucesso.'
+    );
+  } catch (error) {
+    console.error('Erro no ranking da semana:', error);
     return next(error);
   }
 });

@@ -241,6 +241,7 @@ if-rede-backend/
 | **/auth/login**                      | `POST`             | ❌             | Gera **JWT** (`accessToken` 15 min) + **Refresh** (`refreshToken` 7 dias).  | `bcrypt`                                           |
 | **/auth/refresh**                    | `POST`             | ❌             | Renova `accessToken` usando `refreshToken`.                                 | —                                                  |
 | **/usuarios/me**                     | `GET`              | ✅             | Dados do usuário autenticado.                                               | `authMiddleware`                                   |
+| **/usuarios/ranking/semana**         | `GET`              | ❌             | Ranking de artistas baseado na soma de likes do Top 3 postagens na semana.  | —                                                  |
 | **/usuarios/:id**                    | `GET`              | ✅             | Dados públicos de outro usuário (visibilidade).                             | `authMiddleware`                                   |
 | **/usuarios/:id/seguir**             | `POST` / `DELETE`  | ✅             | Segue / deixa de seguir; verifica limites (egresso ≤ 2 posts/semana).       | `authMiddleware`, `ownershipCheck`                 |
 | **/postagens**                       | `POST`             | ✅             | Cria postagem (padrão **rascunho**).                                        | `authMiddleware`, `uploadMiddleware`, `validation` |
