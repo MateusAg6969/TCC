@@ -155,38 +155,68 @@ export default function ProfileTabs({
             {isOwner && (
               <div className="mt-12 pt-12 border-t border-white/5">
                 <h3 className="text-xl font-black text-if-purple mb-6 uppercase tracking-tighter">Sua Produção (Para Fixar)</h3>
-                <div className="grid gap-6 md:grid-cols-2 items-start">
-                  {posts.map((post) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                  <div className="flex flex-col gap-6">
+                    {posts.filter((_, i) => i % 2 === 0).map((post) => (
+                      <PostCard 
+                        key={post._id} 
+                        post={post} 
+                        isOwner={isOwner} 
+                        isPinned={portfolio.some(p => p._id === post._id)}
+                        onPin={(pos) => handlePin(post._id, pos)}
+                        onDelete={onPostDelete}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex flex-col gap-6">
+                    {posts.filter((_, i) => i % 2 !== 0).map((post) => (
+                      <PostCard 
+                        key={post._id} 
+                        post={post} 
+                        isOwner={isOwner} 
+                        isPinned={portfolio.some(p => p._id === post._id)}
+                        onPin={(pos) => handlePin(post._id, pos)}
+                        onDelete={onPostDelete}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : active === 'Salvos' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start animate-in fade-in slide-in-from-bottom-8 duration-700">
+            {loadingSaved ? (
+              <div className="col-span-full py-10 text-center text-if-text/50 font-medium">
+                Carregando postagens salvas...
+              </div>
+            ) : displayedSavedPosts.length > 0 ? (
+              <>
+                <div className="flex flex-col gap-6">
+                  {displayedSavedPosts.filter((_, i) => i % 2 === 0).map((post) => (
                     <PostCard 
                       key={post._id} 
                       post={post} 
-                      isOwner={isOwner} 
+                      isOwner={isOwner}
                       isPinned={portfolio.some(p => p._id === post._id)}
                       onPin={(pos) => handlePin(post._id, pos)}
                       onDelete={onPostDelete}
                     />
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
-        ) : active === 'Salvos' ? (
-          <div className="grid gap-6 md:grid-cols-2 items-start animate-in fade-in slide-in-from-bottom-8 duration-700">
-            {loadingSaved ? (
-              <div className="col-span-full py-10 text-center text-if-text/50 font-medium">
-                Carregando postagens salvas...
-              </div>
-            ) : displayedSavedPosts.length > 0 ? (
-              displayedSavedPosts.map((post) => (
-                <PostCard 
-                  key={post._id} 
-                  post={post} 
-                  isOwner={isOwner}
-                  isPinned={portfolio.some(p => p._id === post._id)}
-                  onPin={(pos) => handlePin(post._id, pos)}
-                  onDelete={onPostDelete}
-                />
-              ))
+                <div className="flex flex-col gap-6">
+                  {displayedSavedPosts.filter((_, i) => i % 2 !== 0).map((post) => (
+                    <PostCard 
+                      key={post._id} 
+                      post={post} 
+                      isOwner={isOwner}
+                      isPinned={portfolio.some(p => p._id === post._id)}
+                      onPin={(pos) => handlePin(post._id, pos)}
+                      onDelete={onPostDelete}
+                    />
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="col-span-full rounded-[40px] bg-if-card/50 p-20 text-center text-if-text/50 font-medium italic border-2 border-dashed border-white/5">
                 Nenhuma postagem salva ainda. Salve postagens interessantes no seu feed para ler depois!
@@ -194,20 +224,37 @@ export default function ProfileTabs({
             )}
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 items-start animate-in fade-in slide-in-from-bottom-8 duration-700">
-            {filteredPosts.map((post) => (
-              <PostCard 
-                key={post._id} 
-                post={post} 
-                isOwner={isOwner}
-                isPinned={portfolio.some(p => p._id === post._id)}
-                onPin={(pos) => handlePin(post._id, pos)}
-                onDelete={onPostDelete}
-              />
-            ))}
-            {!filteredPosts.length && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start animate-in fade-in slide-in-from-bottom-8 duration-700">
+            {filteredPosts.length > 0 ? (
+              <>
+                <div className="flex flex-col gap-6">
+                  {filteredPosts.filter((_, i) => i % 2 === 0).map((post) => (
+                    <PostCard 
+                      key={post._id} 
+                      post={post} 
+                      isOwner={isOwner}
+                      isPinned={portfolio.some(p => p._id === post._id)}
+                      onPin={(pos) => handlePin(post._id, pos)}
+                      onDelete={onPostDelete}
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-col gap-6">
+                  {filteredPosts.filter((_, i) => i % 2 !== 0).map((post) => (
+                    <PostCard 
+                      key={post._id} 
+                      post={post} 
+                      isOwner={isOwner}
+                      isPinned={portfolio.some(p => p._id === post._id)}
+                      onPin={(pos) => handlePin(post._id, pos)}
+                      onDelete={onPostDelete}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
               <div className="col-span-full rounded-[40px] bg-if-card/50 p-20 text-center text-if-text/50 font-medium italic border-2 border-dashed border-white/5">
-                O silêncio é uma tela em branco. Nenhuma postagem encontrada nesta categoria.
+                Nenhuma postagem encontrada nesta categoria.
               </div>
             )}
           </div>
