@@ -44,6 +44,19 @@ export default function RootLayout({
                   cleanClasses.push('theme-' + saved);
                   document.documentElement.className = cleanClasses.join(' ').trim();
                   
+                  function getContrastColor(hex) {
+                    if (!hex) return '#ffffff';
+                    var cleanHex = hex.replace('#', '');
+                    if (cleanHex.length === 3) {
+                      cleanHex = cleanHex[0] + cleanHex[0] + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2];
+                    }
+                    var r = parseInt(cleanHex.substr(0, 2), 16);
+                    var g = parseInt(cleanHex.substr(2, 2), 16);
+                    var b = parseInt(cleanHex.substr(4, 2), 16);
+                    var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+                    return (yiq >= 128) ? '#000000' : '#ffffff';
+                  }
+
                   if (saved === 'custom') {
                     var customVars = JSON.parse(localStorage.getItem('user-theme-custom-values') || '{}');
                     for (var key in customVars) {
@@ -51,6 +64,11 @@ export default function RootLayout({
                         document.documentElement.style.setProperty(key, customVars[key]);
                       }
                     }
+                    
+                    var highlight = customVars['--brand-highlight'] || '#ADCC5A';
+                    var titleBg = customVars['--brand-title-background'] || '#2A172B';
+                    document.documentElement.style.setProperty('--brand-highlight-text', getContrastColor(highlight));
+                    document.documentElement.style.setProperty('--brand-card-text', getContrastColor(titleBg));
                   }
                 } catch (e) {}
               })();

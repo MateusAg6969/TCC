@@ -134,10 +134,10 @@ export default function ProfileClient({
     <main className="min-h-screen bg-if-bg text-if-text pb-20" style={styleVars}>
       <div className="mx-auto max-w-7xl p-4 md:p-8">
         {/* Navbar */}
-        <header className="mb-6 flex flex-wrap items-center gap-3 rounded-main bg-if-card p-4 md:flex-nowrap md:px-6">
+        <header className="mb-6 flex flex-wrap items-center gap-3 rounded-main bg-if-menu p-4 md:flex-nowrap md:px-6">
           <Link
             href="/post/new"
-            className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-bg hover:brightness-110 transition-all"
+            className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-olive-contrast hover:brightness-110 transition-all"
           >
             <PlusSquare size={18} /> Nova postagem
           </Link>
@@ -157,7 +157,7 @@ export default function ProfileClient({
 
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 rounded-full bg-if-olive/10 px-4 py-2 text-sm font-semibold text-if-olive hover:bg-if-olive hover:text-if-bg transition-all ml-auto md:ml-0"
+            className="inline-flex items-center gap-2 rounded-full bg-if-olive/10 px-4 py-2 text-sm font-semibold text-if-olive hover:bg-if-olive hover:text-if-olive-contrast transition-all ml-auto md:ml-0"
           >
             <House size={18} /> Início
           </Link>
@@ -238,7 +238,7 @@ export default function ProfileClient({
                 {ehProprioPerfil ? (
                   <button
                     onClick={() => setOpenModal(true)}
-                    className="rounded-2xl border-2 border-if-olive/20 bg-if-olive/10 px-8 py-3.5 sm:px-10 sm:py-4 text-sm sm:text-base font-bold text-if-olive shadow-xl hover:bg-if-olive hover:text-if-bg active:scale-95 transition-all"
+                    className="rounded-2xl border-2 border-if-olive/20 bg-if-olive/10 px-8 py-3.5 sm:px-10 sm:py-4 text-sm sm:text-base font-bold text-if-olive shadow-xl hover:bg-if-olive hover:text-if-olive-contrast active:scale-95 transition-all"
                   >
                     Editar Perfil
                   </button>

@@ -94,6 +94,23 @@ export default function ConfiguracoesPage() {
     '--brand-menu-highlight': '#8B5CF6'
   });
 
+  const getContrastColor = (hex: string) => {
+    if (!hex) return '#ffffff';
+    const cleanHex = hex.replace('#', '');
+    let r = 0, g = 0, b = 0;
+    if (cleanHex.length === 3) {
+      r = parseInt(cleanHex[0] + cleanHex[0], 16);
+      g = parseInt(cleanHex[1] + cleanHex[1], 16);
+      b = parseInt(cleanHex[2] + cleanHex[2], 16);
+    } else {
+      r = parseInt(cleanHex.substring(0, 2), 16);
+      g = parseInt(cleanHex.substring(2, 4), 16);
+      b = parseInt(cleanHex.substring(4, 6), 16);
+    }
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return yiq >= 128 ? '#000000' : '#ffffff';
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('user-theme') || 'default';
@@ -102,7 +119,14 @@ export default function ConfiguracoesPage() {
       const savedCustom = localStorage.getItem('user-theme-custom-values');
       if (savedCustom) {
         try {
-          setCustomValues(JSON.parse(savedCustom));
+          const parsed = JSON.parse(savedCustom);
+          setCustomValues(parsed);
+          
+          if (savedTheme === 'custom') {
+            const html = document.documentElement;
+            html.style.setProperty('--brand-highlight-text', getContrastColor(parsed['--brand-highlight'] || '#ADCC5A'));
+            html.style.setProperty('--brand-card-text', getContrastColor(parsed['--brand-title-background'] || '#2A172B'));
+          }
         } catch (e) {
           console.error(e);
         }
@@ -128,11 +152,15 @@ export default function ConfiguracoesPage() {
       Object.entries(customValues).forEach(([key, val]) => {
         html.style.setProperty(key, val);
       });
+      html.style.setProperty('--brand-highlight-text', getContrastColor(customValues['--brand-highlight']));
+      html.style.setProperty('--brand-card-text', getContrastColor(customValues['--brand-title-background']));
     } else {
       // Clear inline custom values
       Object.keys(customValues).forEach((key) => {
         html.style.removeProperty(key);
       });
+      html.style.removeProperty('--brand-highlight-text');
+      html.style.removeProperty('--brand-card-text');
     }
   };
 
@@ -143,6 +171,12 @@ export default function ConfiguracoesPage() {
     
     if (currentTheme === 'custom') {
       document.documentElement.style.setProperty(key, value);
+      if (key === '--brand-highlight') {
+        document.documentElement.style.setProperty('--brand-highlight-text', getContrastColor(value));
+      }
+      if (key === '--brand-title-background') {
+        document.documentElement.style.setProperty('--brand-card-text', getContrastColor(value));
+      }
     }
   };
 
