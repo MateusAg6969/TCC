@@ -12,6 +12,7 @@ import api, { resolveAssetUrl } from '@/lib/api';
 import ContadorAlcance from './ContadorAlcance';
 import ConfirmModal from './ConfirmModal';
 import CustomAudioPlayer from './CustomAudioPlayer';
+import ImageCarousel from './ImageCarousel';
 
 /**
  * ============================================================================
@@ -331,41 +332,12 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
                 </div>
               </div>
             ) : (
-              <>
-                {post.conteudo?.galeria && post.conteudo.galeria.length > 1 ? (
-                  <div className="flex overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    {post.conteudo.galeria.map((img, i) => (
-                      <div key={i} className="relative aspect-[16/10] w-full flex-none snap-center">
-                        <Image
-                          src={resolveAssetUrl(img.url)}
-                          alt={`${post.titulo} - Imagem ${i + 1}`}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="relative aspect-[16/10] w-full">
-                    <Image
-                      src={arquivoUrl}
-                      alt={post.titulo}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      unoptimized
-                    />
-                  </div>
-                )}
-                
-                {post.conteudo?.galeria && post.conteudo.galeria.length > 1 && (
-                  <div className="absolute top-2 right-2 z-10 bg-black/60 px-2 py-1 rounded-md backdrop-blur-md pointer-events-none border border-white/10 opacity-0 group-hover/carousel:opacity-100 transition-opacity">
-                    <p className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-1">
-                      Galeria <span className="text-if-purple font-black">{post.conteudo.galeria.length}</span>
-                    </p>
-                  </div>
-                )}
-              </>
+              <ImageCarousel 
+                images={post.conteudo?.galeria || [{ url: post.conteudo?.url || '' }]}
+                titulo={post.titulo}
+                aspectClass="aspect-[16/10]"
+                objectFitClass="object-cover"
+              />
             )}
           </div>
         )}
