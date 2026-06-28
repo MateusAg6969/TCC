@@ -203,26 +203,76 @@ router.get('/feed', authMiddleware, async (req, res, next) => {
       .limit(limit)
       .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position');
 
-    // 4. Modo de Descoberta (Fase 2: Fallback para Populares)
-    // Se o usuário não segue ninguém ou já viu o conteúdo dos seguidos na página atual.
+    // 4. Modo de Descoberta (Fase 2: Fallback Inteligente / Personalizado)
     if (items.length < limit) {
       const idsJaCarregados = items.map(item => item._id);
       const limiteRestante = limit - items.length;
 
-      const criterioPopulares = {
+      // 4.1. Analisar preferências do usuário (Top Subtipos baseados nas curtidas recentes)
+      const postsCurtidos = await Postagem.find({ 'stats.usuarios_que_curtiram': req.usuario.id })
+        .select('subtipo')
+        .limit(100)
+        .lean();
+
+      const preferencias = {};
+      postsCurtidos.forEach(p => {
+        if (p.subtipo) {
+          preferencias[p.subtipo] = (preferencias[p.subtipo] || 0) + 1;
+        }
+      });
+      
+      const subtiposFavoritos = Object.keys(preferencias)
+        .sort((a, b) => preferencias[b] - preferencias[a])
+        .slice(0, 5);
+
+      const criterioDescobertaBase = {
         ...criterioBase,
-        _id: { $not: { $in: idsJaCarregados } }, // Evita duplicados na mesma página
         'config.visibilidade': 'todos',
-        // Opcional: Não mostrar posts do próprio autor na descoberta se ele já os viu
-        autor_id: { $ne: req.usuario.id } 
+        autor_id: { $ne: req.usuario.id }
       };
 
-      const postsPopulares = await Postagem.find(criterioPopulares)
-        .sort({ 'stats.likes': -1, 'stats.visualizacoes': -1, createdAt: -1 })
-        .limit(limiteRestante)
-        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position');
+      let postsPersonalizados = [];
+      let postsGerais = [];
 
-      items = [...items, ...postsPopulares];
+      // 4.2. Se o usuário tiver preferências, dividimos as vagas 50/50
+      if (subtiposFavoritos.length > 0) {
+        const limitePersonalizado = Math.ceil(limiteRestante / 2);
+        
+        postsPersonalizados = await Postagem.find({
+          ...criterioDescobertaBase,
+          _id: { $not: { $in: idsJaCarregados } },
+          subtipo: { $in: subtiposFavoritos }
+        })
+        .sort({ 'stats.likes': -1, createdAt: -1 })
+        .limit(limitePersonalizado)
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position');
+        
+        // Atualizamos os IDs já carregados para a busca geral
+        postsPersonalizados.forEach(p => idsJaCarregados.push(p._id));
+      }
+
+      // 4.3. Preenche as vagas restantes com postagens populares gerais
+      const limiteGeral = limiteRestante - postsPersonalizados.length;
+      
+      if (limiteGeral > 0) {
+        postsGerais = await Postagem.find({
+          ...criterioDescobertaBase,
+          _id: { $not: { $in: idsJaCarregados } }
+        })
+        .sort({ 'stats.likes': -1, 'stats.visualizacoes': -1, createdAt: -1 })
+        .limit(limiteGeral)
+        .populate('autor_id', 'perfil.nome perfil.privacidade customizacao.avatar_url customizacao.banner_url customizacao.avatar_position customizacao.banner_position');
+      }
+
+      // 4.4. Mesclar e embaralhar o feed de descoberta
+      let descoberta = [...postsPersonalizados, ...postsGerais];
+      
+      for (let i = descoberta.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [descoberta[i], descoberta[j]] = [descoberta[j], descoberta[i]];
+      }
+
+      items = [...items, ...descoberta];
     }
 
     const total = await Postagem.countDocuments(criterioBase);
