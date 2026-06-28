@@ -228,14 +228,40 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
           {/* Área de Conteúdo Central */}
           <div className="p-6 md:p-10">
             {renderTipo === 'imagem' && arquivoUrl && (
-              <div className="relative aspect-video w-full overflow-hidden rounded-2xl shadow-xl border border-white/5">
-                <Image 
-                  src={arquivoUrl} 
-                  alt={post.titulo} 
-                  fill 
-                  className="object-contain bg-black/20" 
-                  unoptimized 
-                />
+              <div className="relative w-full overflow-hidden rounded-2xl shadow-xl border border-white/5 bg-black group/carousel">
+                {post.conteudo?.galeria && post.conteudo.galeria.length > 1 ? (
+                  <div className="flex overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {post.conteudo.galeria.map((img, i) => (
+                      <div key={i} className="relative aspect-video w-full flex-none snap-center">
+                        <Image
+                          src={resolveAssetUrl(img.url)}
+                          alt={`${post.titulo} - Imagem ${i + 1}`}
+                          fill
+                          className="object-contain"
+                          unoptimized
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="relative aspect-video w-full">
+                    <Image 
+                      src={arquivoUrl} 
+                      alt={post.titulo} 
+                      fill 
+                      className="object-contain" 
+                      unoptimized 
+                    />
+                  </div>
+                )}
+                
+                {post.conteudo?.galeria && post.conteudo.galeria.length > 1 && (
+                  <div className="absolute top-4 right-4 z-10 bg-black/60 px-3 py-1.5 rounded-md backdrop-blur-md pointer-events-none border border-white/10 opacity-0 group-hover/carousel:opacity-100 transition-opacity">
+                    <p className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                      Galeria <span className="text-if-purple font-black">{post.conteudo.galeria.length}</span>
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

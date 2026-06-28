@@ -38,6 +38,19 @@ const conteudoSchema = new mongoose.Schema(
       tamanho_bytes: { type: Number, default: 0, min: 0 },
     },
 
+    // Galeria de mídias para suporte a carrossel
+    galeria: [
+      {
+        url: { type: String, required: true },
+        arquivo: {
+          nome_original: { type: String, default: '' },
+          nome_servidor: { type: String, default: '' },
+          mimetype: { type: String, default: '' },
+          tamanho_bytes: { type: Number, default: 0, min: 0 },
+        },
+      }
+    ],
+
     // Texto longo ou descrição
     texto_longo: {
       type: String,

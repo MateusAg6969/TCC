@@ -60,6 +60,15 @@ export interface Post {
       mimetype?: string;
       tamanho_bytes?: number;
     };
+    galeria?: Array<{
+      url: string;
+      arquivo: {
+        nome_original?: string;
+        nome_servidor?: string;
+        mimetype?: string;
+        tamanho_bytes?: number;
+      };
+    }>;
   };
   tags?: string[];
   stats?: {

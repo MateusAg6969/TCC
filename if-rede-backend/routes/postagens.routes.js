@@ -20,7 +20,7 @@ router.post(
   '/',
   authMiddleware,
   uploadPostArquivo.fields([
-    { name: 'arquivo', maxCount: 1 },
+    { name: 'arquivo', maxCount: 10 },
     { name: 'capa', maxCount: 1 },
   ]),
   async (req, res, next) => {
@@ -36,13 +36,13 @@ router.post(
         config,
       } = req.body;
 
-      const arquivo = req.files && req.files['arquivo'] ? req.files['arquivo'][0] : null;
+      const arquivos = req.files && req.files['arquivo'] ? req.files['arquivo'] : [];
       const capa = req.files && req.files['capa'] ? req.files['capa'][0] : null;
 
       // O que faz: valida campos obrigatorios para fluxo de upload.
       // Por que: agora toda postagem depende de arquivo real, nao apenas URL manual.
       // Fluxo de dados: multipart/form-data -> multer(req.file + req.body) -> validacao.
-      if (!titulo || !tipo || !arquivo) {
+      if (!titulo || !tipo || arquivos.length === 0) {
         return res.fail('Campos obrigatorios: titulo, tipo e arquivo.', 400);
       }
 
@@ -51,11 +51,13 @@ router.post(
         return res.fail('Tipo de postagem invalido.', 400);
       }
 
-      if (arquivo.size > limiteTipo) {
-        return res.fail(
-          `Arquivo excede o limite para ${tipo}. Limite: ${Math.round(limiteTipo / (1024 * 1024))}MB.`,
-          413
-        );
+      for (const arquivo of arquivos) {
+        if (arquivo.size > limiteTipo) {
+          return res.fail(
+            `Um dos arquivos excede o limite para ${tipo}. Limite: ${Math.round(limiteTipo / (1024 * 1024))}MB.`,
+            413
+          );
+        }
       }
 
       // Resolve tag oficial de subtipo, quando enviada.
@@ -70,7 +72,8 @@ router.post(
       }
 
       const { uploadBuffer } = require('../services/cloudinary.service');
-      const resultCloudinary = await uploadBuffer(arquivo.buffer, arquivo.mimetype);
+      const uploadPromises = arquivos.map(arquivo => uploadBuffer(arquivo.buffer, arquivo.mimetype));
+      const resultsCloudinary = await Promise.all(uploadPromises);
 
       // Upload da capa se fornecida
       let resultCapa = null;
@@ -85,15 +88,21 @@ router.post(
         resultCapa = await uploadBuffer(capa.buffer, capa.mimetype);
       }
 
-      const conteudo = {
-        url: resultCloudinary.secure_url,
-        texto_longo: tipo === 'texto' ? String(req.body.texto_longo || '').trim() : '',
+      const galeria = arquivos.map((arquivo, index) => ({
+        url: resultsCloudinary[index].secure_url,
         arquivo: {
           nome_original: arquivo.originalname,
-          nome_servidor: resultCloudinary.public_id,
+          nome_servidor: resultsCloudinary[index].public_id,
           mimetype: arquivo.mimetype,
           tamanho_bytes: arquivo.size,
-        },
+        }
+      }));
+
+      const conteudo = {
+        url: galeria[0].url,
+        texto_longo: tipo === 'texto' ? String(req.body.texto_longo || '').trim() : '',
+        arquivo: galeria[0].arquivo,
+        galeria: galeria,
       };
 
       const palavraDetectada = await detectarPalavraEmPartes([

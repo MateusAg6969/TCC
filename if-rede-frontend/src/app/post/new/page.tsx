@@ -32,7 +32,7 @@ export default function NewPostPage() {
     subtipo_tag_id: '',
   });
 
-  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [arquivos, setArquivos] = useState<File[]>([]);
   const [capa, setCapa] = useState<File | null>(null);
   const [tags, setTags] = useState<TagSubtipo[]>([]);
   
@@ -125,14 +125,21 @@ export default function NewPostPage() {
       return;
     }
 
-    if (!arquivo) {
-      setStatus({ ok: false, message: 'Selecione um arquivo para publicar.' });
+    if (arquivos.length === 0) {
+      setStatus({ ok: false, message: 'Selecione pelo menos um arquivo para publicar.' });
       return;
     }
 
-    if (arquivo.size > 25 * 1024 * 1024) {
-      setStatus({ ok: false, message: `Arquivo excede o limite unificado de 25MB.` });
+    if (arquivos.length > 10) {
+      setStatus({ ok: false, message: 'O limite é de 10 arquivos por postagem.' });
       return;
+    }
+
+    for (const arquivo of arquivos) {
+      if (arquivo.size > 25 * 1024 * 1024) {
+        setStatus({ ok: false, message: 'Um dos arquivos excede o limite de 25MB.' });
+        return;
+      }
     }
 
     setLoading(true);
@@ -144,7 +151,9 @@ export default function NewPostPage() {
       payload.append('tipo', form.tipo);
       payload.append('texto_longo', form.tipo === 'texto' ? form.texto_longo.trim() : '');
       payload.append('subtipo_tag_id', form.subtipo_tag_id || '');
-      payload.append('arquivo', arquivo);
+      arquivos.forEach((arq) => {
+        payload.append('arquivo', arq);
+      });
       if (capa) {
         payload.append('capa', capa);
       }
@@ -162,11 +171,12 @@ export default function NewPostPage() {
     }
   }
 
-  // Helper para lidar com arquivos no drag and drop ou click
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) setArquivo(file);
+    if (e.dataTransfer.files?.length > 0) {
+      const newFiles = Array.from(e.dataTransfer.files);
+      setArquivos((prev) => [...prev, ...newFiles].slice(0, 10));
+    }
   };
 
   return (
@@ -236,43 +246,69 @@ export default function NewPostPage() {
               <div 
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleFileDrop}
-                onClick={() => !arquivo && fileInputRef.current?.click()}
-                className={`relative flex flex-col items-center justify-center w-full min-h-[200px] rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden
-                  ${arquivo ? 'border-if-olive bg-if-olive/5' : 'border-white/20 hover:border-if-olive hover:bg-if-olive/5'}`}
+                onClick={() => arquivos.length === 0 && fileInputRef.current?.click()}
+                className={`relative flex flex-col items-center justify-center w-full min-h-[200px] rounded-2xl border-2 border-dashed transition-all overflow-hidden
+                  ${arquivos.length > 0 ? 'border-if-olive bg-if-olive/5' : 'border-white/20 hover:border-if-olive hover:bg-if-olive/5 cursor-pointer'}`}
               >
                 <input
                   type="file"
+                  multiple
                   ref={fileInputRef}
                   className="hidden"
                   onChange={(e) => {
-                    if (e.target.files?.[0]) setArquivo(e.target.files[0]);
+                    if (e.target.files && e.target.files.length > 0) {
+                      const newFiles = Array.from(e.target.files);
+                      setArquivos((prev) => [...prev, ...newFiles].slice(0, 10));
+                    }
                   }}
                 />
                 
                 <AnimatePresence mode="wait">
-                  {arquivo ? (
+                  {arquivos.length > 0 ? (
                     <motion.div 
                       key="file"
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.8, opacity: 0 }}
-                      className="flex flex-col items-center p-6 text-center"
+                      className="flex flex-col items-center p-6 text-center w-full"
                     >
-                      <div className="h-16 w-16 rounded-2xl bg-if-olive/20 text-if-olive flex items-center justify-center mb-4">
-                        <UploadCloud size={32} />
+                      <div className="flex gap-2 overflow-x-auto max-w-full pb-4 custom-scrollbar">
+                        {arquivos.map((arq, idx) => (
+                          <div key={idx} className="relative flex-shrink-0 w-24 h-24 rounded-xl border border-if-olive/30 bg-black/40 flex flex-col items-center justify-center p-2 group">
+                            <UploadCloud size={20} className="text-if-olive mb-2" />
+                            <p className="text-[10px] font-bold text-white line-clamp-1 w-full text-center">{arq.name}</p>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setArquivos((prev) => prev.filter((_, i) => i !== idx));
+                              }}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                        {arquivos.length < 10 && (
+                          <div 
+                            onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                            className="flex-shrink-0 w-24 h-24 rounded-xl border border-dashed border-if-olive/50 bg-if-olive/5 flex flex-col items-center justify-center cursor-pointer hover:bg-if-olive/20 transition-colors"
+                          >
+                            <Plus size={20} className="text-if-olive" />
+                          </div>
+                        )}
                       </div>
-                      <p className="font-bold text-white line-clamp-1 break-all px-4">{arquivo.name}</p>
-                      <p className="mt-1 text-xs text-if-text/50">{(arquivo.size / 1024 / 1024).toFixed(2)} MB</p>
+                      <p className="mt-2 text-xs font-bold text-if-olive">{arquivos.length} arquivo(s) selecionado(s)</p>
                       
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setArquivo(null);
+                          setArquivos([]);
                         }}
                         className="mt-6 rounded-full bg-red-500/20 px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
                       >
-                        <X size={14} /> Remover arquivo
+                        <X size={14} /> Remover tudo
                       </button>
                     </motion.div>
                   ) : (
@@ -281,13 +317,13 @@ export default function NewPostPage() {
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.8, opacity: 0 }}
-                      className="flex flex-col items-center p-6 text-center"
+                      className="flex flex-col items-center p-6 text-center cursor-pointer"
                     >
                       <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-4 text-white/50 group-hover:text-if-olive group-hover:bg-if-olive/10 transition-all">
                         <UploadCloud size={32} />
                       </div>
-                      <p className="font-bold text-white">Clique ou Arraste um arquivo</p>
-                      <p className="mt-1 text-xs text-if-text/50">Até 25MB (Imagens, Vídeos, Áudios ou PDFs)</p>
+                      <p className="font-bold text-white">Clique ou Arraste arquivos (até 10)</p>
+                      <p className="mt-1 text-xs text-if-text/50">Até 25MB cada (Imagens, Vídeos, Áudios ou PDFs)</p>
                     </motion.div>
                   )}
                 </AnimatePresence>

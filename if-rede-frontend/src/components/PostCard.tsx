@@ -303,9 +303,9 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
         )}
 
         {renderTipo === 'imagem' && arquivoUrl && (
-          <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-if-purple/10 bg-black">
+          <div className="relative overflow-hidden rounded-xl border border-if-purple/10 bg-black group/carousel">
             {post.capa_url && !revelado ? (
-              <div className="relative w-full h-full">
+              <div className="relative aspect-[16/10] w-full h-full">
                 <Image
                   src={resolveAssetUrl(post.capa_url)}
                   alt="Capa de spoiler"
@@ -331,13 +331,41 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
                 </div>
               </div>
             ) : (
-              <Image
-                src={arquivoUrl}
-                alt={post.titulo}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                unoptimized
-              />
+              <>
+                {post.conteudo?.galeria && post.conteudo.galeria.length > 1 ? (
+                  <div className="flex overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {post.conteudo.galeria.map((img, i) => (
+                      <div key={i} className="relative aspect-[16/10] w-full flex-none snap-center">
+                        <Image
+                          src={resolveAssetUrl(img.url)}
+                          alt={`${post.titulo} - Imagem ${i + 1}`}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="relative aspect-[16/10] w-full">
+                    <Image
+                      src={arquivoUrl}
+                      alt={post.titulo}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                
+                {post.conteudo?.galeria && post.conteudo.galeria.length > 1 && (
+                  <div className="absolute top-2 right-2 z-10 bg-black/60 px-2 py-1 rounded-md backdrop-blur-md pointer-events-none border border-white/10 opacity-0 group-hover/carousel:opacity-100 transition-opacity">
+                    <p className="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-1">
+                      Galeria <span className="text-if-purple font-black">{post.conteudo.galeria.length}</span>
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
