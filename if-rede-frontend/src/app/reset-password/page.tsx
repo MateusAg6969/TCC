@@ -4,7 +4,7 @@ import { FormEvent, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { Lock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Lock, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
@@ -13,6 +13,8 @@ export default function ResetPasswordPage() {
 
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [erro, setErro] = useState('');
@@ -108,14 +110,22 @@ export default function ResetPasswordPage() {
                       <Lock size={18} />
                     </div>
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-black/20 pl-12 pr-4 py-3 outline-none focus:border-if-olive/60 focus:bg-white/5 transition placeholder:text-if-text/30"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 pl-12 pr-12 py-3 outline-none focus:border-if-olive/60 focus:bg-white/5 transition placeholder:text-if-text/30"
                       placeholder="Mínimo 8 caracteres"
                       required
                       autoFocus
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-if-text/50 hover:text-if-olive transition-colors"
+                      title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                 </label>
 
@@ -126,13 +136,21 @@ export default function ResetPasswordPage() {
                       <Lock size={18} />
                     </div>
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmarSenha}
                       onChange={(e) => setConfirmarSenha(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-black/20 pl-12 pr-4 py-3 outline-none focus:border-if-olive/60 focus:bg-white/5 transition placeholder:text-if-text/30"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 pl-12 pr-12 py-3 outline-none focus:border-if-olive/60 focus:bg-white/5 transition placeholder:text-if-text/30"
                       placeholder="Repita a senha"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-if-text/50 hover:text-if-olive transition-colors"
+                      title={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                 </label>
 

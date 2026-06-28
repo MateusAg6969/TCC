@@ -10,6 +10,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useMemo, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function RegisterPage() {
@@ -23,6 +24,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Etapa 2: Dados do perfil
   const [nome, setNome] = useState('');
@@ -176,29 +179,49 @@ export default function RegisterPage() {
 
                   <label className="block text-sm font-medium">
                     Senha
-                    <input
-                      type="password"
-                      value={senha}
-                      onChange={(e) => setSenha(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
-                      placeholder="Mínimo 8 caracteres"
-                      minLength={8}
-                      required
-                      autoComplete="new-password"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 pl-4 pr-12 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                        placeholder="Mínimo 8 caracteres"
+                        minLength={8}
+                        required
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 text-if-text/50 hover:text-if-olive transition-colors"
+                        title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
                   </label>
 
                   <label className="block text-sm font-medium">
                     Confirmar senha
-                    <input
-                      type="password"
-                      value={confirmarSenha}
-                      onChange={(e) => setConfirmarSenha(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
-                      placeholder="Repita sua senha"
-                      required
-                      autoComplete="new-password"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmarSenha}
+                        onChange={(e) => setConfirmarSenha(e.target.value)}
+                        className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 pl-4 pr-12 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                        placeholder="Repita sua senha"
+                        required
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 mt-1 text-if-text/50 hover:text-if-olive transition-colors"
+                        title={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
                   </label>
                 </>
               )}
