@@ -174,8 +174,29 @@ export default function NewPostPage() {
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.dataTransfer.files?.length > 0) {
-      const newFiles = Array.from(e.dataTransfer.files);
+      const newFiles = Array.from(e.dataTransfer.files).filter(f => {
+        if (form.tipo === 'imagem') return f.type.startsWith('image/');
+        if (form.tipo === 'video') return f.type.startsWith('video/');
+        if (form.tipo === 'audio') return f.type.startsWith('audio/');
+        if (form.tipo === 'texto') return ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(f.type) || f.name.endsWith('.doc') || f.name.endsWith('.docx') || f.name.endsWith('.pdf') || f.name.endsWith('.txt');
+        return true;
+      });
+
+      if (newFiles.length < e.dataTransfer.files.length) {
+        setStatus({ ok: false, message: 'Arquivos incompatíveis com o tipo de postagem foram ignorados.' });
+      }
+
       setArquivos((prev) => [...prev, ...newFiles].slice(0, 10));
+    }
+  };
+
+  const getAcceptStr = () => {
+    switch (form.tipo) {
+      case 'imagem': return 'image/*';
+      case 'video': return 'video/*';
+      case 'audio': return 'audio/*';
+      case 'texto': return '.txt,.pdf,.doc,.docx,text/plain,application/pdf,application/msword';
+      default: return '*/*';
     }
   };
 
@@ -253,11 +274,23 @@ export default function NewPostPage() {
                 <input
                   type="file"
                   multiple
+                  accept={getAcceptStr()}
                   ref={fileInputRef}
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) {
-                      const newFiles = Array.from(e.target.files);
+                      const newFiles = Array.from(e.target.files).filter(f => {
+                        if (form.tipo === 'imagem') return f.type.startsWith('image/');
+                        if (form.tipo === 'video') return f.type.startsWith('video/');
+                        if (form.tipo === 'audio') return f.type.startsWith('audio/');
+                        if (form.tipo === 'texto') return ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(f.type) || f.name.endsWith('.doc') || f.name.endsWith('.docx') || f.name.endsWith('.pdf') || f.name.endsWith('.txt');
+                        return true;
+                      });
+
+                      if (newFiles.length < e.target.files.length) {
+                        setStatus({ ok: false, message: 'Arquivos incompatíveis com o tipo de postagem foram ignorados.' });
+                      }
+
                       setArquivos((prev) => [...prev, ...newFiles].slice(0, 10));
                     }
                   }}
