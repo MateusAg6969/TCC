@@ -37,7 +37,8 @@ type Theme = {
 };
 
 const THEMES: Theme[] = [
-  { id: 'default', name: 'Default', className: 'theme-default', bg: '#FFFFFF', main: '#000000', highlight: '#0500AD', titleBg: '#FFBB00', menuBg: '#0500AD' },
+  { id: 'default', name: 'Original (IF REDE)', className: 'theme-default', bg: '#190E1A', main: '#F2F2F2', highlight: '#ADCC5A', titleBg: '#2A172B', menuBg: '#2A172B' },
+  { id: 'pi_light', name: 'Pi Light', className: 'theme-pi_light', bg: '#FFFFFF', main: '#000000', highlight: '#0500AD', titleBg: '#FFBB00', menuBg: '#0500AD' },
   { id: 'dark', name: 'Dark Mode', className: 'theme-dark', bg: '#000000', main: '#FFFFFF', highlight: '#FFBB00', titleBg: '#FFBB00', menuBg: '#FFBB00' },
   { id: 'pi_classic', name: 'Pi Classic', className: 'theme-pi_classic', bg: '#0500AD', main: '#ffffff', highlight: '#FFBB00', titleBg: '#FFBB00', menuBg: '#0500AD' },
   { id: 'pink_and_red', name: 'Pink & Red', className: 'theme-pink_and_red', bg: '#DE0000', main: '#ffffff', highlight: '#FFB6C1', titleBg: '#FF10F0', menuBg: '#FFB6C1' },

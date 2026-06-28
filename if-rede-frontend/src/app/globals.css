@@ -66,6 +66,25 @@ html, body {
 
 /* Theme definitions */
 .theme-default {
+  --brand-background: #190E1A !important;
+  --brand-main: #F2F2F2 !important;
+  --brand-color: #F2F2F2 !important;
+  --brand-card-text: #F2F2F2 !important;
+  --brand-secondary: #A99DB0 !important;
+  --brand-highlight: #ADCC5A !important;
+  --brand-highlight-text: #190E1A !important;
+  --brand-highlight-border: #412644 !important;
+  --brand-logo-color: #ADCC5A !important;
+  --brand-title-background: #2A172B !important;
+  --brand-title-border: #412644 !important;
+  --brand-menu-background: #2A172B !important;
+  --brand-menu-logo: #ADCC5A !important;
+  --brand-menu-text: #F2F2F2 !important;
+  --brand-menu-highlight: #8B5CF6 !important;
+  --brand-menu-highlight-text: #ffffff !important;
+}
+
+.theme-pi_light {
   --brand-background: #FFFFFF !important;
   --brand-main: #000000 !important;
   --brand-color: #000000 !important;
