@@ -8,24 +8,193 @@
 }
 
 :root {
-  --background: #190E1A;
-  --foreground: #F2F2F2;
-  --primary-color: #ADCC5A;
-  --profile-bg: #190E1A;
+  /* Default/Fallback values (original dark purple theme) */
+  --brand-background: #190E1A;
+  --brand-main: #F2F2F2;
+  --brand-color: #F2F2F2;
+  --brand-secondary: #A99DB0;
+  --brand-highlight: #ADCC5A;
+  --brand-highlight-border: #412644;
+  --brand-logo-color: #ADCC5A;
+  --brand-title-background: #2A172B;
+  --brand-title-border: #412644;
+  --brand-menu-background: #2A172B;
+  --brand-menu-logo: #ADCC5A;
+  --brand-menu-text: #F2F2F2;
+  --brand-menu-highlight: #8B5CF6;
+
+  --background: var(--brand-background);
+  --foreground: var(--brand-color);
+  --primary-color: var(--brand-highlight);
+  --profile-bg: var(--brand-background);
+}
+
+/* Transitions for smooth theme switching */
+html, body {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Theme definitions */
+.theme-default {
+  --brand-background: #FFFFFF !important;
+  --brand-main: #000000 !important;
+  --brand-color: #000000 !important;
+  --brand-secondary: #555555 !important;
+  --brand-highlight: #0500AD !important;
+  --brand-highlight-border: #0500AD !important;
+  --brand-logo-color: #0500AD !important;
+  --brand-title-background: #FFBB00 !important;
+  --brand-title-border: #000000 !important;
+  --brand-menu-background: #0500AD !important;
+  --brand-menu-logo: #FFFFFF !important;
+  --brand-menu-text: #FFFFFF !important;
+  --brand-menu-highlight: #FFBB00 !important;
+}
+
+.theme-dark {
+  --brand-background: #000000 !important;
+  --brand-main: #FFFFFF !important;
+  --brand-color: #FFFFFF !important;
+  --brand-secondary: #A3A3A3 !important;
+  --brand-highlight: #FFBB00 !important;
+  --brand-highlight-border: #FFBB00 !important;
+  --brand-logo-color: #FFBB00 !important;
+  --brand-title-background: #FFBB00 !important;
+  --brand-title-border: #FFFFFF !important;
+  --brand-menu-background: #FFBB00 !important;
+  --brand-menu-logo: #000000 !important;
+  --brand-menu-text: #000000 !important;
+  --brand-menu-highlight: #FFFFFF !important;
+}
+
+.theme-pi_classic {
+  --brand-background: #0500AD !important;
+  --brand-main: #ffffff !important;
+  --brand-color: #ffffff !important;
+  --brand-secondary: #cccccc !important;
+  --brand-highlight: #FFBB00 !important;
+  --brand-highlight-border: #FFBB00 !important;
+  --brand-logo-color: #FFBB00 !important;
+  --brand-title-background: #FFBB00 !important;
+  --brand-title-border: #ffffff !important;
+  --brand-menu-background: #0500AD !important;
+  --brand-menu-logo: #ffffff !important;
+  --brand-menu-text: #ffffff !important;
+  --brand-menu-highlight: #FFBB00 !important;
+}
+
+.theme-pink_and_red {
+  --brand-background: #DE0000 !important;
+  --brand-main: #ffffff !important;
+  --brand-color: #ffffff !important;
+  --brand-secondary: #ffaaaa !important;
+  --brand-highlight: #FFB6C1 !important;
+  --brand-highlight-border: #FFB6C1 !important;
+  --brand-logo-color: #FFB6C1 !important;
+  --brand-title-background: #FF10F0 !important;
+  --brand-title-border: #ffffff !important;
+  --brand-menu-background: #FFB6C1 !important;
+  --brand-menu-logo: #DE0000 !important;
+  --brand-menu-text: #DE0000 !important;
+  --brand-menu-highlight: #FF10F0 !important;
+}
+
+.theme-reggae {
+  --brand-background: #00A726 !important;
+  --brand-main: #000000 !important;
+  --brand-color: #000000 !important;
+  --brand-secondary: #333333 !important;
+  --brand-highlight: #DE0000 !important;
+  --brand-highlight-border: #DE0000 !important;
+  --brand-logo-color: #DE0000 !important;
+  --brand-title-background: #FFBB00 !important;
+  --brand-title-border: #000000 !important;
+  --brand-menu-background: #00A726 !important;
+  --brand-menu-logo: #FFBB00 !important;
+  --brand-menu-text: #000000 !important;
+  --brand-menu-highlight: #DE0000 !important;
+}
+
+.theme-dakota {
+  --brand-background: #1B003F !important;
+  --brand-main: #ffffff !important;
+  --brand-color: #ffffff !important;
+  --brand-secondary: #b3b3b3 !important;
+  --brand-highlight: #A4FF00 !important;
+  --brand-highlight-border: #A4FF00 !important;
+  --brand-logo-color: #A4FF00 !important;
+  --brand-title-background: #A4FF00 !important;
+  --brand-title-border: #ffffff !important;
+  --brand-menu-background: #1B003F !important;
+  --brand-menu-logo: #A4FF00 !important;
+  --brand-menu-text: #ffffff !important;
+  --brand-menu-highlight: #A4FF00 !important;
+}
+
+.theme-iris {
+  --brand-background: #f211c1 !important;
+  --brand-main: #ffffff !important;
+  --brand-color: #ffffff !important;
+  --brand-secondary: #ffc2f1 !important;
+  --brand-highlight: #f7f70a !important;
+  --brand-highlight-border: #f7f70a !important;
+  --brand-logo-color: #f7f70a !important;
+  --brand-title-background: #ffffff !important;
+  --brand-title-border: #f211c1 !important;
+  --brand-menu-background: #f211c1 !important;
+  --brand-menu-logo: #f7f70a !important;
+  --brand-menu-text: #ffffff !important;
+  --brand-menu-highlight: #ffffff !important;
+}
+
+.theme-johanna {
+  --brand-background: #ccfffe !important;
+  --brand-main: #2c47c9 !important;
+  --brand-color: #2c47c9 !important;
+  --brand-secondary: #455dd4 !important;
+  --brand-highlight: #2c47c9 !important;
+  --brand-highlight-border: #2c47c9 !important;
+  --brand-logo-color: #2c47c9 !important;
+  --brand-title-background: #63f7f5 !important;
+  --brand-title-border: #2c47c9 !important;
+  --brand-menu-background: #FFBB00 !important;
+  --brand-menu-logo: #2c47c9 !important;
+  --brand-menu-text: #2c47c9 !important;
+  --brand-menu-highlight: #63f7f5 !important;
+}
+
+.theme-caroline {
+  --brand-background: #8C1C13 !important;
+  --brand-main: #161925 !important;
+  --brand-color: #161925 !important;
+  --brand-secondary: #4c5475 !important;
+  --brand-highlight: #BFDBF7 !important;
+  --brand-highlight-border: #BFDBF7 !important;
+  --brand-logo-color: #BFDBF7 !important;
+  --brand-title-background: #D1CCDC !important;
+  --brand-title-border: #161925 !important;
+  --brand-menu-background: #8C1C13 !important;
+  --brand-menu-logo: #BFDBF7 !important;
+  --brand-menu-text: #161925 !important;
+  --brand-menu-highlight: #D1CCDC !important;
+}
+
+.theme-custom {
+  /* Values will be overridden inline via element.style */
 }
 
 @theme inline {
-  --color-if-bg: #190E1A;
-  --color-if-card: #2A172B;
-  --color-if-olive: #ADCC5A;
-  --color-if-text: #F2F2F2;
-  --color-if-purple: #8B5CF6;
-  --color-if-purple-dark: #6D28D9;
+  --color-if-bg: var(--brand-background);
+  --color-if-card: var(--brand-title-background);
+  --color-if-olive: var(--brand-highlight);
+  --color-if-text: var(--brand-color);
+  --color-if-purple: var(--brand-menu-highlight);
+  --color-if-purple-dark: var(--brand-menu-highlight);
   --color-if-glow: rgba(139, 92, 246, 0.5);
-  --color-if-text-muted: #A99DB0;
-  --color-if-border: #412644;
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-if-text-muted: var(--brand-secondary);
+  --color-if-border: var(--brand-title-border);
+  --color-background: var(--brand-background);
+  --color-foreground: var(--brand-color);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

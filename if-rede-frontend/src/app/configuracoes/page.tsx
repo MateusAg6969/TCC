@@ -25,6 +25,46 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean, onChange: (val:
   );
 }
 
+type Theme = {
+  id: string;
+  name: string;
+  className: string;
+  bg: string;
+  main: string;
+  highlight: string;
+  titleBg: string;
+  menuBg: string;
+};
+
+const THEMES: Theme[] = [
+  { id: 'default', name: 'Default', className: 'theme-default', bg: '#FFFFFF', main: '#000000', highlight: '#0500AD', titleBg: '#FFBB00', menuBg: '#0500AD' },
+  { id: 'dark', name: 'Dark Mode', className: 'theme-dark', bg: '#000000', main: '#FFFFFF', highlight: '#FFBB00', titleBg: '#FFBB00', menuBg: '#FFBB00' },
+  { id: 'pi_classic', name: 'Pi Classic', className: 'theme-pi_classic', bg: '#0500AD', main: '#ffffff', highlight: '#FFBB00', titleBg: '#FFBB00', menuBg: '#0500AD' },
+  { id: 'pink_and_red', name: 'Pink & Red', className: 'theme-pink_and_red', bg: '#DE0000', main: '#ffffff', highlight: '#FFB6C1', titleBg: '#FF10F0', menuBg: '#FFB6C1' },
+  { id: 'reggae', name: 'Reggae', className: 'theme-reggae', bg: '#00A726', main: '#000000', highlight: '#DE0000', titleBg: '#FFBB00', menuBg: '#00A726' },
+  { id: 'dakota', name: 'Dakota', className: 'theme-dakota', bg: '#1B003F', main: '#ffffff', highlight: '#A4FF00', titleBg: '#A4FF00', menuBg: '#1B003F' },
+  { id: 'iris', name: 'Iris', className: 'theme-iris', bg: '#f211c1', main: '#ffffff', highlight: '#f7f70a', titleBg: '#ffffff', menuBg: '#f211c1' },
+  { id: 'johanna', name: 'Johanna', className: 'theme-johanna', bg: '#ccfffe', main: '#2c47c9', highlight: '#2c47c9', titleBg: '#63f7f5', menuBg: '#FFBB00' },
+  { id: 'caroline', name: 'Caroline', className: 'theme-caroline', bg: '#8C1C13', main: '#161925', highlight: '#BFDBF7', titleBg: '#D1CCDC', menuBg: '#8C1C13' },
+  { id: 'custom', name: 'Personalizado', className: 'theme-custom', bg: '#190E1A', main: '#F2F2F2', highlight: '#ADCC5A', titleBg: '#2A172B', menuBg: '#2A172B' },
+];
+
+const CUSTOM_LABELS: Record<string, string> = {
+  '--brand-background': 'Fundo do Perfil',
+  '--brand-main': 'Texto Principal',
+  '--brand-color': 'Texto de Corpo',
+  '--brand-secondary': 'Texto Secundário',
+  '--brand-highlight': 'Destaque/Botões',
+  '--brand-highlight-border': 'Borda de Destaque',
+  '--brand-logo-color': 'Cor do Logotipo',
+  '--brand-title-background': 'Fundo do Cabeçalho',
+  '--brand-title-border': 'Borda do Cabeçalho',
+  '--brand-menu-background': 'Fundo do Menu',
+  '--brand-menu-logo': 'Logo do Menu',
+  '--brand-menu-text': 'Texto do Menu',
+  '--brand-menu-highlight': 'Destaque do Menu',
+};
+
 export default function ConfiguracoesPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -35,6 +75,76 @@ export default function ConfiguracoesPage() {
   const [pushNotif, setPushNotif] = useState(true);
   const [emailNotif, setEmailNotif] = useState(false);
   const [privacidade, setPrivacidade] = useState('publico');
+
+  // Theme states
+  const [currentTheme, setCurrentTheme] = useState<string>('default');
+  const [customValues, setCustomValues] = useState<Record<string, string>>({
+    '--brand-background': '#190E1A',
+    '--brand-main': '#F2F2F2',
+    '--brand-color': '#F2F2F2',
+    '--brand-secondary': '#A99DB0',
+    '--brand-highlight': '#ADCC5A',
+    '--brand-highlight-border': '#412644',
+    '--brand-logo-color': '#ADCC5A',
+    '--brand-title-background': '#2A172B',
+    '--brand-title-border': '#412644',
+    '--brand-menu-background': '#2A172B',
+    '--brand-menu-logo': '#ADCC5A',
+    '--brand-menu-text': '#F2F2F2',
+    '--brand-menu-highlight': '#8B5CF6'
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('user-theme') || 'default';
+      setCurrentTheme(savedTheme);
+      
+      const savedCustom = localStorage.getItem('user-theme-custom-values');
+      if (savedCustom) {
+        try {
+          setCustomValues(JSON.parse(savedCustom));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, []);
+
+  const changeTheme = (themeName: string) => {
+    setCurrentTheme(themeName);
+    if (typeof window === 'undefined') return;
+
+    const html = document.documentElement;
+    // Remove any existing theme class
+    const classes = html.className.split(' ');
+    const cleanClasses = classes.filter(c => !c.startsWith('theme-'));
+    cleanClasses.push(`theme-${themeName}`);
+    html.className = cleanClasses.join(' ').trim();
+    
+    localStorage.setItem('user-theme', themeName);
+
+    if (themeName === 'custom') {
+      // Apply current custom values
+      Object.entries(customValues).forEach(([key, val]) => {
+        html.style.setProperty(key, val);
+      });
+    } else {
+      // Clear inline custom values
+      Object.keys(customValues).forEach((key) => {
+        html.style.removeProperty(key);
+      });
+    }
+  };
+
+  const updateCustomValue = (key: string, value: string) => {
+    const newVals = { ...customValues, [key]: value };
+    setCustomValues(newVals);
+    localStorage.setItem('user-theme-custom-values', JSON.stringify(newVals));
+    
+    if (currentTheme === 'custom') {
+      document.documentElement.style.setProperty(key, value);
+    }
+  };
 
   useEffect(() => {
     if (!user && !isLoggingOut) {
@@ -222,25 +332,70 @@ export default function ConfiguracoesPage() {
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                   className="space-y-6"
                 >
-                  <div className="mb-8">
+                  <div className="mb-6">
                     <h2 className="text-2xl font-black text-white">Aparência</h2>
-                    <p className="text-if-text/60 mt-1">Customize a interface da sua rede.</p>
+                    <p className="text-if-text/60 mt-1">Personalize o tema visual do seu perfil e plataforma.</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <button className="flex flex-col items-center justify-center p-6 rounded-3xl border-2 border-if-olive bg-if-olive/10 transition-all cursor-pointer">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-black to-gray-800 mb-4 shadow-xl border border-white/10" />
-                      <span className="text-if-olive font-bold">Modo Noturno</span>
-                    </button>
-                    
-                    <button className="flex flex-col items-center justify-center p-6 rounded-3xl border-2 border-transparent bg-white/5 hover:bg-white/10 transition-all cursor-not-allowed opacity-50 relative overflow-hidden group">
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-white to-gray-200 mb-4 shadow-xl border border-black/10" />
-                      <span className="text-white font-bold">Modo Claro</span>
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-xs font-black text-white px-3 py-1 rounded-full bg-black">Em breve</span>
-                      </div>
-                    </button>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {THEMES.map((theme) => {
+                      const isActive = currentTheme === theme.id;
+                      const previewBg = theme.id === 'custom' ? customValues['--brand-background'] : theme.bg;
+                      const previewHighlight = theme.id === 'custom' ? customValues['--brand-highlight'] : theme.highlight;
+                      const previewTitleBg = theme.id === 'custom' ? customValues['--brand-title-background'] : theme.titleBg;
+                      
+                      return (
+                        <button
+                          key={theme.id}
+                          type="button"
+                          onClick={() => changeTheme(theme.id)}
+                          className={`flex flex-col p-4 rounded-2xl border-2 transition-all text-left group ${
+                            isActive
+                              ? 'border-if-olive bg-if-olive/5 shadow-lg shadow-if-olive/5'
+                              : 'border-white/5 bg-black/20 hover:border-white/20'
+                          }`}
+                        >
+                          <span className="text-sm font-bold text-white mb-3 block">{theme.name}</span>
+                          
+                          {/* Mini visual preview */}
+                          <div className="w-full h-12 rounded-xl flex gap-1 p-1" style={{ backgroundColor: previewBg }}>
+                            <div className="w-8 h-full rounded-lg" style={{ backgroundColor: previewTitleBg }} />
+                            <div className="flex-1 h-full rounded-lg flex items-center justify-center" style={{ backgroundColor: previewHighlight + '20' }}>
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: previewHighlight }} />
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
+
+                  {currentTheme === 'custom' && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="rounded-2xl border border-white/10 bg-black/30 p-5 mt-6 space-y-4"
+                    >
+                      <h3 className="text-lg font-black text-white">Personalizar Cores</h3>
+                      <p className="text-xs font-bold text-if-text/50">Altere as cores do seu tema personalizado abaixo. O preview na tela é aplicado em tempo real!</p>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        {Object.keys(customValues).map((key) => (
+                          <div key={key} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                            <span className="text-xs font-bold text-if-text/80">{CUSTOM_LABELS[key] || key}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono text-if-text/40">{customValues[key]}</span>
+                              <input
+                                type="color"
+                                value={customValues[key]}
+                                onChange={(e) => updateCustomValue(key, e.target.value)}
+                                className="w-8 h-8 rounded-lg overflow-hidden cursor-pointer border-0 bg-transparent"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
 
