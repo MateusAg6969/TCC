@@ -333,7 +333,7 @@ export default function PostCard({ post, isOwner, isPinned, onPin, onDelete }: P
               </div>
             ) : (
               <ImageCarousel 
-                images={post.conteudo?.galeria || [{ url: post.conteudo?.url || '' }]}
+                images={post.conteudo?.galeria?.length ? post.conteudo.galeria : [{ url: post.conteudo?.url || '' }]}
                 titulo={post.titulo}
                 aspectClass="aspect-[16/10]"
                 objectFitClass="object-cover"

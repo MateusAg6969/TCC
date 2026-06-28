@@ -233,7 +233,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
             {renderTipo === 'imagem' && arquivoUrl && (
               <div className="relative w-full overflow-hidden rounded-2xl shadow-xl border border-white/5 bg-black">
                 <ImageCarousel 
-                  images={post.conteudo?.galeria || [{ url: post.conteudo?.url || '' }]}
+                  images={post.conteudo?.galeria?.length ? post.conteudo.galeria : [{ url: post.conteudo?.url || '' }]}
                   titulo={post.titulo}
                   aspectClass="aspect-video"
                   objectFitClass="object-contain"
