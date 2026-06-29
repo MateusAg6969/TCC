@@ -439,10 +439,10 @@ export default function NewPostPage() {
                 <span className="font-bold text-if-text/80">Categoria Principal</span>
                 <CustomSelect
                   options={[
-                    { value: 'texto', label: '📖 Texto Literário' },
-                    { value: 'imagem', label: '🎨 Arte Visual' },
-                    { value: 'audio', label: '🎧 Produção Sonora' },
-                    { value: 'video', label: '🎬 Produção Audiovisual' }
+                    { value: 'texto', label: 'Texto' },
+                    { value: 'imagem', label: 'Imagens' },
+                    { value: 'audio', label: 'Audio' },
+                    { value: 'video', label: 'Video' }
                   ]}
                   value={form.tipo}
                   onChange={(val) => updateField('tipo', val as FormState['tipo'])}
