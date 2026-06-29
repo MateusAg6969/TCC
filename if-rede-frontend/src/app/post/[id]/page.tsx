@@ -31,6 +31,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
   const hasRegistered = useRef(false);
 
   useEffect(() => {
+    hasRegistered.current = false;
     async function fetchPost() {
       try {
         const res = await api.get<ApiSuccess<Post>>(`/postagens/${id}`);
@@ -85,10 +86,10 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
   };
 
   useEffect(() => {
-    if (!user || !post || hasRegistered.current) return;
+    if (!post || hasRegistered.current) return;
     
     const autorId = String(post.autor_id?._id || post.autor_id);
-    if (user.id === autorId) return;
+    if (user && user.id === autorId) return;
     
     hasRegistered.current = true;
     api.post(`/postagens/${id}/visualizar`).catch((err) => {

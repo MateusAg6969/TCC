@@ -11,9 +11,9 @@ const postagensController = {
    */
   async registrarVisualizacao(req, res, next) {
     try {
-      const { alterado, alcance, autorId } = await postagensService.registrarVisualizacaoUnica(
+      const { alterado, alcance, visualizacoes, autorId } = await postagensService.registrarVisualizacaoUnica(
         req.params.id,
-        req.usuario.id
+        req.usuario?.id
       );
 
       // Emite evento via Socket.io APENAS se o alcance realmente mudou
@@ -24,7 +24,7 @@ const postagensController = {
         });
       }
 
-      return res.success({ alcance }, 'Processamento de alcance concluído.');
+      return res.success({ alcance, visualizacoes }, 'Processamento de alcance concluído.');
     } catch (error) {
       if (error.status) {
         return res.fail(error.message, error.status);

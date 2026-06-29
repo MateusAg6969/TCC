@@ -488,7 +488,7 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
   }
 });
 
-router.post('/:id/visualizar', authMiddleware, postagensController.registrarVisualizacao);
+router.post('/:id/visualizar', optionalAuthMiddleware, postagensController.registrarVisualizacao);
 
 
 router.patch('/:id', authMiddleware, async (req, res, next) => {
