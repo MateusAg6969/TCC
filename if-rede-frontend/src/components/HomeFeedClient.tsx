@@ -82,23 +82,13 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
             <Settings size={18} /> <span className="hidden lg:inline">Configurações</span>
           </Link>
           
-          {user?.admin && (
-            <Link
-              href="/admin/users"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-red-500/10 px-3 md:px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0"
-              title="Painel Admin"
-            >
-              <Shield size={18} /> <span className="hidden lg:inline">Admin</span>
-            </Link>
-          )}
-
           {(user?.admin || user?.mod_voluntario) && (
-             <Link
-              href="/admin/moderation"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-500/10 px-3 md:px-4 py-2 text-sm font-semibold text-blue-500 hover:bg-blue-500 hover:text-white transition-all shrink-0"
-              title="Painel Moderação"
+            <Link
+              href="/admin"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-red-500/10 px-3 md:px-4 py-2 text-sm font-semibold text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0"
+              title="Painel Administrativo"
             >
-              <ShieldAlert size={18} /> <span className="hidden lg:inline">Moderação</span>
+              <Shield size={18} /> <span className="hidden lg:inline">Painel Admin</span>
             </Link>
           )}
         </header>

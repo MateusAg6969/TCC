@@ -1651,3 +1651,45 @@ O **IF REDE** não é apenas um sistema de *software*; é uma ferramenta de inte
 2. **Processamento**: A requisição chega à API Express, que valida a autenticidade do JWT e checa regras de negócio (ex: o usuário não está suspenso).
 3. **Persistência e Efeito Social**: O MongoDB salva a postagem e distribui notificações assíncronas aos interessados. O algoritmo híbrido de *Feed* processa visibilidade (`melhores_amigos`, `seguidores`, `todos`).
 4. **Resposta**: O ecossistema acadêmico interage com a publicação em poucos segundos, cumprindo o papel social do IF REDE de conectar as ilhas de conhecimento da instituição.
+
+---
+
+# 13. FUNÇÕES ADMINISTRATIVAS E DE MODERAÇÃO (GLOBAL)
+
+Para dotar o **IF REDE** de controle operacional completo por parte de administradores (servidores habilitados) e moderadores (voluntários), foram desenvolvidas e consolidadas diversas ferramentas de administração global.
+
+## 13.1 Painel Administrativo Central (Dashboard)
+Acessível a partir da rota `/admin` (disponível para administradores e moderadores voluntários através do botão **Painel Admin** na barra superior de navegação):
+- **Dashboard Unificado**: Exibe métricas em tempo real sobre a saúde do sistema (Total de Usuários Cadastrados, Postagens retidas na fila de moderação, termos proibidos ativos e medalhas cadastradas).
+- **Controle de Acesso**: Bloqueia de forma proativa o acesso de estudantes comuns (redirecionando-os ao feed público).
+- **Cards de Atalho**: Direcionam para a gestão de usuários, moderação de conteúdo, controle de palavras banidas e criador de medalhas.
+
+## 13.2 Filtro de Palavras Proibidas (Censura e Retenção Automática)
+Disponível em `/admin/words`:
+- **Tabela de Termos**: Permite que administradores e moderadores visualizem todos os termos bloqueados pelo sistema.
+- **Configuração de Severidade**: Adição de termos com classificação de severidade (`baixa`, `media`, `alta`).
+- **Controle Dinâmico**: Permite desativar temporariamente um termo (`ativo = false`) ou removê-lo em definitivo do filtro automático de publicações.
+
+## 13.3 Sistema de Medalhas e Gamificação Acadêmica
+Disponível em `/admin/badges`:
+- **Painel de Criação**: Administradores podem definir novas medalhas institucionais fornecendo o nome do reconhecimento, descrição dos critérios e a URL de um ícone.
+- **Atribuição Direta**: No painel de usuários (`/admin/users`), administradores e moderadores podem acessar a opção **Medalhas** de qualquer perfil, o que abre um modal dinâmico permitindo:
+  - Visualizar as medalhas que o usuário possui.
+  - Atribuir uma nova medalha (com detecção de duplicidade).
+  - Remover uma medalha anteriormente concedida.
+
+## 13.4 Exclusão Definitiva de Usuário (Limpeza em Cascata)
+No painel de usuários (`/admin/users`), foi disponibilizado um botão destrutivo de exclusão para administradores:
+- **Remoção Segura**: Deleta o perfil do usuário do banco físico.
+- **Limpeza em Cascata**: Varre a base e apaga todas as postagens do usuário, comentários criados por ele, curtidas efetuadas (removendo seu ID do array de curtidas e decrementando o total de likes de postagens/comentários de outros usuários), relações de seguidor e notificações associadas. Isso garante 100% de consistência na base MongoDB e previne problemas de referências órfãs.
+
+## 13.5 Resumo de Rotas do Backend (Novos Endpoints)
+Todas as operações administrativas exigem validação de privilégios (`adminMiddleware` ou `moderadorMiddleware`):
+
+| Rota | Método | Permissão | Descrição |
+| --- | --- | --- | --- |
+| `/admin/users/:id` | `DELETE` | Admin | Exclui fisicamente o usuário e limpa relacionamentos em cascata. |
+| `/medalhas` | `POST` | Admin | Cria uma nova definição de medalha no sistema. |
+| `/medalhas/:id` | `DELETE` | Admin | Exclui uma definição de medalha e as conquistas relacionadas. |
+| `/medalhas/:badgeId/atribuir/:userId` | `POST` | Admin/Mod | Concede a medalha ao usuário. |
+| `/medalhas/:badgeId/remover/:userId` | `DELETE` | Admin/Mod | Revoga a medalha do perfil do usuário. |

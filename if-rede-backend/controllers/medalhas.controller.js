@@ -78,6 +78,70 @@ const medalhasController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  /**
+   * Cria uma nova medalha no sistema
+   */
+  async criarMedalha(req, res, next) {
+    try {
+      const { nome, descricao, icone_url } = req.body;
+
+      if (!nome || !descricao || !icone_url) {
+        return res.fail('Nome, descrição e URL do ícone são obrigatórios.', 400);
+      }
+
+      const medalha = await Medalha.create({ nome, descricao, icone_url });
+      return res.success(medalha, 'Medalha criada com sucesso!', undefined, 201);
+    } catch (error) {
+      if (error?.code === 11000) {
+        return res.fail('Já existe uma medalha com este nome.', 409);
+      }
+      next(error);
+    }
+  },
+
+  /**
+   * Exclui uma medalha do sistema e todas as conquistas relacionadas
+   */
+  async excluirMedalha(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const medalha = await Medalha.findByIdAndDelete(id);
+      if (!medalha) {
+        return res.fail('Medalha não encontrada.', 404);
+      }
+
+      // Remover conquistas de usuários associadas
+      await UsuarioMedalha.deleteMany({ medalha_id: id });
+
+      return res.success(null, 'Medalha e suas associações excluídas com sucesso.');
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Remove uma medalha conquistada de um usuário
+   */
+  async removerDeUsuario(req, res, next) {
+    try {
+      const { userId, badgeId } = req.params;
+
+      const conquistasRemovidas = await UsuarioMedalha.deleteOne({
+        usuario_id: userId,
+        medalha_id: badgeId
+      });
+
+      if (conquistasRemovidas.deletedCount === 0) {
+        return res.fail('O usuário não possui esta medalha.', 404);
+      }
+
+      return res.success(null, 'Medalha removida do usuário com sucesso.');
+    } catch (error) {
+      next(error);
+    }
   }
 };
 

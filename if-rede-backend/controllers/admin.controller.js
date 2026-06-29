@@ -1,4 +1,4 @@
-const { Usuario } = require('../models');
+const { Usuario, Postagem, Comentario, Seguidor, Notificacao, UsuarioMedalha, PortfolioItem } = require('../models');
 
 const adminController = {
   /**
@@ -144,6 +144,74 @@ const adminController = {
         { id: usuario._id },
         'Suspensão removida com sucesso.'
       );
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Exclui fisicamente um usuário e todos os seus dados e associações em cascata
+   */
+  async deletarUsuario(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      if (id === req.usuario.id) {
+        return res.fail('Você não pode excluir sua própria conta por este painel.', 403);
+      }
+
+      const usuario = await Usuario.findById(id);
+      if (!usuario) {
+        return res.fail('Usuário não encontrado.', 404);
+      }
+
+      if (usuario.configuracoes.admin) {
+        return res.fail('Não é possível excluir outro administrador. Remova seus privilégios primeiro.', 403);
+      }
+
+      // 1. Encontrar e deletar todas as postagens criadas por ele
+      const postagens = await Postagem.find({ autor_id: id });
+      const postagemIds = postagens.map(p => p._id);
+
+      // Deletar comentários feitos nas postagens dele
+      await Comentario.deleteMany({ postagem_id: { $in: postagemIds } });
+
+      // Deletar as postagens dele
+      await Postagem.deleteMany({ autor_id: id });
+
+      // 2. Deletar comentários criados pelo próprio usuário em outras postagens
+      await Comentario.deleteMany({ autor_id: id });
+
+      // 3. Remover curtidas dele em outras postagens e comentários
+      await Postagem.updateMany(
+        { 'stats.usuarios_que_curtiram': id },
+        { $pull: { 'stats.usuarios_que_curtiram': id }, $inc: { 'stats.likes': -1 } }
+      );
+      await Comentario.updateMany(
+        { 'stats.usuarios_que_curtiram': id },
+        { $pull: { 'stats.usuarios_que_curtiram': id }, $inc: { 'stats.likes': -1 } }
+      );
+
+      // 4. Deletar as relações de seguidor (tanto quem ele segue quanto quem o segue)
+      await Seguidor.deleteMany({
+        $or: [{ seguidor_id: id }, { seguido_id: id }]
+      });
+
+      // 5. Deletar notificações enviadas para ele ou geradas por ações dele
+      await Notificacao.deleteMany({
+        $or: [{ usuario_id: id }, { ator_id: id }]
+      });
+
+      // 6. Deletar conquistas de medalhas
+      await UsuarioMedalha.deleteMany({ usuario_id: id });
+
+      // 7. Deletar itens do portfólio
+      await PortfolioItem.deleteMany({ usuario_id: id });
+
+      // 8. Por fim, deletar o usuário
+      await Usuario.deleteOne({ _id: id });
+
+      return res.success(null, 'Usuário e todos os seus dados associados foram excluídos com sucesso.');
     } catch (error) {
       next(error);
     }

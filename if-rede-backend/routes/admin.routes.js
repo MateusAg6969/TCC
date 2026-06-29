@@ -15,5 +15,6 @@ router.get('/users', adminController.listarUsuarios);
 router.patch('/users/:id/role', adminController.alterarPapelUsuario);
 router.patch('/users/:id/suspend', adminController.suspenderUsuario);
 router.patch('/users/:id/unsuspend', adminController.removerSuspensaoUsuario);
+router.delete('/users/:id', adminController.deletarUsuario);
 
 module.exports = router;
