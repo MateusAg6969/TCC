@@ -260,7 +260,9 @@ exports.processarCitacoesPost = async (post, autorId, textoAnterior = '') => {
     const { Usuario } = require('../models'); // Lazy load
 
     for (const username of novasCitacoes) {
-      const usuarioCitado = await Usuario.findOne({ 'perfil.url_personalizada': username });
+      const usuarioCitado = await Usuario.findOne({ 
+        'perfil.apelido': { $regex: new RegExp(`^${username}$`, 'i') } 
+      });
       
       // Não notifica se o usuário citado não existir ou se for o próprio autor da postagem
       if (usuarioCitado && String(usuarioCitado._id) !== String(autorId)) {
@@ -288,7 +290,9 @@ exports.processarCitacoesBio = async (usuarioAtualizado, bioAnterior = '') => {
     const { Usuario } = require('../models'); // Lazy load
 
     for (const username of novasCitacoes) {
-      const usuarioCitado = await Usuario.findOne({ 'perfil.url_personalizada': username });
+      const usuarioCitado = await Usuario.findOne({ 
+        'perfil.apelido': { $regex: new RegExp(`^${username}$`, 'i') } 
+      });
       
       // Não notifica se o usuário citado não existir ou se for o próprio usuário da bio
       if (usuarioCitado && String(usuarioCitado._id) !== String(usuarioAtualizado._id)) {

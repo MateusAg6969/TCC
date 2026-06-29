@@ -83,28 +83,27 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
     // Atualiza campos do perfil se fornecidos
     if (perfil) {
       if (perfil.nome) usuario.perfil.nome = perfil.nome;
-      if (perfil.apelido !== undefined) usuario.perfil.apelido = perfil.apelido;
       if (perfil.bio !== undefined) usuario.perfil.bio = perfil.bio;
       if (perfil.privacidade) usuario.perfil.privacidade = perfil.privacidade;
       
-      // Validação de url_personalizada (username de citação)
-      if (perfil.url_personalizada !== undefined) {
-        const novoUsername = String(perfil.url_personalizada || '').trim().toLowerCase();
-        if (novoUsername !== usuario.perfil.url_personalizada) {
-          if (novoUsername) {
-            if (!/^[a-z0-9_.-]+$/.test(novoUsername)) {
-              return res.fail('Nome de usuário inválido. Use apenas letras minúsculas, números, hifens, underscores ou pontos.', 400);
+      // Validação e exclusividade do apelido (handle de citação @)
+      if (perfil.apelido !== undefined) {
+        const novoApelido = String(perfil.apelido || '').trim().toLowerCase();
+        if (novoApelido !== usuario.perfil.apelido) {
+          if (novoApelido) {
+            if (!/^[a-z0-9_.-]+$/.test(novoApelido)) {
+              return res.fail('O apelido deve conter apenas letras minúsculas, números, hifens, underscores ou pontos (sem acentos ou espaços).', 400);
             }
             const jaExiste = await Usuario.exists({ 
-              'perfil.url_personalizada': novoUsername,
+              'perfil.apelido': { $regex: new RegExp(`^${novoApelido}$`, 'i') },
               _id: { $ne: usuario._id }
             });
             if (jaExiste) {
-              return res.fail('Este nome de usuário já está em uso.', 400);
+              return res.fail('Este apelido já está em uso por outro usuário.', 400);
             }
-            usuario.perfil.url_personalizada = novoUsername;
+            usuario.perfil.apelido = novoApelido;
           } else {
-            usuario.perfil.url_personalizada = undefined;
+            usuario.perfil.apelido = ''; // Apelido em branco limpa o handle
           }
         }
       }
@@ -368,7 +367,7 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
     if (mongoose.Types.ObjectId.isValid(req.params.id)) {
       alvo = await Usuario.findById(req.params.id);
     } else {
-      alvo = await Usuario.findOne({ 'perfil.url_personalizada': req.params.id.toLowerCase() });
+      alvo = await Usuario.findOne({ 'perfil.apelido': { $regex: new RegExp(`^${req.params.id}$`, 'i') } });
     }
 
     if (!alvo) {
