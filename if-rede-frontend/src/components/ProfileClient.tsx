@@ -11,6 +11,7 @@ import SocialSidePanel from './SocialSidePanel';
 import BadgeGallery from './BadgeGallery';
 import { useAuth } from '@/context/AuthContext';
 import api, { resolveAssetUrl } from '@/lib/api';
+import FormattedText from './FormattedText';
 
 type ProfilePayload = {
   id: string;
@@ -19,6 +20,7 @@ type ProfilePayload = {
     apelido?: string;
     bio?: string;
     privacidade?: string;
+    url_personalizada?: string;
   };
   customizacao?: {
     cor_fundo?: string;
@@ -273,13 +275,24 @@ export default function ProfileClient({
                   <div className="flex items-center gap-3">
                     <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{profile?.perfil?.nome || 'Perfil'}</h1>
                   </div>
-                  {profile?.perfil?.apelido && (
-                    <div className="inline-block mt-1 px-3 py-0.5 rounded-full bg-if-olive/10 border border-if-olive/20 text-if-olive text-sm font-bold tracking-wide">
-                      {profile.perfil.apelido}
-                    </div>
-                  )}
-                  <p className="max-w-xl text-if-text/60 mt-2 font-medium italic">
-                    {profile?.perfil?.bio || 'Sem bio por enquanto.'}
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    {profile?.perfil?.url_personalizada && (
+                      <span className="text-if-purple text-sm font-black tracking-wide">
+                        @{profile.perfil.url_personalizada}
+                      </span>
+                    )}
+                    {profile?.perfil?.apelido && (
+                      <div className="inline-block px-3 py-0.5 rounded-full bg-if-olive/10 border border-if-olive/20 text-if-olive text-xs font-bold tracking-wide">
+                        {profile.perfil.apelido}
+                      </div>
+                    )}
+                  </div>
+                  <p className="max-w-xl text-if-text/60 mt-3 font-medium italic">
+                    {profile?.perfil?.bio ? (
+                      <FormattedText text={profile.perfil.bio} />
+                    ) : (
+                      'Sem bio por enquanto.'
+                    )}
                   </p>
                   
                   {/* Botões de Seguidores/Seguindo - Painel Lateral */}
@@ -386,6 +399,7 @@ export default function ProfileClient({
           apelido: profile?.perfil?.apelido || '',
           bio: profile?.perfil?.bio || '',
           privacidade: profile?.perfil?.privacidade || 'publico',
+          url_personalizada: profile?.perfil?.url_personalizada || '',
           avatar_url: profile?.customizacao?.avatar_url || '',
           banner_url: profile?.customizacao?.banner_url || '',
           avatar_position: profile?.customizacao?.avatar_position || '50% 50%',

@@ -160,6 +160,10 @@ router.post(
 
     await Usuario.updateOne({ _id: req.usuario.id }, { $inc: { 'stats.total_postagens': 1 } });
 
+    // Processar citações da postagem de forma assíncrona
+    const { processarCitacoesPost } = require('../services/notificacoes.service');
+    processarCitacoesPost(post, req.usuario.id).catch(err => console.error('Erro ao processar citações na criação de post:', err));
+
     return res.success(post, 'Postagem criada com sucesso.', undefined, 201);
   } catch (error) {
     return next(error);
@@ -502,6 +506,9 @@ router.patch('/:id', authMiddleware, async (req, res, next) => {
       return res.fail('Você não pode editar esta postagem.', 403);
     }
 
+    // Salvar o texto anterior para evitar notificações duplicadas nas citações
+    const textoAnterior = `${post.titulo || ''} ${post.descricao || ''} ${post.conteudo?.texto_longo || ''}`;
+
     const camposPermitidos = [
       'titulo',
       'descricao',
@@ -530,6 +537,10 @@ router.patch('/:id', authMiddleware, async (req, res, next) => {
     }
 
     await post.save();
+
+    // Processar citações da postagem de forma assíncrona
+    const { processarCitacoesPost } = require('../services/notificacoes.service');
+    processarCitacoesPost(post, req.usuario.id, textoAnterior).catch(err => console.error('Erro ao processar citações na edição de post:', err));
 
     return res.success(post, 'Postagem atualizada com sucesso.');
   } catch (error) {

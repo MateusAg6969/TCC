@@ -78,12 +78,36 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
       return res.fail('Usuário não encontrado.', 404);
     }
 
+    const bioAnterior = usuario.perfil?.bio || '';
+
     // Atualiza campos do perfil se fornecidos
     if (perfil) {
       if (perfil.nome) usuario.perfil.nome = perfil.nome;
       if (perfil.apelido !== undefined) usuario.perfil.apelido = perfil.apelido;
       if (perfil.bio !== undefined) usuario.perfil.bio = perfil.bio;
       if (perfil.privacidade) usuario.perfil.privacidade = perfil.privacidade;
+      
+      // Validação de url_personalizada (username de citação)
+      if (perfil.url_personalizada !== undefined) {
+        const novoUsername = String(perfil.url_personalizada || '').trim().toLowerCase();
+        if (novoUsername !== usuario.perfil.url_personalizada) {
+          if (novoUsername) {
+            if (!/^[a-z0-9_.-]+$/.test(novoUsername)) {
+              return res.fail('Nome de usuário inválido. Use apenas letras minúsculas, números, hifens, underscores ou pontos.', 400);
+            }
+            const jaExiste = await Usuario.exists({ 
+              'perfil.url_personalizada': novoUsername,
+              _id: { $ne: usuario._id }
+            });
+            if (jaExiste) {
+              return res.fail('Este nome de usuário já está em uso.', 400);
+            }
+            usuario.perfil.url_personalizada = novoUsername;
+          } else {
+            usuario.perfil.url_personalizada = undefined;
+          }
+        }
+      }
     }
 
     // Atualiza campos de customização se fornecidos
@@ -102,6 +126,12 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
     }
 
     await usuario.save();
+
+    // Processar citações na bio de forma assíncrona
+    if (perfil && perfil.bio !== undefined) {
+      const { processarCitacoesBio } = require('../services/notificacoes.service');
+      processarCitacoesBio(usuario, bioAnterior).catch(err => console.error('Erro ao processar citações bio:', err));
+    }
 
     return res.success(
       {
@@ -334,11 +364,12 @@ router.get('/ranking/semana', async (req, res, next) => {
 
 router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.fail('ID de usuário inválido.', 400);
+    let alvo;
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      alvo = await Usuario.findById(req.params.id);
+    } else {
+      alvo = await Usuario.findOne({ 'perfil.url_personalizada': req.params.id.toLowerCase() });
     }
-
-    const alvo = await Usuario.findById(req.params.id);
 
     if (!alvo) {
       return res.fail('Usuário não encontrado.', 404);

@@ -15,6 +15,7 @@ import ImageCarousel from '@/components/ImageCarousel';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { useEffect, useRef, useState, use } from 'react';
+import FormattedText from '@/components/FormattedText';
 
 export default function PostDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -224,7 +225,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
             
             {post.descricao && (
               <p className="mt-4 text-lg text-if-text/70 font-medium leading-relaxed italic">
-                {post.descricao}
+                <FormattedText text={post.descricao} />
               </p>
             )}
           </header>
@@ -270,7 +271,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
             {post.tipo === 'texto' && post.conteudo?.texto_longo && (
               <div className="prose prose-invert max-w-none">
                 <div className="rounded-2xl bg-black/20 p-8 border border-white/5 text-lg leading-relaxed whitespace-pre-wrap font-medium">
-                  {post.conteudo.texto_longo}
+                  <FormattedText text={post.conteudo.texto_longo} />
                 </div>
               </div>
             )}

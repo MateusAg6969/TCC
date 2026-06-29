@@ -207,3 +207,95 @@ exports.limparNotificacoesAntigas = async (diasRetencao = 30) => {
     console.error('Erro ao limpar notificações antigas:', erro);
   }
 };
+
+// ============================================================================
+// Citações / Marcações (@username)
+// ============================================================================
+
+/**
+ * Função utilitária para extrair citações no formato @username
+ */
+function extrairCitacoes(texto) {
+  if (!texto) return [];
+  const regex = /@([a-z0-9_.-]+)/gi;
+  const matches = [...texto.matchAll(regex)];
+  return [...new Set(matches.map(m => m[1].toLowerCase()))];
+}
+
+/**
+ * Notificações de Citação na Bio
+ */
+exports.notificarCitacaoBio = async (usuario_id, ator_id) => {
+  try {
+    const notificacao = new Notificacao({
+      usuario_id,
+      ator_id,
+      tipo: 'tag',
+      mensagem: 'te marcou na bio',
+      objeto_id: ator_id, // Aponta para o próprio ator da bio
+      objeto_tipo: 'usuario',
+    });
+
+    await notificacao.save();
+    socket.emitirNotificacao(usuario_id, notificacao);
+    return notificacao;
+  } catch (erro) {
+    console.error('Erro ao criar notificação de citação na bio:', erro);
+  }
+};
+
+/**
+ * Processar citações em uma postagem e notificar os usuários citados
+ */
+exports.processarCitacoesPost = async (post, autorId, textoAnterior = '') => {
+  try {
+    const textoAtual = `${post.titulo || ''} ${post.descricao || ''} ${post.conteudo?.texto_longo || ''}`;
+    const citacoesAtuais = extrairCitacoes(textoAtual);
+    const citacoesAnteriores = extrairCitacoes(textoAnterior);
+
+    // Filtra apenas as novas citações para evitar spam
+    const novasCitacoes = citacoesAtuais.filter(username => !citacoesAnteriores.includes(username));
+    if (novasCitacoes.length === 0) return;
+
+    const { Usuario } = require('../models'); // Lazy load
+
+    for (const username of novasCitacoes) {
+      const usuarioCitado = await Usuario.findOne({ 'perfil.url_personalizada': username });
+      
+      // Não notifica se o usuário citado não existir ou se for o próprio autor da postagem
+      if (usuarioCitado && String(usuarioCitado._id) !== String(autorId)) {
+        await exports.notificarTag(usuarioCitado._id, autorId, post._id);
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao processar citações em postagem:', error);
+  }
+};
+
+/**
+ * Processar citações na bio do usuário e notificar os usuários citados
+ */
+exports.processarCitacoesBio = async (usuarioAtualizado, bioAnterior = '') => {
+  try {
+    const bioAtual = usuarioAtualizado.perfil?.bio || '';
+    const citacoesAtuais = extrairCitacoes(bioAtual);
+    const citacoesAnteriores = extrairCitacoes(bioAnterior);
+
+    // Filtra apenas as novas citações para evitar spam
+    const novasCitacoes = citacoesAtuais.filter(username => !citacoesAnteriores.includes(username));
+    if (novasCitacoes.length === 0) return;
+
+    const { Usuario } = require('../models'); // Lazy load
+
+    for (const username of novasCitacoes) {
+      const usuarioCitado = await Usuario.findOne({ 'perfil.url_personalizada': username });
+      
+      // Não notifica se o usuário citado não existir ou se for o próprio usuário da bio
+      if (usuarioCitado && String(usuarioCitado._id) !== String(usuarioAtualizado._id)) {
+        await exports.notificarCitacaoBio(usuarioCitado._id, usuarioAtualizado._id);
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao processar citações na bio:', error);
+  }
+};

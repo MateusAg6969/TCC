@@ -16,6 +16,7 @@ type Props = {
     apelido?: string;
     bio?: string;
     privacidade: string;
+    url_personalizada?: string;
     avatar_url: string;
     banner_url: string;
     avatar_position?: string;
@@ -28,6 +29,7 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
   const [apelido, setApelido] = useState(defaultData.apelido || '');
   const [bio, setBio] = useState(defaultData.bio || '');
   const [privacidade, setPrivacidade] = useState(defaultData.privacidade || 'publico');
+  const [urlPersonalizada, setUrlPersonalizada] = useState(defaultData.url_personalizada || '');
   
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
@@ -66,6 +68,16 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
   const handleSalvar = async () => {
     setCarregando(true);
     setErro('');
+    
+    const usernameTrimming = urlPersonalizada.trim().toLowerCase();
+    if (usernameTrimming && !/^[a-z0-9_.-]+$/.test(usernameTrimming)) {
+      const errorMsg = 'Nome de usuário inválido. Use apenas letras minúsculas, números, hifens, underscores ou pontos.';
+      setErro(errorMsg);
+      toast.error(errorMsg);
+      setCarregando(false);
+      return;
+    }
+
     try {
       if (avatarFile || bannerFile) {
         const formData = new FormData();
@@ -76,14 +88,20 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
       }
 
       const payload = {
-        perfil: { nome, apelido, bio, privacidade },
+        perfil: { 
+          nome, 
+          apelido, 
+          bio, 
+          privacidade,
+          url_personalizada: usernameTrimming || undefined
+        },
         customizacao: {
           avatar_position: `${avatarPositionX}% ${avatarPositionY}%`,
           banner_position: `${bannerPositionY}%`
         }, 
       };
       const res = await api.patch('/usuarios/me', payload);
-      toast.success('Perfil updated com sucesso!');
+      toast.success('Perfil atualizado com sucesso!');
       onSave(res.data.data);
       onClose();
     } catch (err: any) {
@@ -294,6 +312,20 @@ export default function EditProfileModal({ open, onClose, onSave, defaultData }:
                       maxLength={50}
                     />
                   </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-bold text-if-text/80">Nome de Usuário (@handle)</label>
+                  <input
+                    value={urlPersonalizada}
+                    onChange={(e) => setUrlPersonalizada(e.target.value.toLowerCase().replace(/\s+/g, ''))}
+                    className="w-full rounded-2xl border border-white/5 bg-black/20 px-5 py-4 text-base outline-none focus:border-if-olive/50 transition-all font-medium text-white"
+                    placeholder="Seu nome de usuário exclusivo (ex: joao.silva)"
+                    maxLength={50}
+                  />
+                  <span className="text-[10px] text-if-text/40 mt-1.5 block leading-relaxed">
+                    Apenas letras minúsculas, números, hifens, underscores ou pontos. Utilizado para citações (@nome_de_usuario).
+                  </span>
+                </div>
 
                 <label className="block">
                   <span className="text-sm font-bold text-if-text/70 mb-2 block">Bio / Descrição</span>

@@ -6,6 +6,7 @@ export interface Perfil {
   email?: string;
   bio?: string;
   privacidade?: 'publico' | 'privado';
+  url_personalizada?: string;
 }
 
 export interface Medalha {
