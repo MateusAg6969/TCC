@@ -37,6 +37,8 @@ type AuthContextValue = {
     email: string;
     senha: string;
     status_vinculo?: string;
+    curso?: string;
+    ano?: string;
   }) => Promise<void>;
   logout: () => void;
   loading: boolean;
@@ -160,6 +162,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string;
     senha: string;
     status_vinculo?: string;
+    curso?: string;
+    ano?: string;
   }) => {
     const response = await api.post('/auth/register', payload);
     const data = response.data?.data;

@@ -103,6 +103,16 @@ const perfilSchema = new mongoose.Schema(
       default: Date.now,
       immutable: true,
     },
+
+    curso: {
+      type: String,
+      default: '',
+    },
+
+    ano: {
+      type: String,
+      default: '',
+    },
   },
   { _id: false } // Não precisa ID próprio, é subdocumento
 );

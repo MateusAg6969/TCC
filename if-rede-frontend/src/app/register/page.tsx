@@ -9,7 +9,7 @@
 // ============================================================================
 
 import Link from 'next/link';
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -32,10 +32,24 @@ export default function RegisterPage() {
   const [apelido, setApelido] = useState('');
   // status_vinculo define as permissões e limites do usuário no sistema
   const [statusVinculo, setStatusVinculo] = useState<'estudante' | 'egresso' | 'servidor'>('estudante');
+  const [curso, setCurso] = useState('');
+  const [ano, setAno] = useState('');
 
   // Estado de feedback para o usuário
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // ============================================================================
+  // LÓGICA DE TRANSIÇÃO DE VÍNCULO
+  // ============================================================================
+  const handleStatusVinculoChange = (val: 'estudante' | 'egresso' | 'servidor') => {
+    setStatusVinculo(val);
+    if (val === 'egresso') {
+      setAno('ex-aluno');
+    } else {
+      setAno('');
+    }
+  };
 
   // ============================================================================
   // VALIDAÇÃO: ETAPA 1 — Credenciais
@@ -55,6 +69,15 @@ export default function RegisterPage() {
   function validarEtapa2(): string | null {
     if (!nome || nome.trim().length < 3) return 'O Nome deve ter pelo menos 3 caracteres.';
     if (!apelido || apelido.trim().length < 3) return 'O Apelido deve ter pelo menos 3 caracteres.';
+    
+    // Se for estudante ou egresso, exige curso
+    if ((statusVinculo === 'estudante' || statusVinculo === 'egresso') && !curso.trim()) {
+      return 'Por favor, informe o seu curso.';
+    }
+    // Se for estudante, exige informar o ano/fase
+    if (statusVinculo === 'estudante' && !ano.trim()) {
+      return 'Por favor, informe o ano ou fase em que você está.';
+    }
     return null;
   }
 
@@ -92,21 +115,19 @@ export default function RegisterPage() {
         email,
         senha,
         status_vinculo: statusVinculo,
+        curso: (statusVinculo === 'estudante' || statusVinculo === 'egresso') ? curso.trim() : '',
+        ano: statusVinculo === 'egresso' ? 'ex-aluno' : (statusVinculo === 'estudante' ? ano.trim() : ''),
       });
       // Após sucesso, mostra mensagem na tela com novo state 'sucesso' em vez de fazer login
       setStep(3);
     } catch (err: any) {
       // CORREÇÃO: lê a mensagem de erro real retornada pela API, em vez de mostrar mensagem genérica.
-      // Entrada: objeto de erro do Axios com err.response.data.error.message
-      // Saída: mensagem compreensível para o usuário
       const msgApi = err?.response?.data?.error?.message;
       const status = err?.response?.status;
 
       if (status === 409) {
-        // Código 409 = Conflict = Registro duplicado (email ou matrícula já existem)
         setErro('Email ou matrícula já cadastrados. Verifique seus dados.');
       } else if (status === 400 && msgApi) {
-        // Código 400 = Bad Request = Erro de validação do schema Mongoose
         setErro(`Dados inválidos: ${msgApi}`);
       } else if (msgApi) {
         setErro(msgApi);
@@ -119,8 +140,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-if-bg p-4">
-      <section className="w-full max-w-xl rounded-main bg-if-card p-7 text-if-text shadow-card">
+    <main className="grid min-h-screen place-items-center bg-if-bg p-4 animate-in fade-in duration-500">
+      <section className="w-full max-w-xl rounded-main bg-if-card p-7 text-if-text shadow-card border border-white/5">
 
         {/* Cabeçalho com identidade visual IF REDE */}
         <div className="mb-6">
@@ -130,7 +151,7 @@ export default function RegisterPage() {
           {/* Indicador de progresso visual */}
           <p className="mt-1 text-sm text-if-text/70">Etapa {step > 2 ? 2 : step} de 2</p>
           {/* Barra de progresso */}
-          <div className="mt-3 h-1.5 w-full rounded-full bg-white/10">
+          <div className="mt-3 h-1.5 w-full rounded-full bg-white/10 animate-pulse">
             <div
               className="h-full rounded-full bg-if-olive transition-all duration-500"
               style={{ width: step === 1 ? '50%' : '100%' }}
@@ -151,7 +172,7 @@ export default function RegisterPage() {
             </p>
             <Link
               href="/login"
-              className="inline-block w-full rounded-full bg-if-olive px-6 py-3 font-bold text-if-bg transition hover:brightness-110 active:scale-95"
+              className="inline-block w-full rounded-full bg-if-olive px-6 py-3 font-bold text-if-bg transition hover:brightness-110 active:scale-95 text-center text-sm"
             >
               Fazer Login
             </Link>
@@ -170,7 +191,7 @@ export default function RegisterPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45 text-sm font-semibold"
                       placeholder="você@email.com"
                       required
                       autoComplete="email"
@@ -184,7 +205,7 @@ export default function RegisterPage() {
                         type={showPassword ? "text" : "password"}
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
-                        className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 pl-4 pr-12 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                        className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 pl-4 pr-12 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45 text-sm font-semibold"
                         placeholder="Mínimo 8 caracteres"
                         minLength={8}
                         required
@@ -208,7 +229,7 @@ export default function RegisterPage() {
                         type={showConfirmPassword ? "text" : "password"}
                         value={confirmarSenha}
                         onChange={(e) => setConfirmarSenha(e.target.value)}
-                        className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 pl-4 pr-12 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45"
+                        className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 pl-4 pr-12 py-3 outline-none focus:border-if-olive/60 transition placeholder:text-if-text/45 text-sm font-semibold"
                         placeholder="Repita sua senha"
                         required
                         autoComplete="new-password"
@@ -235,7 +256,7 @@ export default function RegisterPage() {
                     <input
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition text-sm font-semibold"
                       placeholder="Seu nome completo"
                       minLength={3}
                       required
@@ -247,7 +268,7 @@ export default function RegisterPage() {
                     <input
                       value={apelido}
                       onChange={(e) => setApelido(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition text-sm font-semibold"
                       placeholder="Seu apelido curto"
                       minLength={3}
                       required
@@ -259,14 +280,42 @@ export default function RegisterPage() {
                     Vínculo institucional
                     <select
                       value={statusVinculo}
-                      onChange={(e) => setStatusVinculo(e.target.value as any)}
-                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition text-if-text"
+                      onChange={(e) => handleStatusVinculoChange(e.target.value as any)}
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition text-if-text text-sm font-semibold"
                     >
                       <option value="estudante">Estudante</option>
                       <option value="egresso">Egresso (ex-aluno)</option>
                       <option value="servidor">Servidor / Professor</option>
                     </select>
                   </label>
+
+                  {/* Campo dinâmico: Curso */}
+                  {(statusVinculo === 'estudante' || statusVinculo === 'egresso') && (
+                    <label className="block text-sm font-medium animate-in fade-in slide-in-from-top-3 duration-200">
+                      Qual curso você {statusVinculo === 'egresso' ? 'fazia' : 'faz'}?
+                      <input
+                        value={curso}
+                        onChange={(e) => setCurso(e.target.value)}
+                        className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition text-sm font-semibold"
+                        placeholder="Ex: Técnico em Informática, Agronomia..."
+                        required
+                      />
+                    </label>
+                  )}
+
+                  {/* Campo dinâmico: Ano */}
+                  {statusVinculo === 'estudante' && (
+                    <label className="block text-sm font-medium animate-in fade-in slide-in-from-top-3 duration-200">
+                      Ano ou fase que está cursando
+                      <input
+                        value={ano}
+                        onChange={(e) => setAno(e.target.value)}
+                        className="mt-2 w-full rounded-xl border border-white/10 bg-if-olive/15 px-4 py-3 outline-none focus:border-if-olive/60 transition text-sm font-semibold"
+                        placeholder="Ex: 3º ano, 5º semestre..."
+                        required
+                      />
+                    </label>
+                  )}
                 </>
               )}
 
@@ -283,7 +332,7 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => { setStep(1); setErro(''); }}
-                    className="w-full rounded-full border border-white/20 px-4 py-3 text-sm hover:bg-white/5 transition"
+                    className="w-full rounded-full border border-white/20 px-4 py-3 text-sm font-semibold hover:bg-white/5 transition"
                   >
                     ← Voltar
                   </button>
@@ -291,7 +340,7 @@ export default function RegisterPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-full bg-if-olive px-5 py-3 font-semibold text-if-bg hover:brightness-110 transition disabled:opacity-60"
+                  className="w-full rounded-full bg-if-olive px-5 py-3 font-semibold text-if-bg hover:brightness-110 transition disabled:opacity-60 text-sm"
                 >
                   {loading ? 'Criando conta...' : step === 1 ? 'Próximo →' : 'Criar conta'}
                 </button>

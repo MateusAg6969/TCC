@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post('/register', async (req, res, next) => {
   try {
-    const { nome, apelido, email, senha, status_vinculo = 'estudante' } = req.body;
+    const { nome, apelido, email, senha, status_vinculo = 'estudante', curso, ano } = req.body;
 
     if (!nome || !email || !senha) {
       return res.fail('Campos obrigatórios: nome, email e senha.', 400);
@@ -22,6 +22,9 @@ router.post('/register', async (req, res, next) => {
     const senhaHash = await bcrypt.hash(String(senha), 10);
 
     const tokenVerificacao = crypto.randomBytes(32).toString('hex');
+
+    // Regra de Egresso: forçar o ano letivo como ex-aluno
+    const anoFinal = status_vinculo === 'egresso' ? 'ex-aluno' : (ano || '');
 
     const usuario = await Usuario.create({
       senha: senhaHash,
@@ -33,6 +36,8 @@ router.post('/register', async (req, res, next) => {
         email,
         matricula: '',
         status_vinculo,
+        curso: curso || '',
+        ano: anoFinal,
       },
     });
 
