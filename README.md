@@ -1669,6 +1669,10 @@ Disponível em `/admin/words`:
 - **Tabela de Termos**: Permite que administradores e moderadores visualizem todos os termos bloqueados pelo sistema.
 - **Configuração de Severidade**: Adição de termos com classificação de severidade (`baixa`, `media`, `alta`).
 - **Controle Dinâmico**: Permite desativar temporariamente um termo (`ativo = false`) ou removê-lo em definitivo do filtro automático de publicações.
+- **Base de Dados Multilíngue (Carga de Seed)**: A base de dados conta com um seed de 112 profanidades e palavras ofensivas comuns nos idiomas **Português**, **Inglês** e **Espanhol**, importadas através do script administrativo `seed_palavras.js`.
+- **Retenção Automática de Conteúdo**: Caso um estudante crie um post ou comentário que contenha qualquer uma das palavras ofensivas registradas, o sistema não rejeitará mais a requisição abruptamente. Em vez disso, ele criará o registro marcado com `denuncias.bloqueado = true` e `status_moderacao = 'pendente'`, impedindo-o de aparecer nos feeds públicos gerais.
+- **Notificação em Tempo Real para Moderadores**: No momento exato da retenção, o backend dispara uma rotina em lote que localiza todos os administradores e moderadores voluntários ativos do sistema e gera para cada um uma notificação em tempo real (via Socket.io e MongoDB) com o aviso de moderação de conteúdo (ex: `Conteúdo retido p/ moderação: "Título/Trecho..."`).
+- **Redirecionamento Inteligente de UX**: Ao clicar na notificação, o administrador/moderador é redirecionado de forma inteligente para a Central de Moderação (`/admin/moderation`) em vez da página pública da postagem retida (o que causaria erro de acesso 404/403).
 
 ## 13.3 Sistema de Medalhas e Gamificação Acadêmica
 Disponível em `/admin/badges`:

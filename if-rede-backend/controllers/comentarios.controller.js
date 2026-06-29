@@ -68,6 +68,12 @@ const comentariosController = {
           objeto_id: comentario._id,
           resultado: 'sucesso'
         });
+
+        // Notificar administradores/moderadores sobre o comentário retido
+        const { notificarRetencaoModeracao } = require('../services/notificacoes.service');
+        notificarRetencaoModeracao(comentario._id, 'comentario', comentario.texto, req.usuario.id).catch(err =>
+          console.error('Erro ao disparar notificacao de retencao de comentario:', err)
+        );
       } else if (comentario.status === 'aprovado') {
         // Notificar autor se o comentário for aprovado automaticamente
         if (parent_id) {

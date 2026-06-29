@@ -112,12 +112,8 @@ router.post(
         subtipoTag?.nome || subtipo,
       ]);
 
-      if (palavraDetectada) {
-        return res.fail(`Sua postagem contém um termo não permitido: "${palavraDetectada}". Remova-o para continuar.`, 400);
-      }
-
       const configFinal = { ...(config || { eh_rascunho: false }) };
-      let statusModeracao = 'pendente';
+      let statusModeracao = palavraDetectada ? 'pendente' : 'aprovado';
 
       const post = await Postagem.create({
         autor_id: req.usuario.id,
@@ -151,20 +147,34 @@ router.post(
             motivos: [
               {
                 usuario_id: req.usuario.id,
-                motivo: `Filtro automatico detectou o termo: ${palavraDetectada}`,
+                motivo: `Filtro automático detectou o termo: ${palavraDetectada}`,
               },
             ],
+            bloqueado: true,
+            motivo_bloqueio: `Retido automaticamente pelo filtro: "${palavraDetectada}"`
           }
         : undefined,
     });
 
     await Usuario.updateOne({ _id: req.usuario.id }, { $inc: { 'stats.total_postagens': 1 } });
 
+    // Notificar moderadores caso a postagem contenha termos proibidos
+    if (palavraDetectada) {
+      const { notificarRetencaoModeracao } = require('../services/notificacoes.service');
+      notificarRetencaoModeracao(post._id, 'postagem', post.titulo, req.usuario.id).catch(err => 
+        console.error('Erro ao disparar notificacao de retencao de postagem:', err)
+      );
+    }
+
     // Processar citações da postagem de forma assíncrona
     const { processarCitacoesPost } = require('../services/notificacoes.service');
     processarCitacoesPost(post, req.usuario.id).catch(err => console.error('Erro ao processar citações na criação de post:', err));
 
-    return res.success(post, 'Postagem criada com sucesso.', undefined, 201);
+    const msg = palavraDetectada 
+      ? 'Sua postagem contém termos restritos e foi enviada para análise da moderação.'
+      : 'Postagem criada com sucesso.';
+
+    return res.success(post, msg, undefined, 201);
   } catch (error) {
     return next(error);
   }

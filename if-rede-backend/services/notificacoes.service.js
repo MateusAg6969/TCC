@@ -180,10 +180,55 @@ exports.criarNotificacaoCustomizada = async (dados) => {
     });
 
     await notificacao.save();
-    socket.emitirNotificacao(usuario_id, notificacao);
+    socket.emitirNotificacao(dados.usuario_id, notificacao);
     return notificacao;
   } catch (erro) {
     console.error('Erro ao criar notificação customizada:', erro);
+  }
+};
+
+// ============================================================================
+// Notificação de Conteúdo Retido para Moderação (Palavras Ofensivas)
+// ============================================================================
+exports.notificarRetencaoModeracao = async (objetoId, objetoTipo, tituloOuTexto, atorId) => {
+  try {
+    const { Usuario } = require('../models');
+    
+    // Buscar todos os administradores e moderadores voluntários ativos
+    const destinatarios = await Usuario.find({
+      $or: [
+        { 'configuracoes.admin': true },
+        { 'configuracoes.mod_voluntario': true }
+      ],
+      ativo: true
+    }).select('_id');
+
+    if (destinatarios.length === 0) return;
+
+    const textoTruncado = String(tituloOuTexto || '').substring(0, 30);
+    const mensagem = `Conteúdo retido p/ moderação: "${textoTruncado}..."`;
+
+    const notificacoes = [];
+    for (const dest of destinatarios) {
+      // Evitar que o próprio autor receba a notificação caso seja um admin/mod criando o post
+      if (String(dest._id) === String(atorId)) continue;
+
+      const notificacao = new Notificacao({
+        usuario_id: dest._id,
+        ator_id: atorId,
+        tipo: 'tag', // Reutiliza tipo tag para renderização apropriada
+        mensagem,
+        objeto_id: objetoId,
+        objeto_tipo: objetoTipo,
+      });
+
+      await notificacao.save();
+      socket.emitirNotificacao(dest._id, notificacao);
+      notificacoes.push(notificacao);
+    }
+    return notificacoes;
+  } catch (erro) {
+    console.error('Erro ao notificar retenção para moderação:', erro);
   }
 };
 

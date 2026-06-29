@@ -231,10 +231,16 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     }
 
     switch (notificacao.tipo) {
+      case 'tag':
+        if (notificacao.mensagem.includes('retido') || notificacao.mensagem.includes('moderação')) {
+          router.push('/admin/moderation');
+        } else if (notificacao.objeto_id) {
+          router.push(`/post/${notificacao.objeto_id}`);
+        }
+        break;
       case 'like':
       case 'comentario':
       case 'repost':
-      case 'tag':
       case 'resposta':
         if (notificacao.objeto_id) {
           const isCommentTarget = notificacao.objeto_tipo === 'comentario' || 
