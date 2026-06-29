@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { 
   Shield, 
   Users, 
@@ -28,6 +29,8 @@ export default function AdminDashboardPage() {
     badgesCount: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
+  const [manutencaoAtiva, setManutencaoAtiva] = useState(false);
+  const [alternandoManutencao, setAlternandoManutencao] = useState(false);
 
   // Redireciona usuários que não são admin nem moderadores
   useEffect(() => {
@@ -100,6 +103,49 @@ export default function AdminDashboardPage() {
     }
   }, [user, authLoading]);
 
+  // Buscar configuracao do Modo de Manutenção
+  useEffect(() => {
+    const buscarConfiguracoes = async () => {
+      if (!user?.admin) return;
+      try {
+        const res = await api.get('/admin/configuracoes-sistema');
+        setManutencaoAtiva(res.data.data?.modo_manutencao || false);
+      } catch (err) {
+        console.error('Erro ao buscar configuracoes do sistema:', err);
+      }
+    };
+    buscarConfiguracoes();
+  }, [user]);
+
+  const alternarManutencao = async () => {
+    if (alternandoManutencao) return;
+    
+    const novoStatus = !manutencaoAtiva;
+    const confirmacao = window.confirm(
+      novoStatus 
+        ? 'Tem certeza que deseja ATIVAR o Modo de Manutenção? Isso bloqueará o acesso de todos os estudantes na plataforma imediatamente!'
+        : 'Tem certeza que deseja DESATIVAR o Modo de Manutenção? O acesso do público geral será liberado.'
+    );
+
+    if (!confirmacao) return;
+
+    setAlternandoManutencao(true);
+    try {
+      const res = await api.patch('/admin/configuracoes-sistema', { modo_manutencao: novoStatus });
+      setManutencaoAtiva(res.data.data?.modo_manutencao);
+      if (novoStatus) {
+        toast.success('Modo de manutenção ativado com sucesso! Plataforma restrita.');
+      } else {
+        toast.success('Modo de manutenção desativado! Plataforma liberada.');
+      }
+    } catch (err) {
+      console.error('Erro ao alternar modo de manutencao:', err);
+      toast.error('Não foi possível alterar o status do modo de manutenção.');
+    } finally {
+      setAlternandoManutencao(false);
+    }
+  };
+
   if (authLoading || (!user || (!user.admin && !user.mod_voluntario))) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-if-bg">
@@ -171,13 +217,38 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           
-          <div className="flex gap-3">
-             <Link 
-               href="/home"
-               className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 font-bold transition-all active:scale-95 text-sm"
-             >
-               <Home size={18} /> Ir para o Feed
-             </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            {user.admin && (
+              <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-5 py-2.5 rounded-2xl">
+                <div className="flex flex-col text-left">
+                  <span className="text-[11px] font-bold text-if-text/80 leading-none">Modo Manutenção</span>
+                  <span className={`text-[9px] uppercase tracking-wider font-black mt-1.5 ${manutencaoAtiva ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    {manutencaoAtiva ? 'Ativo (Restrito)' : 'Inativo (Aberto)'}
+                  </span>
+                </div>
+                <button
+                  onClick={alternarManutencao}
+                  disabled={alternandoManutencao}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    manutencaoAtiva ? 'bg-rose-500 animate-pulse' : 'bg-white/20'
+                  }`}
+                  title={manutencaoAtiva ? 'Desativar Modo de Manutenção' : 'Ativar Modo de Manutenção'}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      manutencaoAtiva ? 'translate-x-4' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+
+            <Link 
+              href="/home"
+              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 font-bold transition-all active:scale-95 text-sm"
+            >
+              <Home size={18} /> Ir para o Feed
+            </Link>
           </div>
         </header>
 

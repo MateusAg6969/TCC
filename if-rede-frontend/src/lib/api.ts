@@ -17,6 +17,17 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Se o backend retornar status 503 e código de manutenção, redireciona o usuário comum para a página de manutenção
+    if (
+      error.response?.status === 503 &&
+      error.response?.data?.error?.code === 'MAINTENANCE_MODE'
+    ) {
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/manutencao')) {
+        window.location.href = '/manutencao';
+      }
+      return Promise.reject(error);
+    }
+
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&

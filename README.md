@@ -1687,7 +1687,14 @@ No painel de usuários (`/admin/users`), foi disponibilizado um botão destrutiv
 - **Remoção Segura**: Deleta o perfil do usuário do banco físico.
 - **Limpeza em Cascata**: Varre a base e apaga todas as postagens do usuário, comentários criados por ele, curtidas efetuadas (removendo seu ID do array de curtidas e decrementando o total de likes de postagens/comentários de outros usuários), relações de seguidor e notificações associadas. Isso garante 100% de consistência na base MongoDB e previne problemas de referências órfãs.
 
-## 13.5 Resumo de Rotas do Backend (Novos Endpoints)
+## 13.5 Modo de Manutenção Global
+Disponível no cabeçalho do Painel Admin (`/admin`) exclusivamente para Administradores:
+- **Ativação Instantânea**: Um switch no painel permite que o administrador ative ou desative o modo de manutenção a qualquer momento.
+- **Middleware de Interceptação**: No backend, o middleware global `verificarManutencao` monitora todas as requisições. Se o modo estiver ativo, as requisições de estudantes são rejeitadas com o status HTTP 503 contendo o código `'MAINTENANCE_MODE'`.
+- **Acesso de Administradores/Moderadores**: Os privilégios de administradores e moderadores voluntários continuam sendo validados através do cabeçalho JWT de forma que eles mantenham acesso total à plataforma para testes de novas funcionalidades e correções de bugs.
+- **Redirecionamento Automático**: No frontend, ao receber uma resposta HTTP 503 com código `'MAINTENANCE_MODE'`, o interceptador redireciona o usuário comum para a página `/manutencao` que apresenta um visual moderno e micro-animado de status do sistema.
+
+## 13.6 Resumo de Rotas do Backend (Novos Endpoints)
 Todas as operações administrativas exigem validação de privilégios (`adminMiddleware` ou `moderadorMiddleware`):
 
 | Rota | Método | Permissão | Descrição |
@@ -1697,3 +1704,5 @@ Todas as operações administrativas exigem validação de privilégios (`adminM
 | `/medalhas/:id` | `DELETE` | Admin | Exclui uma definição de medalha e as conquistas relacionadas. |
 | `/medalhas/:badgeId/atribuir/:userId` | `POST` | Admin/Mod | Concede a medalha ao usuário. |
 | `/medalhas/:badgeId/remover/:userId` | `DELETE` | Admin/Mod | Revoga a medalha do perfil do usuário. |
+| `/admin/configuracoes-sistema` | `GET` | Admin | Retorna as configurações globais do sistema. |
+| `/admin/configuracoes-sistema` | `PATCH` | Admin | Atualiza o estado do Modo de Manutenção na plataforma. |

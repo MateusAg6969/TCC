@@ -215,6 +215,52 @@ const adminController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  /**
+   * Obtém as configurações globais do sistema (modo manutenção)
+   */
+  async obterConfiguracoesSistema(req, res, next) {
+    try {
+      const { ConfiguracaoSistema } = require('../models');
+      let config = await ConfiguracaoSistema.findOne();
+      if (!config) {
+        config = await ConfiguracaoSistema.create({ modo_manutencao: false });
+      }
+      return res.success(config, 'Configurações do sistema carregadas com sucesso.');
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Atualiza as configurações globais do sistema
+   */
+  async atualizarConfiguracoesSistema(req, res, next) {
+    try {
+      const { modo_manutencao } = req.body;
+      if (typeof modo_manutencao !== 'boolean') {
+        return res.fail('O campo modo_manutencao é obrigatório e deve ser booleano.', 400);
+      }
+
+      const { ConfiguracaoSistema } = require('../models');
+      let config = await ConfiguracaoSistema.findOne();
+      if (!config) {
+        config = new ConfiguracaoSistema();
+      }
+
+      config.modo_manutencao = modo_manutencao;
+      config.atualizado_por = req.usuario.id;
+      await config.save();
+
+      // Invalidar o cache do middleware imediatamente
+      const { invalidarCacheManutencao } = require('../middleware/manutencao.middleware');
+      invalidarCacheManutencao(modo_manutencao);
+
+      return res.success(config, `Modo de manutenção ${modo_manutencao ? 'ativado' : 'desativado'} com sucesso.`);
+    } catch (error) {
+      next(error);
+    }
   }
 };
 

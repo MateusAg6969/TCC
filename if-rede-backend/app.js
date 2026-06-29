@@ -67,6 +67,9 @@ app.get('/health', (req, res) => {
   );
 });
 
+const { verificarManutencao } = require('./middleware/manutencao.middleware');
+app.use(verificarManutencao);
+
 app.use('/auth', authRoutes);
 app.use('/usuarios', usuariosRoutes);
 app.use('/postagens', postagensRoutes);

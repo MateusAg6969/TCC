@@ -17,4 +17,7 @@ router.patch('/users/:id/suspend', adminController.suspenderUsuario);
 router.patch('/users/:id/unsuspend', adminController.removerSuspensaoUsuario);
 router.delete('/users/:id', adminController.deletarUsuario);
 
+router.get('/configuracoes-sistema', adminController.obterConfiguracoesSistema);
+router.patch('/configuracoes-sistema', adminController.atualizarConfiguracoesSistema);
+
 module.exports = router;

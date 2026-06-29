@@ -22,6 +22,7 @@ const medalhaSchema = require('../schemas/medalha.schema');
 const usuarioMedalhaSchema = require('../schemas/usuario-medalha.schema');
 const portfolioItemSchema = require('../schemas/portfolio-item.schema');
 const tokenBlacklistSchema = require('../schemas/token-blacklist.schema');
+const configuracaoSistemaSchema = require('../schemas/configuracao-sistema.schema');
 
 // ============================================================================
 // CRIAR MODELOS
@@ -56,6 +57,12 @@ const PortfolioItem = mongoose.model('PortfolioItem', portfolioItemSchema);
  * Tokens invalidados no logout para garantir que não sejam reusados
  */
 const TokenBlacklist = mongoose.model('TokenBlacklist', tokenBlacklistSchema);
+
+/**
+ * Modelo ConfiguracaoSistema
+ * Configurações globais do ecossistema IF REDE
+ */
+const ConfiguracaoSistema = mongoose.model('ConfiguracaoSistema', configuracaoSistemaSchema);
 
 /**
  * Modelo Postagem
@@ -130,4 +137,5 @@ module.exports = {
   UsuarioMedalha,
   PortfolioItem,
   TokenBlacklist,
+  ConfiguracaoSistema,
 };
