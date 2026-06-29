@@ -21,6 +21,9 @@ type ProfilePayload = {
     bio?: string;
     privacidade?: string;
     url_personalizada?: string;
+    status_vinculo?: string;
+    curso?: string;
+    ano?: string;
   };
   customizacao?: {
     cor_fundo?: string;
@@ -282,6 +285,26 @@ export default function ProfileClient({
                       </span>
                     )}
                   </div>
+
+                  {/* Badges Acadêmicos (Curso e Ano) */}
+                  {(profile?.perfil?.status_vinculo || profile?.perfil?.curso || profile?.perfil?.ano) && (
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <span className="bg-if-purple/10 text-if-purple border border-if-purple/20 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                        {profile?.perfil?.status_vinculo === 'egresso' ? 'Egresso (ex-aluno)' : 
+                         profile?.perfil?.status_vinculo === 'servidor' ? 'Servidor / Professor' : 'Estudante'}
+                      </span>
+                      {profile?.perfil?.curso && (
+                        <span className="bg-if-olive/15 text-if-olive border border-if-olive/20 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                          {profile.perfil.curso}
+                        </span>
+                      )}
+                      {profile?.perfil?.ano && (
+                        <span className="bg-white/5 text-if-text/70 border border-white/10 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
+                          {profile.perfil.ano === 'ex-aluno' ? 'Ex-aluno' : profile.perfil.ano}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <p className="max-w-xl text-if-text/60 mt-3 font-medium italic">
                     {profile?.perfil?.bio ? (
                       <FormattedText text={profile.perfil.bio} />

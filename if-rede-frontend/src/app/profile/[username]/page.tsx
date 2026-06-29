@@ -9,6 +9,9 @@ type ProfilePayload = {
     apelido?: string;
     bio?: string;
     privacidade?: string;
+    status_vinculo?: string;
+    curso?: string;
+    ano?: string;
   };
   customizacao?: {
     cor_fundo?: string;
