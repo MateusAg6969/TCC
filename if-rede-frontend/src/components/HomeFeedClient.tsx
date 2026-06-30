@@ -31,7 +31,7 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
   const semResultados = postsFiltrados.length === 0;
 
   return (
-    <main className="min-h-screen bg-if-bg text-if-text">
+    <main className="min-h-screen bg-if-bg text-if-text pb-24 md:pb-8">
       <div className="mx-auto max-w-7xl p-4 md:p-8">
         <header className="mb-6 flex flex-wrap items-center gap-3 rounded-main bg-if-menu p-4 md:flex-nowrap md:px-6">
           {/*
@@ -43,7 +43,7 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
           */}
           <Link
             href="/post/new"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-if-olive px-3 md:px-4 py-2 text-sm font-semibold text-if-olive-contrast hover:brightness-110 transition-all shrink-0"
+            className="hidden md:inline-flex items-center justify-center gap-2 rounded-full bg-if-olive px-3 md:px-4 py-2 text-sm font-semibold text-if-olive-contrast hover:brightness-110 transition-all shrink-0"
             title="Nova postagem"
           >
             <PlusSquare size={18} /> <span className="hidden sm:inline">Nova postagem</span>
@@ -56,11 +56,13 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
             />
           </div>
           
-          <NotificationBell />
+          <div className="hidden md:block">
+            <NotificationBell />
+          </div>
           
           <Link
             href="/home"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-if-olive/10 px-3 md:px-4 py-2 text-sm font-semibold text-if-olive hover:bg-if-olive hover:text-if-olive-contrast transition-all ml-auto md:ml-0 shrink-0"
+            className="hidden md:inline-flex items-center justify-center gap-2 rounded-full bg-if-olive/10 px-3 md:px-4 py-2 text-sm font-semibold text-if-olive hover:bg-if-olive hover:text-if-olive-contrast transition-all ml-auto md:ml-0 shrink-0"
             title="Início"
           >
             <House size={18} /> <span className="hidden lg:inline">Início</span>
@@ -68,7 +70,7 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
 
           <Link
             href={profileHref}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-if-olive px-3 md:px-4 py-2 text-sm font-semibold text-if-olive-contrast hover:brightness-110 transition-all shrink-0"
+            className="hidden md:inline-flex items-center justify-center gap-2 rounded-full bg-if-olive px-3 md:px-4 py-2 text-sm font-semibold text-if-olive-contrast hover:brightness-110 transition-all shrink-0"
             title="Meu Perfil"
           >
             <UserCircle2 size={18} /> <span className="hidden lg:inline">Meu Perfil</span>
@@ -76,7 +78,7 @@ export default function HomeFeedClient({ feed, destaques, profileHref }: HomeFee
 
           <Link
             href="/configuracoes"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-if-purple/10 px-3 md:px-4 py-2 text-sm font-semibold text-if-purple hover:bg-if-purple hover:text-white transition-all shrink-0"
+            className="hidden md:inline-flex items-center justify-center gap-2 rounded-full bg-if-purple/10 px-3 md:px-4 py-2 text-sm font-semibold text-if-purple hover:bg-if-purple hover:text-white transition-all shrink-0"
             title="Configurações"
           >
             <Settings size={18} /> <span className="hidden lg:inline">Configurações</span>

@@ -205,10 +205,10 @@ export default function ProfileClient({
   }, [profile]);
 
   return (
-    <main className="min-h-screen bg-if-bg text-if-text pb-20" style={styleVars}>
+    <main className="min-h-screen bg-if-bg text-if-text pb-24 md:pb-8" style={styleVars}>
       <div className="mx-auto max-w-7xl p-4 md:p-8">
         {/* Navbar */}
-        <header className="mb-6 flex flex-wrap items-center gap-3 rounded-main bg-if-menu p-4 md:flex-nowrap md:px-6">
+        <header className="mb-6 hidden md:flex flex-wrap items-center gap-3 rounded-main bg-if-menu p-4 md:flex-nowrap md:px-6">
           <Link
             href="/post/new"
             className="inline-flex items-center gap-2 rounded-full bg-if-olive px-4 py-2 text-sm font-semibold text-if-olive-contrast hover:brightness-110 transition-all"
@@ -336,12 +336,20 @@ export default function ProfileClient({
               {/* Ações Sociais */}
               <div className="mb-6 sm:mb-10">
                 {ehProprioPerfil ? (
-                  <button
-                    onClick={() => setOpenModal(true)}
-                    className="rounded-2xl border-2 border-if-olive/20 bg-if-olive/10 px-8 py-3.5 sm:px-10 sm:py-4 text-sm sm:text-base font-bold text-if-olive shadow-xl hover:bg-if-olive hover:text-if-olive-contrast active:scale-95 transition-all"
-                  >
-                    Editar Perfil
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setOpenModal(true)}
+                      className="rounded-2xl border-2 border-if-olive/20 bg-if-olive/10 px-6 py-3 text-sm font-bold text-if-olive shadow-xl hover:bg-if-olive hover:text-if-olive-contrast active:scale-95 transition-all"
+                    >
+                      Editar Perfil
+                    </button>
+                    <Link
+                      href="/configuracoes"
+                      className="rounded-2xl border-2 border-if-purple/20 bg-if-purple/10 px-6 py-3 text-sm font-bold text-if-purple shadow-xl hover:bg-if-purple hover:text-white active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <Settings size={16} /> Configurações
+                    </Link>
+                  </div>
                 ) : (
                   <button
                     onClick={alternarSeguir}

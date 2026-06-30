@@ -67,7 +67,7 @@ export default function NotificacoesPage() {
     filtro === 'nao-lidas' ? notificacoes.filter((n) => !n.lida) : notificacoes;
 
   return (
-    <main className="min-h-screen bg-if-bg text-if-text">
+    <main className="min-h-screen bg-if-bg text-if-text pb-24 md:pb-8">
       <div className="mx-auto max-w-2xl p-4 md:p-8">
         {/* Cabeçalho de Navegação */}
         <div className="mb-8">

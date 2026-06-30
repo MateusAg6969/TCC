@@ -268,7 +268,7 @@ export default function ConfiguracoesPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-if-bg text-if-text pb-24">
+    <main className="min-h-screen bg-if-bg text-if-text pb-24 md:pb-8">
       <div className="mx-auto max-w-5xl p-4 md:p-8">
         
         <header className="mb-8 flex items-center gap-4">

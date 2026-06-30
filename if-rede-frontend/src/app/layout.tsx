@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 
 import Link from "next/link";
 import { Toaster } from "sonner";
+import BottomNavigation from "@/components/BottomNavigation";
 
 export default function RootLayout({
   children,
@@ -79,8 +80,8 @@ export default function RootLayout({
       <body className="min-h-full bg-if-bg text-if-text">
         <Toaster position="top-right" richColors />
         <Providers>
-
           {children}
+          <BottomNavigation />
         </Providers>
       </body>
     </html>
