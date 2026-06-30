@@ -41,7 +41,7 @@ router.get('/me', authMiddleware, async (req, res, next) => {
         id: usuario._id,
         perfil: usuario.perfil,
         customizacao: {
-          ...usuario.customizacao.toObject?.(),
+          ...usuario.toObject().customizacao,
           medalhas: medalhas.map(m => ({
             ...m.medalha_id.toObject(),
             awarded_at: m.awarded_at
@@ -56,7 +56,7 @@ router.get('/me', authMiddleware, async (req, res, next) => {
         },
         configuracoes: usuario.configuracoes,
         stats: {
-          ...usuario.stats.toObject?.(),
+          ...usuario.toObject().stats,
           total_seguidores: rel.seguidores,
           total_seguindo: rel.seguindo,
         },
@@ -120,7 +120,7 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
       if (customizacao.tema !== undefined) usuario.customizacao.tema = customizacao.tema;
       if (customizacao.tema_valores_customizados !== undefined) {
         usuario.customizacao.tema_valores_customizados = customizacao.tema_valores_customizados;
-        usuario.markModified('customizacao.tema_valores_customizados');
+        usuario.markModified('customizacao');
       }
     }
 
@@ -415,7 +415,7 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
         id: alvo._id,
         perfil: alvo.perfil,
         customizacao: {
-          ...alvo.customizacao.toObject?.(),
+          ...alvo.toObject().customizacao,
           medalhas: medalhas.map(m => ({
             ...m.medalha_id.toObject(),
             awarded_at: m.awarded_at
@@ -429,7 +429,7 @@ router.get('/:id', optionalAuthMiddleware, async (req, res, next) => {
             }))
         },
         stats: {
-          ...alvo.stats.toObject?.(),
+          ...alvo.toObject().stats,
           total_seguidores: rel.seguidores,
           total_seguindo: rel.seguindo,
         },
