@@ -43,6 +43,7 @@ type AuthContextValue = {
   logout: () => void;
   loading: boolean;
   toggleSavePost: (postId: string) => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -202,8 +203,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser({ ...user, postagens_salvas: novasSalvas });
   };
 
+  const updateUser = (updates: Partial<AuthUser>) => {
+    if (!user) return;
+    setUser({ ...user, ...updates });
+  };
+
   const value = useMemo(
-    () => ({ user, token, login, register, logout, loading, toggleSavePost }),
+    () => ({ user, token, login, register, logout, loading, toggleSavePost, updateUser }),
     [user, token, loading]
   );
 

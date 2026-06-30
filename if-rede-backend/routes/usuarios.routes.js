@@ -119,8 +119,8 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
       if (customizacao.banner_position !== undefined) usuario.customizacao.banner_position = customizacao.banner_position;
       if (customizacao.tema !== undefined) usuario.customizacao.tema = customizacao.tema;
       if (customizacao.tema_valores_customizados !== undefined) {
-        usuario.customizacao.tema_valores_customizados = customizacao.tema_valores_customizados;
-        usuario.markModified('customizacao');
+        usuario.set('customizacao.tema_valores_customizados', customizacao.tema_valores_customizados);
+        usuario.markModified('customizacao.tema_valores_customizados');
       }
     }
 

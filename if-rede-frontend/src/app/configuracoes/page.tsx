@@ -131,7 +131,7 @@ const CUSTOM_LABELS: Record<string, string> = {
 };
 
 export default function ConfiguracoesPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('perfil');
@@ -262,6 +262,16 @@ export default function ConfiguracoesPage() {
           tema_valores_customizados: themeName === 'custom' ? customValues : {}
         }
       });
+      
+      // Update global context state
+      updateUser({
+        customizacao: {
+          ...user?.customizacao,
+          tema: themeName,
+          tema_valores_customizados: themeName === 'custom' ? customValues : {}
+        }
+      });
+
       toast.success('Tema atualizado no seu perfil!');
     } catch (e) {
       console.error(e);
@@ -294,6 +304,16 @@ export default function ConfiguracoesPage() {
           tema_valores_customizados: customValues
         }
       });
+      
+      // Update global context state
+      updateUser({
+        customizacao: {
+          ...user?.customizacao,
+          tema: 'custom',
+          tema_valores_customizados: customValues
+        }
+      });
+
       toast.success('Cores personalizadas salvas no seu perfil!');
     } catch (e) {
       console.error(e);
