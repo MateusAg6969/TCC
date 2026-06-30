@@ -31,6 +31,10 @@ export default function AdminDashboardPage() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [manutencaoAtiva, setManutencaoAtiva] = useState(false);
   const [alternandoManutencao, setAlternandoManutencao] = useState(false);
+  
+  // Modal de Changelog ao desativar manutenção
+  const [changelogModalOpen, setChangelogModalOpen] = useState(false);
+  const [changelogText, setChangelogText] = useState('');
 
   // Redireciona usuários que não são admin nem moderadores
   useEffect(() => {
@@ -121,22 +125,36 @@ export default function AdminDashboardPage() {
     if (alternandoManutencao) return;
     
     const novoStatus = !manutencaoAtiva;
+    
+    if (!novoStatus) {
+      // Se estiver desativando a manutenção, abre o modal de changelog
+      setChangelogModalOpen(true);
+      return;
+    }
+
     const confirmacao = window.confirm(
-      novoStatus 
-        ? 'Tem certeza que deseja ATIVAR o Modo de Manutenção? Isso bloqueará o acesso de todos os estudantes na plataforma imediatamente!'
-        : 'Tem certeza que deseja DESATIVAR o Modo de Manutenção? O acesso do público geral será liberado.'
+      'Tem certeza que deseja ATIVAR o Modo de Manutenção? Isso bloqueará o acesso de todos os estudantes na plataforma imediatamente!'
     );
 
     if (!confirmacao) return;
+    executarAlternancia(novoStatus, '');
+  };
 
+  const executarAlternancia = async (novoStatus: boolean, changelog: string = '') => {
     setAlternandoManutencao(true);
     try {
-      const res = await api.patch('/admin/configuracoes-sistema', { modo_manutencao: novoStatus });
+      const payload: any = { modo_manutencao: novoStatus };
+      if (!novoStatus && changelog.trim()) {
+        payload.changelog = changelog;
+      }
+      const res = await api.patch('/admin/configuracoes-sistema', payload);
       setManutencaoAtiva(res.data.data?.modo_manutencao);
       if (novoStatus) {
         toast.success('Modo de manutenção ativado com sucesso! Plataforma restrita.');
       } else {
         toast.success('Modo de manutenção desativado! Plataforma liberada.');
+        setChangelogModalOpen(false);
+        setChangelogText('');
       }
     } catch (err) {
       console.error('Erro ao alternar modo de manutencao:', err);
@@ -354,6 +372,39 @@ export default function AdminDashboardPage() {
             );
           })}
         </section>
+        {/* Modal de Changelog */}
+        {changelogModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="bg-if-card border border-white/10 rounded-2xl p-6 max-w-lg w-full flex flex-col gap-4 animate-in zoom-in-95 duration-200 shadow-2xl">
+              <h2 className="text-xl font-bold">Desativar Modo de Manutenção</h2>
+              <p className="text-sm text-if-text/70">
+                O site voltará ao ar. Deseja adicionar um <strong>Changelog</strong> para avisar os usuários sobre o que há de novo? (Deixe em branco se não houver novidades).
+              </p>
+              <textarea
+                value={changelogText}
+                onChange={(e) => setChangelogText(e.target.value)}
+                placeholder="Ex: - Melhorias no desempenho&#10;- Correção de bugs visuais"
+                className="w-full h-32 p-3 bg-white/5 border border-white/10 rounded-xl resize-none focus:outline-none focus:border-if-purple font-mono text-sm"
+              />
+              <div className="flex justify-end gap-3 mt-2">
+                <button
+                  onClick={() => setChangelogModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-sm font-bold bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => executarAlternancia(false, changelogText)}
+                  disabled={alternandoManutencao}
+                  className="px-4 py-2 rounded-xl text-sm font-bold bg-if-purple hover:bg-if-purple/80 text-white transition-colors flex items-center gap-2"
+                >
+                  {alternandoManutencao && <Loader2 size={16} className="animate-spin" />}
+                  Ligar Site
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

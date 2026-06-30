@@ -15,7 +15,8 @@ exports.verificarManutencao = async (req, res, next) => {
       path.startsWith('/auth/login') ||
       path.startsWith('/auth/refresh') ||
       path.startsWith('/auth/logout') ||
-      path.startsWith('/admin/configuracoes-sistema')
+      path.startsWith('/admin/configuracoes-sistema') ||
+      path.startsWith('/sistema/status')
     ) {
       return next();
     }

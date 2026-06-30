@@ -18,6 +18,7 @@ const medalhasRoutes = require('./routes/medalhas.routes');
 const portfolioRoutes = require('./routes/portfolio.routes');
 const moderacaoRoutes = require('./routes/moderacao.routes');
 const adminRoutes = require('./routes/admin.routes');
+const sistemaRoutes = require('./routes/sistema.routes');
 const { responseMiddleware } = require('./middleware/response.middleware');
 const { notFoundMiddleware, errorMiddleware } = require('./middleware/error.middleware');
 
@@ -68,6 +69,7 @@ app.get('/health', (req, res) => {
 });
 
 const { verificarManutencao } = require('./middleware/manutencao.middleware');
+app.use('/sistema', sistemaRoutes);
 app.use(verificarManutencao);
 
 app.use('/auth', authRoutes);

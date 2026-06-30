@@ -11,6 +11,14 @@ const configuracaoSistemaSchema = new mongoose.Schema(
       ref: 'Usuario',
       default: null,
     },
+    changelog: {
+      type: String,
+      default: '',
+    },
+    changelog_date: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: { createdAt: false, updatedAt: true } }
 );

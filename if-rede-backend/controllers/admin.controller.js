@@ -238,7 +238,7 @@ const adminController = {
    */
   async atualizarConfiguracoesSistema(req, res, next) {
     try {
-      const { modo_manutencao } = req.body;
+      const { modo_manutencao, changelog } = req.body;
       if (typeof modo_manutencao !== 'boolean') {
         return res.fail('O campo modo_manutencao é obrigatório e deve ser booleano.', 400);
       }
@@ -250,6 +250,13 @@ const adminController = {
       }
 
       config.modo_manutencao = modo_manutencao;
+      
+      // Se não for manutenção e tiver changelog, salva
+      if (!modo_manutencao && changelog && changelog.trim().length > 0) {
+        config.changelog = changelog.trim();
+        config.changelog_date = new Date();
+      }
+
       config.atualizado_por = req.usuario.id;
       await config.save();
 
