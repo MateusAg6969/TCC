@@ -104,11 +104,9 @@ export default function CommentItem({ comment, postId, onReply, onRefresh }: Com
         {/* Avatar */}
         <div className="h-8 w-8 md:h-10 md:w-10 shrink-0 overflow-hidden rounded-xl bg-if-purple/20 flex items-center justify-center font-bold text-if-purple border border-if-purple/10">
           {comment.autor_id.customizacao?.avatar_url ? (
-            <Image 
+            <img 
               src={resolveAssetUrl(comment.autor_id.customizacao.avatar_url)} 
               alt={comment.autor_id.perfil.apelido || comment.autor_id.perfil.nome} 
-              width={40} 
-              height={40} 
               className="h-full w-full object-cover"
             />
           ) : (

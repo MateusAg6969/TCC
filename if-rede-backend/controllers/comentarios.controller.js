@@ -110,7 +110,7 @@ const comentariosController = {
         status: 'aprovado' 
       })
       .sort({ highlight_type: -1, createdAt: 1 }) // Destaques primeiro, depois por data
-      .populate('autor_id', 'perfil.nome perfil.status_vinculo customizacao.avatar_url customizacao.avatar_position');
+      .populate('autor_id', 'perfil.nome perfil.apelido perfil.status_vinculo customizacao.avatar_url customizacao.avatar_position');
 
       // Organiza em árvore (apenas 1 nível de profundidade para simplificar UI)
       const raizes = todos.filter(c => !c.parent_id);

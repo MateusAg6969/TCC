@@ -53,11 +53,9 @@ export default function ReplyItem({ reply, parentCommentId, onReply, onRefresh }
     <div className="flex gap-3 relative group/reply mt-3">
       <div className="h-7 w-7 shrink-0 overflow-hidden rounded-lg bg-if-purple/10 flex items-center justify-center text-[10px] font-bold text-if-purple/60 border border-if-purple/10 z-10">
         {reply.autor_id.customizacao?.avatar_url ? (
-          <Image 
+          <img 
             src={resolveAssetUrl(reply.autor_id.customizacao.avatar_url)} 
             alt={reply.autor_id.perfil.nome} 
-            width={28} 
-            height={28} 
             className="h-full w-full object-cover"
           />
         ) : (
