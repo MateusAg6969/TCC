@@ -25,7 +25,7 @@ const conteudoSchema = new mongoose.Schema(
     // Saida: URL consumida pelo frontend para renderizar/download.
     url: {
       type: String,
-      required: [true, 'URL do arquivo e obrigatoria'],
+      default: '',
     },
 
     // Metadados tecnicos do arquivo para auditoria e validacoes futuras.

@@ -125,8 +125,13 @@ export default function NewPostPage() {
       return;
     }
 
-    if (arquivos.length === 0) {
-      setStatus({ ok: false, message: 'Selecione pelo menos um arquivo para publicar.' });
+    if (form.tipo !== 'texto' && arquivos.length === 0) {
+      setStatus({ ok: false, message: 'Selecione pelo menos um arquivo para publicar mídia.' });
+      return;
+    }
+
+    if (form.tipo === 'texto' && arquivos.length === 0 && !form.texto_longo.trim()) {
+      setStatus({ ok: false, message: 'Adicione algum texto ou anexe um arquivo à postagem.' });
       return;
     }
 
@@ -262,7 +267,9 @@ export default function NewPostPage() {
             
             {/* AREA DE UPLOAD */}
             <div className="rounded-3xl bg-if-card/50 backdrop-blur-md border border-white/5 p-6 shadow-2xl">
-              <label className="mb-3 block text-sm font-bold text-if-text/80">Arquivo da Postagem</label>
+              <label className="mb-3 block text-sm font-bold text-if-text/80">
+                Arquivo da Postagem {form.tipo === 'texto' && <span className="text-if-text/50 font-normal font-medium">(Opcional)</span>}
+              </label>
               
               <div 
                 onDragOver={(e) => e.preventDefault()}

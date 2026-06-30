@@ -42,8 +42,16 @@ router.post(
       // O que faz: valida campos obrigatorios para fluxo de upload.
       // Por que: agora toda postagem depende de arquivo real, nao apenas URL manual.
       // Fluxo de dados: multipart/form-data -> multer(req.file + req.body) -> validacao.
-      if (!titulo || !tipo || arquivos.length === 0) {
-        return res.fail('Campos obrigatorios: titulo, tipo e arquivo.', 400);
+      if (!titulo || !tipo) {
+        return res.fail('Campos obrigatórios: titulo e tipo.', 400);
+      }
+      
+      if (tipo !== 'texto' && arquivos.length === 0) {
+        return res.fail('Postagens de mídia requerem ao menos um arquivo.', 400);
+      }
+      
+      if (tipo === 'texto' && arquivos.length === 0 && !String(req.body.texto_longo || '').trim()) {
+        return res.fail('Postagens de texto sem arquivo devem conter um conteúdo textual.', 400);
       }
 
       const limiteTipo = LIMITES_POR_TIPO[tipo];
@@ -99,9 +107,9 @@ router.post(
       }));
 
       const conteudo = {
-        url: galeria[0].url,
+        url: galeria.length > 0 ? galeria[0].url : '',
         texto_longo: tipo === 'texto' ? String(req.body.texto_longo || '').trim() : '',
-        arquivo: galeria[0].arquivo,
+        arquivo: galeria.length > 0 ? galeria[0].arquivo : undefined,
         galeria: galeria,
       };
 
