@@ -117,7 +117,8 @@ const THEMES: Theme[] = [
 const MAIN_CUSTOM_KEYS = [
   { key: '--brand-background', label: 'Cor de Fundo' },
   { key: '--brand-title-background', label: 'Cartões e Menus' },
-  { key: '--brand-highlight', label: 'Cor de Destaque' }
+  { key: '--brand-highlight', label: 'Cor de Destaque' },
+  { key: '--brand-main', label: 'Cor da Fonte' }
 ];
 
 export default function ConfiguracoesPage() {
@@ -247,22 +248,25 @@ export default function ConfiguracoesPage() {
   const updateCustomValue = (key: string, value: string) => {
     const newVals = { ...customValues, [key]: value };
     
-    // Auto-generate the other values based on the 3 main ones
+    // Extract the 4 main values
     const bg = newVals['--brand-background'];
     const cards = newVals['--brand-title-background'];
     const highlight = newVals['--brand-highlight'];
+    const textColor = newVals['--brand-main']; // The newly added text color option
 
-    const bgText = getContrastColor(bg);
-    const cardsText = getContrastColor(cards);
-    
-    newVals['--brand-main'] = bgText;
-    newVals['--brand-color'] = bgText;
-    newVals['--brand-secondary'] = bgText === '#000000' ? '#555555' : '#AAAAAA'; 
+    // Text assignment
+    newVals['--brand-main'] = textColor;
+    newVals['--brand-color'] = textColor;
+    // For secondary, we use the same text color, but opacity is often handled in the UI. 
+    // We can also calculate a slightly faded version if it's hex, but assigning textColor is safest.
+    newVals['--brand-secondary'] = textColor; 
 
     newVals['--brand-menu-background'] = cards;
-    newVals['--brand-menu-text'] = cardsText;
+    newVals['--brand-menu-text'] = textColor;
     
-    newVals['--brand-title-border'] = cardsText === '#000000' ? '#E5E5E5' : '#333333';
+    // Border colors derived from cards background for contrast
+    const cardsTextContrast = getContrastColor(cards);
+    newVals['--brand-title-border'] = cardsTextContrast === '#000000' ? '#E5E5E5' : '#333333';
     
     newVals['--brand-logo-color'] = highlight;
     newVals['--brand-menu-logo'] = highlight;
@@ -272,8 +276,7 @@ export default function ConfiguracoesPage() {
     setCustomValues(newVals);
     
     if (typeof window !== 'undefined') {
-       // local storage is updated only on Save, but we can temporarily update it for preview if we want.
-       // Actually let's just wait for save to update localStorage.
+       // local storage is updated only on Save
     }
     
     if (currentTheme === 'custom') {
@@ -281,7 +284,7 @@ export default function ConfiguracoesPage() {
          document.documentElement.style.setProperty(k, val);
       });
       document.documentElement.style.setProperty('--brand-highlight-text', getContrastColor(highlight));
-      document.documentElement.style.setProperty('--brand-card-text', cardsText);
+      document.documentElement.style.setProperty('--brand-card-text', textColor);
     }
   };
 
@@ -558,8 +561,8 @@ export default function ConfiguracoesPage() {
                           <ThemePreview customValues={customValues} />
                         </div>
 
-                        {/* Seletor de Cores Simplificado (3 opções) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* Seletor de Cores Simplificado (4 opções) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {MAIN_CUSTOM_KEYS.map((item) => (
                             <div key={item.key} className="flex flex-col p-4 rounded-xl bg-white/5 border border-white/5 gap-3">
                               <span className="text-sm font-bold text-if-text/80">{item.label}</span>
