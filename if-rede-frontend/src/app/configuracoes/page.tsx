@@ -114,21 +114,11 @@ const THEMES: Theme[] = [
   { id: 'custom', name: 'Personalizado', className: 'theme-custom', bg: '#190E1A', main: '#F2F2F2', highlight: '#ADCC5A', titleBg: '#2A172B', menuBg: '#2A172B' },
 ];
 
-const CUSTOM_LABELS: Record<string, string> = {
-  '--brand-background': 'Fundo do Perfil',
-  '--brand-main': 'Texto Principal',
-  '--brand-color': 'Texto de Corpo',
-  '--brand-secondary': 'Texto Secundário',
-  '--brand-highlight': 'Destaque/Botões',
-  '--brand-highlight-border': 'Borda de Destaque',
-  '--brand-logo-color': 'Cor do Logotipo',
-  '--brand-title-background': 'Fundo do Cabeçalho',
-  '--brand-title-border': 'Borda do Cabeçalho',
-  '--brand-menu-background': 'Fundo do Menu',
-  '--brand-menu-logo': 'Logo do Menu',
-  '--brand-menu-text': 'Texto do Menu',
-  '--brand-menu-highlight': 'Destaque do Menu',
-};
+const MAIN_CUSTOM_KEYS = [
+  { key: '--brand-background', label: 'Cor de Fundo' },
+  { key: '--brand-title-background', label: 'Cartões e Menus' },
+  { key: '--brand-highlight', label: 'Cor de Destaque' }
+];
 
 export default function ConfiguracoesPage() {
   const { user, logout, updateUser } = useAuth();
@@ -256,17 +246,42 @@ export default function ConfiguracoesPage() {
 
   const updateCustomValue = (key: string, value: string) => {
     const newVals = { ...customValues, [key]: value };
+    
+    // Auto-generate the other values based on the 3 main ones
+    const bg = newVals['--brand-background'];
+    const cards = newVals['--brand-title-background'];
+    const highlight = newVals['--brand-highlight'];
+
+    const bgText = getContrastColor(bg);
+    const cardsText = getContrastColor(cards);
+    
+    newVals['--brand-main'] = bgText;
+    newVals['--brand-color'] = bgText;
+    newVals['--brand-secondary'] = bgText === '#000000' ? '#555555' : '#AAAAAA'; 
+
+    newVals['--brand-menu-background'] = cards;
+    newVals['--brand-menu-text'] = cardsText;
+    
+    newVals['--brand-title-border'] = cardsText === '#000000' ? '#E5E5E5' : '#333333';
+    
+    newVals['--brand-logo-color'] = highlight;
+    newVals['--brand-menu-logo'] = highlight;
+    newVals['--brand-menu-highlight'] = highlight;
+    newVals['--brand-highlight-border'] = newVals['--brand-title-border'];
+
     setCustomValues(newVals);
-    localStorage.setItem('user-theme-custom-values', JSON.stringify(newVals));
+    
+    if (typeof window !== 'undefined') {
+       // local storage is updated only on Save, but we can temporarily update it for preview if we want.
+       // Actually let's just wait for save to update localStorage.
+    }
     
     if (currentTheme === 'custom') {
-      document.documentElement.style.setProperty(key, value);
-      if (key === '--brand-highlight') {
-        document.documentElement.style.setProperty('--brand-highlight-text', getContrastColor(value));
-      }
-      if (key === '--brand-title-background') {
-        document.documentElement.style.setProperty('--brand-card-text', getContrastColor(value));
-      }
+      Object.entries(newVals).forEach(([k, val]) => {
+         document.documentElement.style.setProperty(k, val);
+      });
+      document.documentElement.style.setProperty('--brand-highlight-text', getContrastColor(highlight));
+      document.documentElement.style.setProperty('--brand-card-text', cardsText);
     }
   };
 
@@ -543,19 +558,19 @@ export default function ConfiguracoesPage() {
                           <ThemePreview customValues={customValues} />
                         </div>
 
-                        {/* Seletor de Cores */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {Object.keys(customValues).map((key) => (
-                            <div key={key} className="flex flex-wrap items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 gap-2">
-                              <span className="text-xs font-bold text-if-text/80 break-words flex-1 min-w-[100px] leading-tight">{CUSTOM_LABELS[key] || key}</span>
-                              <div className="flex items-center gap-2 shrink-0 ml-auto">
-                                <span className="text-xs font-mono text-if-text/40">{customValues[key]}</span>
+                        {/* Seletor de Cores Simplificado (3 opções) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {MAIN_CUSTOM_KEYS.map((item) => (
+                            <div key={item.key} className="flex flex-col p-4 rounded-xl bg-white/5 border border-white/5 gap-3">
+                              <span className="text-sm font-bold text-if-text/80">{item.label}</span>
+                              <div className="flex items-center gap-3">
                                 <input
                                   type="color"
-                                  value={customValues[key]}
-                                  onChange={(e) => updateCustomValue(key, e.target.value)}
-                                  className="w-8 h-8 rounded-lg overflow-hidden cursor-pointer border-0 bg-transparent shrink-0"
+                                  value={customValues[item.key]}
+                                  onChange={(e) => updateCustomValue(item.key, e.target.value)}
+                                  className="w-10 h-10 rounded-lg overflow-hidden cursor-pointer border-0 bg-transparent shrink-0"
                                 />
+                                <span className="text-sm font-mono text-if-text/50 uppercase">{customValues[item.key]}</span>
                               </div>
                             </div>
                           ))}
