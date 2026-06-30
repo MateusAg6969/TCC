@@ -10,6 +10,68 @@ import CustomSelect from '@/components/CustomSelect';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 
+// Preview component para mostrar as cores dinâmicas
+const ThemePreview = ({ customValues }: { customValues: Record<string, string> }) => {
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <h4 className="text-sm font-bold text-white mb-1">Preview em tempo real</h4>
+      <div 
+        className="rounded-xl border overflow-hidden shadow-2xl flex flex-col transition-colors duration-300 min-h-[250px]"
+        style={{
+          backgroundColor: customValues['--brand-background'],
+          borderColor: customValues['--brand-title-border'],
+        }}
+      >
+        {/* Menu / Header Mock */}
+        <div 
+          className="p-3 flex items-center justify-between border-b transition-colors duration-300"
+          style={{
+            backgroundColor: customValues['--brand-menu-background'],
+            borderColor: customValues['--brand-title-border']
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-md flex items-center justify-center transition-colors duration-300" style={{ backgroundColor: customValues['--brand-menu-highlight'] }}>
+              <div className="w-3 h-3 rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-menu-logo'] }} />
+            </div>
+            <div className="h-2 w-16 rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-menu-text'] }} />
+          </div>
+          <div className="h-6 w-6 rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-logo-color'] }} />
+        </div>
+
+        {/* Main Content Mock */}
+        <div className="p-4 flex flex-col gap-4 flex-1">
+          {/* Post Card */}
+          <div 
+            className="rounded-xl border p-4 shadow-sm transition-colors duration-300"
+            style={{
+              backgroundColor: customValues['--brand-title-background'],
+              borderColor: customValues['--brand-highlight-border']
+            }}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-highlight'] }} />
+              <div className="flex flex-col gap-1.5">
+                <div className="h-2 w-24 rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-main'] }} />
+                <div className="h-1.5 w-16 rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-secondary'] }} />
+              </div>
+            </div>
+            <div className="space-y-2 mt-4">
+              <div className="h-1.5 w-full rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-color'] }} />
+              <div className="h-1.5 w-5/6 rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-color'] }} />
+              <div className="h-1.5 w-4/6 rounded-full transition-colors duration-300" style={{ backgroundColor: customValues['--brand-color'] }} />
+            </div>
+            <div className="mt-5 pt-3 border-t flex items-center gap-2" style={{ borderColor: customValues['--brand-title-border'] }}>
+               <div className="h-7 w-20 rounded-lg transition-colors duration-300" style={{ backgroundColor: customValues['--brand-highlight'] }} />
+               <div className="h-7 w-20 rounded-lg transition-colors duration-300" style={{ backgroundColor: customValues['--brand-highlight-border'] }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 type Tab = 'perfil' | 'privacidade' | 'notificacoes' | 'aparencia';
 
 function ToggleSwitch({ checked, onChange }: { checked: boolean, onChange: (val: boolean) => void }) {
@@ -473,24 +535,32 @@ export default function ConfiguracoesPage() {
                       <h3 className="text-lg font-black text-white">Personalizar Cores</h3>
                       <p className="text-xs font-bold text-if-text/50">Altere as cores do seu tema personalizado abaixo. O preview na tela é aplicado em tempo real!</p>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                        {Object.keys(customValues).map((key) => (
-                          <div key={key} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                            <span className="text-xs font-bold text-if-text/80">{CUSTOM_LABELS[key] || key}</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-if-text/40">{customValues[key]}</span>
-                              <input
-                                type="color"
-                                value={customValues[key]}
-                                onChange={(e) => updateCustomValue(key, e.target.value)}
-                                className="w-8 h-8 rounded-lg overflow-hidden cursor-pointer border-0 bg-transparent"
-                              />
+                      <div className="flex flex-col lg:flex-row gap-8 pt-2">
+                        {/* Seletor de Cores */}
+                        <div className="flex-1 grid grid-cols-1 gap-3 content-start">
+                          {Object.keys(customValues).map((key) => (
+                            <div key={key} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                              <span className="text-xs font-bold text-if-text/80">{CUSTOM_LABELS[key] || key}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-mono text-if-text/40">{customValues[key]}</span>
+                                <input
+                                  type="color"
+                                  value={customValues[key]}
+                                  onChange={(e) => updateCustomValue(key, e.target.value)}
+                                  className="w-8 h-8 rounded-lg overflow-hidden cursor-pointer border-0 bg-transparent"
+                                />
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+
+                        {/* Preview */}
+                        <div className="w-full lg:w-[350px]">
+                          <ThemePreview customValues={customValues} />
+                        </div>
                       </div>
 
-                      <div className="flex justify-end pt-4">
+                      <div className="flex justify-end pt-4 border-t border-white/10">
                         <button
                           type="button"
                           onClick={salvarCoresCustomizadas}
