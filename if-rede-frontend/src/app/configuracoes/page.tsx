@@ -535,28 +535,28 @@ export default function ConfiguracoesPage() {
                       <h3 className="text-lg font-black text-white">Personalizar Cores</h3>
                       <p className="text-xs font-bold text-if-text/50">Altere as cores do seu tema personalizado abaixo. O preview na tela é aplicado em tempo real!</p>
                       
-                      <div className="flex flex-col lg:flex-row gap-8 pt-2">
+                      <div className="flex flex-col gap-6 pt-4">
+                        {/* Preview no topo para evitar que os popups de cor o cubram */}
+                        <div className="w-full max-w-lg mx-auto">
+                          <ThemePreview customValues={customValues} />
+                        </div>
+
                         {/* Seletor de Cores */}
-                        <div className="flex-1 grid grid-cols-1 gap-3 content-start">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           {Object.keys(customValues).map((key) => (
-                            <div key={key} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                              <span className="text-xs font-bold text-if-text/80">{CUSTOM_LABELS[key] || key}</span>
-                              <div className="flex items-center gap-2">
+                            <div key={key} className="flex flex-wrap items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 gap-2">
+                              <span className="text-xs font-bold text-if-text/80 break-words flex-1 min-w-[100px] leading-tight">{CUSTOM_LABELS[key] || key}</span>
+                              <div className="flex items-center gap-2 shrink-0 ml-auto">
                                 <span className="text-xs font-mono text-if-text/40">{customValues[key]}</span>
                                 <input
                                   type="color"
                                   value={customValues[key]}
                                   onChange={(e) => updateCustomValue(key, e.target.value)}
-                                  className="w-8 h-8 rounded-lg overflow-hidden cursor-pointer border-0 bg-transparent"
+                                  className="w-8 h-8 rounded-lg overflow-hidden cursor-pointer border-0 bg-transparent shrink-0"
                                 />
                               </div>
                             </div>
                           ))}
-                        </div>
-
-                        {/* Preview */}
-                        <div className="w-full lg:w-[350px]">
-                          <ThemePreview customValues={customValues} />
                         </div>
                       </div>
 
