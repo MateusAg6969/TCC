@@ -226,7 +226,7 @@ export default function ConfiguracoesPage() {
     }
   }, [user]);
 
-  const changeTheme = async (themeName: string) => {
+  const previewTheme = (themeName: string) => {
     setCurrentTheme(themeName);
     if (typeof window === 'undefined') return;
 
@@ -236,8 +236,6 @@ export default function ConfiguracoesPage() {
     const cleanClasses = classes.filter(c => !c.startsWith('theme-'));
     cleanClasses.push(`theme-${themeName}`);
     html.className = cleanClasses.join(' ').trim();
-    
-    localStorage.setItem('user-theme', themeName);
 
     if (themeName === 'custom') {
       // Apply current custom values
@@ -253,29 +251,6 @@ export default function ConfiguracoesPage() {
       });
       html.style.removeProperty('--brand-highlight-text');
       html.style.removeProperty('--brand-card-text');
-    }
-
-    try {
-      await api.patch('/usuarios/me', {
-        customizacao: {
-          tema: themeName,
-          tema_valores_customizados: themeName === 'custom' ? customValues : {}
-        }
-      });
-      
-      // Update global context state
-      updateUser({
-        customizacao: {
-          ...user?.customizacao,
-          tema: themeName,
-          tema_valores_customizados: themeName === 'custom' ? customValues : {}
-        }
-      });
-
-      toast.success('Tema atualizado no seu perfil!');
-    } catch (e) {
-      console.error(e);
-      toast.error('Erro ao salvar preferência de tema.');
     }
   };
 
@@ -295,29 +270,36 @@ export default function ConfiguracoesPage() {
     }
   };
 
-  const salvarCoresCustomizadas = async () => {
+  const salvarAparencia = async () => {
     setSalvandoCores(true);
     try {
       await api.patch('/usuarios/me', {
         customizacao: {
-          tema: 'custom',
-          tema_valores_customizados: customValues
+          tema: currentTheme,
+          tema_valores_customizados: currentTheme === 'custom' ? customValues : {}
         }
       });
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user-theme', currentTheme);
+        if (currentTheme === 'custom') {
+          localStorage.setItem('user-theme-custom-values', JSON.stringify(customValues));
+        }
+      }
       
       // Update global context state
       updateUser({
         customizacao: {
           ...user?.customizacao,
-          tema: 'custom',
-          tema_valores_customizados: customValues
+          tema: currentTheme,
+          tema_valores_customizados: currentTheme === 'custom' ? customValues : {}
         }
       });
 
-      toast.success('Cores personalizadas salvas no seu perfil!');
+      toast.success('Aparência salva com sucesso!');
     } catch (e) {
       console.error(e);
-      toast.error('Erro ao salvar cores customizadas no servidor.');
+      toast.error('Erro ao salvar aparência no servidor.');
     } finally {
       setSalvandoCores(false);
     }
@@ -525,7 +507,7 @@ export default function ConfiguracoesPage() {
                         <button
                           key={theme.id}
                           type="button"
-                          onClick={() => changeTheme(theme.id)}
+                          onClick={() => previewTheme(theme.id)}
                           className={`flex flex-col p-4 rounded-2xl border-2 transition-all text-left group ${
                             isActive
                               ? 'border-if-olive bg-if-olive/5 shadow-lg shadow-if-olive/5'
@@ -579,19 +561,19 @@ export default function ConfiguracoesPage() {
                           ))}
                         </div>
                       </div>
-
-                      <div className="flex justify-end pt-4 border-t border-white/10">
-                        <button
-                          type="button"
-                          onClick={salvarCoresCustomizadas}
-                          disabled={salvandoCores}
-                          className="px-6 py-2.5 rounded-full bg-if-olive text-if-olive-contrast font-bold text-sm hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
-                        >
-                          {salvandoCores ? 'Salvando...' : 'Salvar Cores Personalizadas'}
-                        </button>
-                      </div>
                     </motion.div>
                   )}
+
+                  <div className="flex justify-end pt-6 mt-4 border-t border-white/10">
+                    <button
+                      type="button"
+                      onClick={salvarAparencia}
+                      disabled={salvandoCores}
+                      className="px-8 py-3 rounded-full bg-if-olive text-if-olive-contrast font-bold text-sm hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center min-w-[250px]"
+                    >
+                      {salvandoCores ? 'Salvando...' : 'Salvar Preferências de Aparência'}
+                    </button>
+                  </div>
                 </motion.div>
               )}
 

@@ -111,17 +111,20 @@ router.patch('/me', authMiddleware, async (req, res, next) => {
 
     // Atualiza campos de customização se fornecidos
     if (customizacao) {
-      if (customizacao.cor_fundo) usuario.customizacao.cor_fundo = customizacao.cor_fundo;
-      if (customizacao.cor_botoes) usuario.customizacao.cor_botoes = customizacao.cor_botoes;
-      if (customizacao.avatar_url !== undefined) usuario.customizacao.avatar_url = customizacao.avatar_url;
-      if (customizacao.banner_url !== undefined) usuario.customizacao.banner_url = customizacao.banner_url;
-      if (customizacao.avatar_position !== undefined) usuario.customizacao.avatar_position = customizacao.avatar_position;
-      if (customizacao.banner_position !== undefined) usuario.customizacao.banner_position = customizacao.banner_position;
-      if (customizacao.tema !== undefined) usuario.customizacao.tema = customizacao.tema;
+      const novaCustomizacao = { ...usuario.toObject().customizacao };
+
+      if (customizacao.cor_fundo) novaCustomizacao.cor_fundo = customizacao.cor_fundo;
+      if (customizacao.cor_botoes) novaCustomizacao.cor_botoes = customizacao.cor_botoes;
+      if (customizacao.avatar_url !== undefined) novaCustomizacao.avatar_url = customizacao.avatar_url;
+      if (customizacao.banner_url !== undefined) novaCustomizacao.banner_url = customizacao.banner_url;
+      if (customizacao.avatar_position !== undefined) novaCustomizacao.avatar_position = customizacao.avatar_position;
+      if (customizacao.banner_position !== undefined) novaCustomizacao.banner_position = customizacao.banner_position;
+      if (customizacao.tema !== undefined) novaCustomizacao.tema = customizacao.tema;
       if (customizacao.tema_valores_customizados !== undefined) {
-        usuario.set('customizacao.tema_valores_customizados', customizacao.tema_valores_customizados);
-        usuario.markModified('customizacao.tema_valores_customizados');
+        novaCustomizacao.tema_valores_customizados = customizacao.tema_valores_customizados;
       }
+      
+      usuario.customizacao = novaCustomizacao;
     }
 
     await usuario.save();
