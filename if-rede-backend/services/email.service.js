@@ -1,8 +1,24 @@
+// ============================================================================
+// SERVIÇO: EMAIL SERVICE (IF REDE Backend)
+// ============================================================================
+// Propósito: Gerenciamento do disparo de e-mails transacionais (confirmação de
+// conta e recuperação de senha).
+// Integração: Utiliza a API REST HTTP do Brevo (v3) via protocolo HTTPS nativo
+// para evitar bloqueios de portas SMTP em ambientes de hospedagem como Render.
+// Fallback/Dev: Em ambiente local ou sem BREVO_API_KEY, os links gerados são
+// exibidos no console do servidor para testes.
+// ============================================================================
+
 const https = require('https');
 
 /**
- * Função utilitária para enviar e-mails usando a API do Brevo (HTTP).
- * Isso contorna o bloqueio de portas SMTP do Render.
+ * Envia uma requisição HTTP POST para a API REST v3 do Brevo (antigo Sendinblue).
+ * 
+ * @param {string} toEmail - Endereço de e-mail do destinatário.
+ * @param {string} toName - Nome completo ou de exibição do destinatário.
+ * @param {string} subject - Assunto da mensagem de e-mail.
+ * @param {string} htmlContent - Corpo da mensagem formatado em HTML.
+ * @returns {Promise<string>} Promessa que resolve com o corpo da resposta ou 'Simulado'.
  */
 function sendEmailViaBrevo(toEmail, toName, subject, htmlContent) {
   return new Promise((resolve, reject) => {
