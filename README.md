@@ -13,7 +13,7 @@ _Versão: 1.0.0 – 17 abr 2026_
 
 ---
 
-## 1️ Visão Geral
+## 1. Visão Geral
 
 IF REDE é uma rede social acadêmica construída com **Node.js** + **Express**, persiste dados em **MongoDB** usando **Mongoose** e adota quatro padrões de design MongoDB:
 
@@ -30,7 +30,7 @@ IF REDE é uma rede social acadêmica construída com **Node.js** + **Express*
 
 ---
 
-## 2️ Estrutura de Diretórios
+## 2. Estrutura de Diretórios
 
 ```
 if-rede-backend/
@@ -55,7 +55,7 @@ if-rede-backend/
 
 ---
 
-## 3️ Modelos de Dados
+## 3. Modelos de Dados
 
 ### 3.1 Usuario (`schemas/usuario.schema.js`)
 
@@ -232,29 +232,29 @@ if-rede-backend/
 
 ---
 
-## 4️ API REST (rotas)
+## 4. API REST (rotas)
 
 | Rota                                 | Método             | Auth?          | Descrição                                                                   | Middleware(s)                                      |
 | ------------------------------------ | ------------------ | -------------- | --------------------------------------------------------------------------- | -------------------------------------------------- |
-| **/health**                          | `GET`              | ❌             | Health‑check (retorna `service` e `now`).                                   | `responseMiddleware`                               |
-| **/auth/register**                   | `POST`             | ❌             | Cria usuário; valida `email`, `matricula`, `senha`.                         | `validation`, `bcrypt`                             |
-| **/auth/login**                      | `POST`             | ❌             | Gera **JWT** (`accessToken` 15 min) + **Refresh** (`refreshToken` 7 dias).  | `bcrypt`                                           |
-| **/auth/refresh**                    | `POST`             | ❌             | Renova `accessToken` usando `refreshToken`.                                 | —                                                  |
-| **/usuarios/me**                     | `GET`              | ✅             | Dados do usuário autenticado.                                               | `authMiddleware`                                   |
-| **/usuarios/ranking/semana**         | `GET`              | ❌             | Ranking de artistas baseado na soma de likes do Top 3 postagens na semana.  | —                                                  |
-| **/usuarios/:id**                    | `GET`              | ✅             | Dados públicos de outro usuário (visibilidade).                             | `authMiddleware`                                   |
-| **/usuarios/:id/seguir**             | `POST` / `DELETE`  | ✅             | Segue / deixa de seguir; verifica limites (egresso ≤ 2 posts/semana).       | `authMiddleware`, `ownershipCheck`                 |
-| **/postagens**                       | `POST`             | ✅             | Cria postagem (padrão **rascunho**).                                        | `authMiddleware`, `uploadMiddleware`, `validation` |
-| **/postagens/feed**                  | `GET`              | ✅             | Feed paginado; filtra por `visibilidade`.                                   | `authMiddleware`, `rateLimit`                      |
-| **/postagens/:id**                   | `PATCH` / `DELETE` | ✅             | Atualiza / exclui; **ownership** (autor ou moderador).                      | `authMiddleware`, `ownershipCheck`                 |
-| **/postagens/:id/curtir**            | `POST` / `DELETE`  | ✅             | Like / unlike; impede duplicidade.                                          | `authMiddleware`                                   |
-| **/comentarios**                     | `POST`             | ✅             | Cria comentário; pode exigir `moderador` se `config.comentarios_moderados`. | `authMiddleware`                                   |
-| **/comentarios/postagem/:postId**    | `GET`              | ✅             | Lista comentários (paginado).                                               | `authMiddleware`                                   |
-| **/comentarios/moderacao/pendentes** | `GET`              | ✅ (moderador) | Lista comentários aguardando aprovação.                                     | `authMiddleware`, `moderatorCheck`                 |
-| **/comentarios/:id/aprovar**         | `PATCH`            | ✅ (moderador) | Aprova comentário; registra `atividade_moderacao`.                          | `authMiddleware`, `moderatorCheck`                 |
-| **/comentarios/:id/rejeitar**        | `PATCH`            | ✅ (moderador) | Rejeita comentário; registra ação.                                          | `authMiddleware`, `moderatorCheck`                 |
-| **/filtro-palavras**                 | `POST`             | ✅ (moderador) | Aciona filtro de palavras proibidas; cria log.                              | `authMiddleware`, `moderatorCheck`                 |
-| **/tags**                            | `GET`              | ✅             | Lista tags disponíveis.                                                     | `authMiddleware`                                   |
+| **/health**                          | `GET`              | [Não]             | Health‑check (retorna `service` e `now`).                                   | `responseMiddleware`                               |
+| **/auth/register**                   | `POST`             | [Não]             | Cria usuário; valida `email`, `matricula`, `senha`.                         | `validation`, `bcrypt`                             |
+| **/auth/login**                      | `POST`             | [Não]             | Gera **JWT** (`accessToken` 15 min) + **Refresh** (`refreshToken` 7 dias).  | `bcrypt`                                           |
+| **/auth/refresh**                    | `POST`             | [Não]             | Renova `accessToken` usando `refreshToken`.                                 | —                                                  |
+| **/usuarios/me**                     | `GET`              | [Concluído]             | Dados do usuário autenticado.                                               | `authMiddleware`                                   |
+| **/usuarios/ranking/semana**         | `GET`              | [Não]             | Ranking de artistas baseado na soma de likes do Top 3 postagens na semana.  | —                                                  |
+| **/usuarios/:id**                    | `GET`              | [Concluído]             | Dados públicos de outro usuário (visibilidade).                             | `authMiddleware`                                   |
+| **/usuarios/:id/seguir**             | `POST` / `DELETE`  | [Concluído]             | Segue / deixa de seguir; verifica limites (egresso ≤ 2 posts/semana).       | `authMiddleware`, `ownershipCheck`                 |
+| **/postagens**                       | `POST`             | [Concluído]             | Cria postagem (padrão **rascunho**).                                        | `authMiddleware`, `uploadMiddleware`, `validation` |
+| **/postagens/feed**                  | `GET`              | [Concluído]             | Feed paginado; filtra por `visibilidade`.                                   | `authMiddleware`, `rateLimit`                      |
+| **/postagens/:id**                   | `PATCH` / `DELETE` | [Concluído]             | Atualiza / exclui; **ownership** (autor ou moderador).                      | `authMiddleware`, `ownershipCheck`                 |
+| **/postagens/:id/curtir**            | `POST` / `DELETE`  | [Concluído]             | Like / unlike; impede duplicidade.                                          | `authMiddleware`                                   |
+| **/comentarios**                     | `POST`             | [Concluído]             | Cria comentário; pode exigir `moderador` se `config.comentarios_moderados`. | `authMiddleware`                                   |
+| **/comentarios/postagem/:postId**    | `GET`              | [Concluído]             | Lista comentários (paginado).                                               | `authMiddleware`                                   |
+| **/comentarios/moderacao/pendentes** | `GET`              | Sim (moderador) | Lista comentários aguardando aprovação.                                     | `authMiddleware`, `moderatorCheck`                 |
+| **/comentarios/:id/aprovar**         | `PATCH`            | Sim (moderador) | Aprova comentário; registra `atividade_moderacao`.                          | `authMiddleware`, `moderatorCheck`                 |
+| **/comentarios/:id/rejeitar**        | `PATCH`            | Sim (moderador) | Rejeita comentário; registra ação.                                          | `authMiddleware`, `moderatorCheck`                 |
+| **/filtro-palavras**                 | `POST`             | Sim (moderador) | Aciona filtro de palavras proibidas; cria log.                              | `authMiddleware`, `moderatorCheck`                 |
+| **/tags**                            | `GET`              | [Concluído]             | Lista tags disponíveis.                                                     | `authMiddleware`                                   |
 
 ### Middlewares críticos
 
@@ -272,7 +272,7 @@ if-rede-backend/
 
 ---
 
-## 5️ Fluxo de Moderação & Cálculo de Horas Complementares
+## 5. Fluxo de Moderação e Cálculo de Horas Complementares
 
 1. **Ação do moderador** → cria documento `atividade_moderacao`.
 2. **tempo_estimado_minutos** é preenchido automaticamente por tipo de ação (ex.: `postagem_bloqueada = 10 min).
@@ -285,7 +285,7 @@ if-rede-backend/
 
 ---
 
-## 6️ Segurança & Boas‑Práticas
+## 6. Segurança e Boas-Práticas
 
 | Aspecto                     | Implementação                                                                              |
 | --------------------------- | ------------------------------------------------------------------------------------------ |
@@ -302,7 +302,7 @@ if-rede-backend/
 
 ---
 
-## 7️ Contrato para o Frontend
+## 7. Contrato para o Frontend
 
 - **Formato padrão de resposta** (definido em `docs/FRONTEND-START.md`):
 
@@ -350,7 +350,7 @@ api.interceptors.request.use((config) => {
 
 ---
 
-## 8️ Diagrama UML (texto simplificado)
+## 8. Diagrama UML (texto simplificado)
 
 ```
 +-------------------+      1   *    +-------------------+
@@ -378,7 +378,7 @@ api.interceptors.request.use((config) => {
 
 ---
 
-## 9️ Conclusão
+## 9. Conclusão
 
 Este documento consolida toda a documentação técnica do backend, facilitando:
 
@@ -634,12 +634,12 @@ conteudo: { url: "...", dimensoes: { ... }, ... }
 
 ### VALIDAÇÃO NO SCHEMA
 
-✓ Tipos forçados (String, Number, Boolean, Date, ObjectId)  
-✓ Campos obrigatórios (required: true)  
-✓ Limites de tamanho (minlength, maxlength)  
-✓ Padrões regex (email, hexcolor, URL)  
-✓ Enums (apenas valores permitidos)  
-✓ Índices UNIQUE (matricula, email)
+[x] Tipos forçados (String, Number, Boolean, Date, ObjectId)  
+[x] Campos obrigatórios (required: true)  
+[x] Limites de tamanho (minlength, maxlength)  
+[x] Padrões regex (email, hexcolor, URL)  
+[x] Enums (apenas valores permitidos)  
+[x] Índices UNIQUE (matricula, email)
 
 **EXEMPLO:**
 
@@ -655,16 +655,16 @@ email: {
 
 ### IMUTABILIDADE
 
-✓ `autor_id` (Postagem) → immutable: true  
-✓ `tipo_acao` (AtividadeModeração) → immutable: true
+[x] `autor_id` (Postagem) → immutable: true  
+[x] `tipo_acao` (AtividadeModeração) → immutable: true
 
 Uma vez criado, não pode ser alterado
 
 ### SENHAS
 
-✓ Nunca retornar no find: `select: false`  
-✓ Hash com bcrypt (não plaintext!)  
-✓ Comparar com `bcrypt.compare()`
+[x] Nunca retornar no find: `select: false`  
+[x] Hash com bcrypt (não plaintext!)  
+[x] Comparar com `bcrypt.compare()`
 
 ---
 
@@ -672,27 +672,27 @@ Uma vez criado, não pode ser alterado
 
 ### ESTUDANTE
 
-✓ Sem limites de postagem  
-✓ Todos os tipos de conteúdo  
-✓ Pode ser moderador voluntário  
-✓ Acesso público ao perfil  
-✓ Sem suspensão por limite
+[x] Sem limites de postagem  
+[x] Todos os tipos de conteúdo  
+[x] Pode ser moderador voluntário  
+[x] Acesso público ao perfil  
+[x] Sem suspensão por limite
 
 ### EGRESSO
 
-⚠️ Máximo 2 postagens por semana  
-⚠️ Moderação mais rigorosa  
-✓ Acesso leitura completo  
-✗ Não pode ser moderador  
-✓ Perfil público
+[Atenção] Máximo 2 postagens por semana  
+[Atenção] Moderação mais rigorosa  
+[x] Acesso leitura completo  
+ Não pode ser moderador  
+[x] Perfil público
 
 ### SERVIDOR
 
-✓ Sem limites  
-✓ Acesso administrativo  
-✓ Pode moderar  
-✓ Sempre confiável  
-✗ Moderação mínima
+[x] Sem limites  
+[x] Acesso administrativo  
+[x] Pode moderar  
+[x] Sempre confiável  
+ Moderação mínima
 
 ---
 
@@ -700,24 +700,24 @@ Uma vez criado, não pode ser alterado
 
 ### BANCO DE DADOS
 
-✓ Schemas criados (usuario, postagem, atividade_moderacao)  
-✓ Validações implementadas  
-✓ Índices configurados  
-✓ TTL para rascunhos  
-✓ Relacionamentos (refs)
+[x] Schemas criados (usuario, postagem, atividade_moderacao)  
+[x] Validações implementadas  
+[x] Índices configurados  
+[x] TTL para rascunhos  
+[x] Relacionamentos (refs)
 
 ### MODELOS
 
-✓ Métodos de instância (publicar, curtir, etc)  
-✓ Métodos estáticos (buscar, filtrar, etc)  
-✓ Getters (horas formatadas, etc)
+[x] Métodos de instância (publicar, curtir, etc)  
+[x] Métodos estáticos (buscar, filtrar, etc)  
+[x] Getters (horas formatadas, etc)
 
 ### CONEXÃO
 
-✓ Conectar ao MongoDB  
-✓ Criar índices automaticamente  
-✓ Tratamento de erros  
-✓ Graceful shutdown
+[x] Conectar ao MongoDB  
+[x] Criar índices automaticamente  
+[x] Tratamento de erros  
+[x] Graceful shutdown
 
 ### TODO (Próximos Passos)
 
@@ -877,13 +877,13 @@ sequenceDiagram
 
 # 6. DOCUMENTAÇÃO TCC - NOTIFICAÇÕES (PARTE 2)
 
-# 🔔 SISTEMA DE NOTIFICAÇÕES - IF REDE
+# SISTEMA DE NOTIFICAÇÕES - IF REDE
 
-## Status Atual: 🚀 NOTA 8.5 (INTEGRADO & OTIMIZADO)
+## Status Atual: NOTA 8.5 (INTEGRADO & OTIMIZADO)
 
 O sistema de notificações foi revisado e aprimorado pelo Esquadrão de Desenvolvimento. Agora ele não apenas existe, mas está **profundamente integrado** ao fluxo da aplicação.
 
-### ✅ Melhorias Implementadas (v2.0)
+### Melhorias Implementadas (v2.0)
 
 1. **Integração Total (Backend Triggers)**:
     - Notificações disparadas automaticamente em: **Likes**, **Novos Seguidores** e **Comentários Aprovados**.
@@ -901,7 +901,7 @@ O sistema de notificações foi revisado e aprimorado pelo Esquadrão de Desenvo
 
 ---
 
-## 📁 Arquivos Principais
+## Arquivos Principais
 
 ### Backend (Lógica & Gatilhos)
 
@@ -918,7 +918,7 @@ O sistema de notificações foi revisado e aprimorado pelo Esquadrão de Desenvo
 
 ---
 
-## 📁 Arquivos Criados
+## Arquivos Criados
 
 ### Backend
 
@@ -945,7 +945,7 @@ if-rede-frontend/
 
 ---
 
-## 🚀 Como Usar
+## Como Usar
 
 ### 1. **Disparar Notificação no Backend**
 
@@ -996,20 +996,20 @@ O ícone está automaticamente adicionado ao `HomeFeedClient.tsx`:
 
 ---
 
-## 📊 Tipos de Notificações Suportados
+## Tipos de Notificações Suportados
 
 | Tipo           | Mensagem                  | Ícone | Quando disparar                   |
 | -------------- | ------------------------- | ----- | --------------------------------- |
-| **like**       | curtiu sua postagem       | ❤️    | Quando post recebe like           |
-| **comentario** | comentou na sua postagem  | 💬    | Quando há novo comentário         |
-| **seguidor**   | começou a te seguir       | 👥    | Quando alguém faz follow          |
-| **repost**     | compartilhou sua postagem | 🔄    | Quando post é repostado           |
-| **tag**        | te marcou em uma postagem | 🏷️    | Quando usuário é mencionado       |
-| **resposta**   | respondeu seu comentário  | ↩️    | Quando comentário recebe resposta |
+| **like**       | curtiu sua postagem       | (Curtiu) | Quando post recebe like           |
+| **comentario** | comentou na sua postagem  | (Comentou) | Quando há novo comentário         |
+| **seguidor**   | começou a te seguir       |     | Quando alguém faz follow          |
+| **repost**     | compartilhou sua postagem | (Repostou) | Quando post é repostado           |
+| **tag**        | te marcou em uma postagem | (Mencionou) | Quando usuário é mencionado       |
+| **resposta**   | respondeu seu comentário  | ↩    | Quando comentário recebe resposta |
 
 ---
 
-## 🔌 Endpoints da API
+## Endpoints da API
 
 ### GET /notificacoes
 
@@ -1077,31 +1077,31 @@ curl -X DELETE -H "Authorization: Bearer TOKEN" \
 
 ---
 
-## ✨ Status
+## Status
 
-- ✅ Schema Mongoose criado
-- ✅ Controllers prontos (7 endpoints)
-- ✅ Routes registradas
-- ✅ Service helper criado
-- ✅ Frontend Context com polling e redirecionamento
-- ✅ Bell icon na navbar com animações
-- ✅ Página de notificações
-- ✅ Integração de Like (v2.0)
-- ✅ Integração de Seguidores (v2.0)
-- ✅ Integração de Comentários Aprovados (v2.0)
-- ✅ Otimização de Performance Backend (v2.0)
-- ✅ Tipagem TypeScript Completa (v2.0)
+- [x] Schema Mongoose criado
+- [x] Controllers prontos (7 endpoints)
+- [x] Routes registradas
+- [x] Service helper criado
+- [x] Frontend Context com polling e redirecionamento
+- [x] Bell icon na navbar com animações
+- [x] Página de notificações
+- [x] Integração de Like (v2.0)
+- [x] Integração de Seguidores (v2.0)
+- [x] Integração de Comentários Aprovados (v2.0)
+- [x] Otimização de Performance Backend (v2.0)
+- [x] Tipagem TypeScript Completa (v2.0)
 
 ---
 
 **Última atualização**: 2026-06-01  
-**Pronto para produção**: Sim ✅
+**Pronto para produção**: Sim
 
 ---
 
 # 7. DOCUMENTAÇÃO TCC - NOTIFICAÇÕES VISUAL
 
-## 🎉 NOTIFICAÇÕES - IMPLEMENTAÇÃO COMPLETA
+## NOTIFICAÇÕES - IMPLEMENTAÇÃO COMPLETA
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -1109,17 +1109,17 @@ curl -X DELETE -H "Authorization: Bearer TOKEN" \
 └─────────────────────────────────────────────────────────────────────┘
 
 ╔═══════════════════════════════════════════════════════════════════════╗
-║                           ✅ BACKEND                                  ║
+║                           BACKEND                                     ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
-📄 schemas/notificacao.schema.js
+  schemas/notificacao.schema.js
 ├─ Schema Mongoose com TTL (30 dias)
 ├─ Campos: usuario_id, ator_id, tipo, mensagem, objeto_id
 ├─ Índices: usuario_id + lida, usuario_id + criada_em
 ├─ Métodos: marcarComoLida(), marcarComoNaoLida()
 └─ Statics: contarNaoLidas(), buscarComDetalhes()
 
-🎮 controllers/notificacoes.controller.js
+  controllers/notificacoes.controller.js
 ├─ GET    /notificacoes              (listar com paginação)
 ├─ GET    /notificacoes/nao-lidas/contador
 ├─ PATCH  /notificacoes/:id/lida     (marcar como lida)
@@ -1127,7 +1127,7 @@ curl -X DELETE -H "Authorization: Bearer TOKEN" \
 ├─ DELETE /notificacoes/:id          (deletar uma)
 └─ DELETE /notificacoes              (deletar todas)
 
-🛣️  routes/notificacoes.routes.js
+  routes/notificacoes.routes.js
 ├─ GET    /
 ├─ GET    /nao-lidas/contador
 ├─ PATCH  /:id/lida
@@ -1135,7 +1135,7 @@ curl -X DELETE -H "Authorization: Bearer TOKEN" \
 ├─ DELETE /:id
 └─ DELETE /
 
-⚙️  services/notificacoes.service.js
+  services/notificacoes.service.js
 ├─ notificarLike(usuario, ator, postagem)
 ├─ notificarComentario(usuario, ator, postagem, comentario)
 ├─ notificarNovoSeguidor(usuario, ator)
@@ -1144,15 +1144,15 @@ curl -X DELETE -H "Authorization: Bearer TOKEN" \
 ├─ notificarRespostaComentario(usuario, ator, comentario)
 └─ criarNotificacaoCustomizada(dados)
 
-📚 Integração no app.js
-└─ require('./routes/notificacoes.routes') ✅
-└─ app.use('/notificacoes', notificacoesRoutes) ✅
+  Integração no app.js
+└─ require('./routes/notificacoes.routes') (Registrado)
+└─ app.use('/notificacoes', notificacoesRoutes) (Registrado)
 
 ╔═══════════════════════════════════════════════════════════════════════╗
-║                          ✅ FRONTEND                                  ║
+║                          FRONTEND                                     ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
-🎯 NotificationContext.tsx
+  NotificationContext.tsx
 ├─ React Context com estado global
 ├─ Polling automático (30 segundos)
 ├─ Fetch: /api/notificacoes
@@ -1165,48 +1165,48 @@ curl -X DELETE -H "Authorization: Bearer TOKEN" \
 │  └─ contarNaoLidas()
 └─ Hook: useNotifications()
 
-🔔 NotificationBell.tsx
+  NotificationBell.tsx
 ├─ Ícone com badge de contagem
 ├─ Dropdown com últimas 20 notificações
 ├─ Botões: Marcar como lida, Deletar
 ├─ Link: Ver todas as notificações
 └─ Formatação de data: "agora", "5m atrás", etc
 
-📱 notificacoes/page.tsx
+  notificacoes/page.tsx
 ├─ Página completa: /notificacoes
 ├─ Filtros: Todas / Não lidas
 ├─ Ações em massa: Marcar tudo, Deletar tudo
 ├─ Grid responsivo
 └─ 404 quando nenhuma notificação
 
-🔌 Providers.tsx (ATUALIZADO)
+  Providers.tsx (ATUALIZADO)
 ├─ AuthProvider
-└─ NotificationProvider (adicionado) ✅
+└─ NotificationProvider (adicionado)
 
-📦 Integração no HomeFeedClient.tsx
+  Integração no HomeFeedClient.tsx
 ├─ Import NotificationBell
-└─ <NotificationBell /> na navbar ✅
+└─ <NotificationBell /> na navbar
 
 ╔═══════════════════════════════════════════════════════════════════════╗
-║                       🎯 TIPOS DE NOTIFICAÇÃO                        ║
+║                       TIPOS DE NOTIFICAÇÃO                            ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
 ┌──────────────┬────────────────────────────┬─────────────┐
 │ Tipo         │ Mensagem                   │ Ícone       │
 ├──────────────┼────────────────────────────┼─────────────┤
-│ like         │ curtiu sua postagem        │ ❤️          │
-│ comentario   │ comentou na sua postagem   │ 💬          │
-│ seguidor     │ começou a te seguir        │ 👥          │
-│ repost       │ compartilhou sua postagem  │ 🔄          │
-│ tag          │ te marcou em uma postagem  │ 🏷️          │
-│ resposta     │ respondeu seu comentário   │ ↩️           │
+│ like         │ curtiu sua postagem        │ (Curtiu)   │
+│ comentario   │ comentou na sua postagem   │ (Comentou) │
+│ seguidor     │ começou a te seguir        │           │
+│ repost       │ compartilhou sua postagem  │ (Repostou) │
+│ tag          │ te marcou em uma postagem  │ (Mencionou)│
+│ resposta     │ respondeu seu comentário   │ ↩           │
 └──────────────┴────────────────────────────┴─────────────┘
 
 ╔═══════════════════════════════════════════════════════════════════════╗
-║                    📊 FLUXO DE DADOS (Exemplo)                        ║
+║                    FLUXO DE DADOS (Exemplo)                           ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
-Usuário clica ❤️ em uma postagem de João
+Usuário curte uma postagem de João
            │
            ▼
    [POST /api/postagens/:id/like]
@@ -1244,17 +1244,17 @@ Usuário clica ❤️ em uma postagem de João
                    │
                    ▼
    João clica bell icon
-   Vê a notificação e clica ✓
+   Vê a notificação e confirma
                    │
                    ▼
    [PATCH /api/notificacoes/:id/lida]
    { lida: true, data_leitura: now }
 
 ╔═══════════════════════════════════════════════════════════════════════╗
-║                  🔧 COMO INTEGRAR NOS CONTROLLERS                     ║
+║                  COMO INTEGRAR NOS CONTROLLERS                        ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
-1️⃣  LIKES - postagens.controller.js
+1.  LIKES - postagens.controller.js
 
     const { notificarLike } = require('../services/notificacoes.service');
 
@@ -1263,7 +1263,7 @@ Usuário clica ❤️ em uma postagem de João
       await notificarLike(postagem.autor_id, usuario_id, postagem_id);
     }
 
-2️⃣  COMENTÁRIOS - comentarios.controller.js
+2.  COMENTÁRIOS - comentarios.controller.js
 
     const { notificarComentario } = require('../services/notificacoes.service');
 
@@ -1277,7 +1277,7 @@ Usuário clica ❤️ em uma postagem de João
       );
     }
 
-3️⃣  SEGUIDORES - usuarios.routes.js (criar rota)
+3.  SEGUIDORES - usuarios.routes.js (criar rota)
 
     const { notificarNovoSeguidor } = require('../services/notificacoes.service');
 
@@ -1296,32 +1296,32 @@ Usuário clica ❤️ em uma postagem de João
     });
 
 ╔═══════════════════════════════════════════════════════════════════════╗
-║                       📋 CHECKLIST                                    ║
+║                       CHECKLIST                                       ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
-✅ Schema Mongoose criado
-✅ Model exportado em models/index.js
-✅ Controllers implementados (7 endpoints)
-✅ Routes criadas e registradas no app.js
-✅ Service helper criado
-✅ NotificationContext implementado
-✅ Polling automático configurado
-✅ NotificationBell componente criado
-✅ Integrado na navbar (HomeFeedClient)
-✅ Página /notificacoes criada
-✅ Documentação completa
+[Concluído] Schema Mongoose criado
+[Concluído] Model exportado em models/index.js
+[Concluído] Controllers implementados (7 endpoints)
+[Concluído] Routes criadas e registradas no app.js
+[Concluído] Service helper criado
+[Concluído] NotificationContext implementado
+[Concluído] Polling automático configurado
+[Concluído] NotificationBell componente criado
+[Concluído] Integrado na navbar (HomeFeedClient)
+[Concluído] Página /notificacoes criada
+[Concluído] Documentação completa
 
 ⏳ PRÓXIMO PASSO:
   Integrar chamadas a notificacoes.service nos controllers
   de likes, comentários, e follow
 
 ╔═══════════════════════════════════════════════════════════════════════╗
-║                      🚀 PRONTO PARA USAR                              ║
+║                      PRONTO PARA USAR                                 ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
 O sistema está 100% funcional:
 
-1. Usuários veem o ícone 🔔 na navbar
+1. Usuários veem o ícone   na navbar
 2. Badge mostra número de não lidas
 3. Dropdown mostra últimas 20 notificações
 4. Polling atualiza automaticamente
@@ -1329,7 +1329,7 @@ O sistema está 100% funcional:
 6. TTL auto-deleta após 30 dias
 
 Quando você integrar os disparos nos controllers,
-as notificações aparecerão em tempo real! ⚡
+as notificações aparecerão em tempo real! 
 
 ```
 
@@ -1367,22 +1367,22 @@ A. Lista de Melhorias Necessárias
 ┌────────────┬─────────────────┬────────────────────────────────────────┬────────────────────────────────────────┐
 │ Prioridade │ Localização │ Problema │ Sugestão de Solução │
 ├────────────┼─────────────────┼────────────────────────────────────────┼────────────────────────────────────────┤
-│ 🔴 Crítica │ Geral (PostCard │ Erros de rede (likes, seguidores) são │ Implementar Toasts ou Snackbars (ex: │
+│ Crítica │ Geral (PostCard │ Erros de rede (likes, seguidores) são │ Implementar Toasts ou Snackbars (ex: │
 │ │ / Social) │ logados no console mas não exibidos ao │ Sonner ou React Hot Toast) para erros. │
 │ │ │ usuário. │ │
-│ 🟠 Alta │ Geral │ Falta de acessibilidade básica │ Adicionar aria-label descritivos e │
+│ Alta │ Geral │ Falta de acessibilidade básica │ Adicionar aria-label descritivos e │
 │ │ │ (aria-label em botões de ícone como │ garantir navegação via teclado │
 │ │ │ Curtir, Sino, Comentar). │ (tabindex). │
-│ 🟠 Alta │ Feed / Busca │ Mudanças bruscas de conteúdo durante o │ Implementar Skeleton Screens no │
+│ Alta │ Feed / Busca │ Mudanças bruscas de conteúdo durante o │ Implementar Skeleton Screens no │
 │ │ │ carregamento de dados assíncronos. │ HomeFeedClient e SearchClient para │
 │ │ │ │ suavizar o carregamento. │
-│ 🟡 Média │ PostCard │ Player de vídeo e áudio são │ Integrar componentes de player nativos │
+│ Média │ PostCard │ Player de vídeo e áudio são │ Integrar componentes de player nativos │
 │ │ │ representados por placeholders │ ou customizados (ex: video-js ou tags │
 │ │ │ estáticos. │ HTML5 estilizadas). │
-│ 🟡 Média │ Navegação │ Falta de uma barra de navegação │ Criar um menu lateral persistente com │
+│ Média │ Navegação │ Falta de uma barra de navegação │ Criar um menu lateral persistente com │
 │ │ │ principal (Sidebar/Navbar) no Desktop. │ links rápidos para Search, │
 │ │ │ │ Notificações e Perfil. │
-│ ⚪ Baixa │ NewPostPage │ Usuário pode digitar títulos longos │ Adicionar contador de caracteres em │
+│ Baixa │ NewPostPage │ Usuário pode digitar títulos longos │ Adicionar contador de caracteres em │
 │ │ │ sem saber se serão cortados (limite │ tempo real nos inputs de Título e │
 │ │ │ visual). │ Descrição. │
 └────────────┴─────────────────┴────────────────────────────────────────┴────────────────────────────────────────┘
@@ -1420,7 +1420,7 @@ Nota Geral: 8.2 / 10
   de mensagens (Chat).
 
   Recomendação Estratégica:
-  O foco imediato deve ser a Acessibilidade e Feedback de Erro (🔴/🟠). Uma rede social que falha silenciosamente
+  O foco imediato deve ser a Acessibilidade e Feedback de Erro (/). Uma rede social que falha silenciosamente
   frustra o usuário. Em seguida, a implementação da Lógica de Repostagem e Chat transformará o IFRede de um mural de
   publicações em uma rede de colaboração completa.
 
@@ -1428,13 +1428,13 @@ Nota Geral: 8.2 / 10
 
 # 9. TUTORIAL DE EXECUÇÃO
 
-# 🚀 Guia de Execução - IF REDE (TCC)
+# Guia de Execução - IF REDE (TCC)
 
 Este guia contém o passo a passo completo para configurar e rodar o projeto **IF REDE** em sua máquina local.
 
 ---
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 Antes de começar, você precisará ter instalado:
 
@@ -1444,7 +1444,7 @@ Antes de começar, você precisará ter instalado:
 
 ---
 
-## 🛠️ Passo 1: Configurando o Backend
+## Passo 1: Configurando o Backend
 
 O backend gerencia o banco de dados, autenticação e a lógica de negócios.
 
@@ -1475,7 +1475,7 @@ O backend gerencia o banco de dados, autenticação e a lógica de negócios.
 
 ---
 
-## 🎨 Passo 2: Configurando o Frontend
+## Passo 2: Configurando o Frontend
 
 O frontend é a interface visual construída em Next.js.
 
@@ -1496,7 +1496,7 @@ O frontend é a interface visual construída em Next.js.
 
 ---
 
-## 🌐 Resumo de Portas
+## Resumo de Portas
 
 - **Frontend:** `http://localhost:3001`
 - **Backend (API):** `http://localhost:3000`
@@ -1504,7 +1504,7 @@ O frontend é a interface visual construída em Next.js.
 
 ---
 
-## 📝 Comandos Úteis
+## Comandos Úteis
 
 ### Backend
 
@@ -1519,7 +1519,7 @@ O frontend é a interface visual construída em Next.js.
 
 ---
 
-## 🧐 Solução de Problemas
+## Solução de Problemas
 
 1. **Erro de conexão com o MongoDB:** Verifique se o serviço do MongoDB está ativo (Services.msc no Windows ou `systemctl status mongod` no Linux).
 2. **Porta 3000 ou 3001 ocupada:** Encerre processos antigos ou mude a porta nos arquivos de configuração (`.env` no backend ou script no `package.json` do frontend).
@@ -1527,7 +1527,7 @@ O frontend é a interface visual construída em Next.js.
 
 ---
 
-✨ **IF REDE** - Conectando Conhecimento Acadêmico.
+**IF REDE** - Conectando Conhecimento Acadêmico.
 
 ---
 
