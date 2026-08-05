@@ -66,7 +66,8 @@ router.post('/register', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, senha } = req.body;
+    // 1. Extração de Parâmetros: Captura email, senha e opção "Lembre de mim".
+    const { email, senha, rememberMe = false } = req.body;
 
     // 1. Validação de Entrada: Verifica se os campos básicos foram enviados.
     if (!email || !senha) {
@@ -98,16 +99,15 @@ router.post('/login', async (req, res, next) => {
       return res.fail('Conta inativa ou suspensa.', 403);
     }
 
-    // Bloqueia acesso se o e-mail não estiver confirmado (desativado temporariamente)
     // Bloqueia acesso se o e-mail não estiver confirmado
     if (usuario.email_confirmado === false) {
       return res.fail('Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.', 403);
     }
 
-    // 6. Geração de Tokens: Cria Access Token (curta duração) e Refresh Token (longa duração).
+    // 6. Geração de Tokens: Cria Access Token e Refresh Token com validade ajustada por rememberMe.
     // Fluxo: O Access Token carrega os claims (mod_voluntario, vinculo) para o middleware.
-    const accessToken = gerarAccessToken(usuario);
-    const refreshToken = gerarRefreshToken(usuario);
+    const accessToken = gerarAccessToken(usuario, Boolean(rememberMe));
+    const refreshToken = gerarRefreshToken(usuario, Boolean(rememberMe));
 
     // 7. Resposta de Sucesso: Retorna dados do perfil e tokens.
     // O que faz: Garante que mod_voluntario esteja presente para liberar a UI de moderação no front.

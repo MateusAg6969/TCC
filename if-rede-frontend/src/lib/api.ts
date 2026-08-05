@@ -45,9 +45,13 @@ api.interceptors.response.use(
           const { accessToken: newAccess, refreshToken: newRefresh } = response.data?.data?.tokens || {};
 
           if (newAccess) {
-            Cookies.set('ifrede_token', newAccess, { expires: 1, path: '/' });
+            // Verifica se o usuário optou por "Lembre de mim" (sessão estendida)
+            const isRemember = Cookies.get('ifrede_remember') === 'true';
+            const cookieOptions = isRemember ? { expires: 30, path: '/' } : { path: '/' };
+
+            Cookies.set('ifrede_token', newAccess, cookieOptions);
             if (newRefresh) {
-              Cookies.set('ifrede_refresh', newRefresh, { expires: 7, path: '/' });
+              Cookies.set('ifrede_refresh', newRefresh, cookieOptions);
             }
 
             setAuthHeader(newAccess);
@@ -58,6 +62,7 @@ api.interceptors.response.use(
         } catch (refreshError) {
           Cookies.remove('ifrede_token');
           Cookies.remove('ifrede_refresh');
+          Cookies.remove('ifrede_remember');
           setAuthHeader(undefined);
           if (typeof window !== 'undefined') {
             const publicPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
@@ -70,6 +75,7 @@ api.interceptors.response.use(
       } else {
         Cookies.remove('ifrede_token');
         Cookies.remove('ifrede_refresh');
+        Cookies.remove('ifrede_remember');
         setAuthHeader(undefined);
         if (typeof window !== 'undefined') {
           const publicPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];

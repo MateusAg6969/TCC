@@ -30,7 +30,7 @@ type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   token: string | null;
-  login: (email: string, senha: string) => Promise<void>;
+  login: (email: string, senha: string, rememberMe?: boolean) => Promise<void>;
   register: (payload: {
     nome: string;
     apelido: string;
@@ -50,6 +50,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 const ACCESS_COOKIE = 'ifrede_token';
 const REFRESH_COOKIE = 'ifrede_refresh';
+const REMEMBER_COOKIE = 'ifrede_remember';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -96,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!active) return;
         Cookies.remove(ACCESS_COOKIE);
         Cookies.remove(REFRESH_COOKIE);
+        Cookies.remove(REMEMBER_COOKIE);
         setAuthHeader(undefined);
         setToken(null);
         setUser(null);
@@ -112,11 +114,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Lógica de Login: Realiza a autenticação e persiste a sessão.
-  // Entrada: email e senha digitados no formulário.
-  // Fluxo: Chamada API -> Extração de Tokens -> Gravação de Cookies -> Atualização de Estado -> Redirecionamento.
-  const login = async (email: string, senha: string) => {
+  // Entrada: email, senha digitados no formulário e a opção rememberMe (Lembre de mim).
+  // Fluxo: Chamada API com rememberMe -> Extração de Tokens -> Gravação de Cookies (Persistentes por 30 dias ou de Sessão) -> Atualização de Estado -> Redirecionamento.
+  const login = async (email: string, senha: string, rememberMe = false) => {
     try {
-      const response = await api.post('/auth/login', { email, senha });
+      const response = await api.post('/auth/login', { email, senha, rememberMe });
       
       // O que faz: Extrai os dados da resposta padronizada { ok: true, data: { ... } }
       const { data } = response.data;
@@ -129,9 +131,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // 1. Persistência Física: Grava os tokens nos Cookies para serem lidos pelo Middleware (SSR).
-      // Por que: Permite que o Next.js proteja rotas no lado do servidor.
-      Cookies.set(ACCESS_COOKIE, accessToken, { expires: 1, path: '/' }); // 1 dia
-      Cookies.set(REFRESH_COOKIE, refreshToken, { expires: 7, path: '/' }); // 7 dias
+      // Se rememberMe for true: cookies persistentes por 30 dias.
+      // Se rememberMe for false: cookies de sessão (removidos ao fechar o navegador).
+      if (rememberMe) {
+        Cookies.set(ACCESS_COOKIE, accessToken, { expires: 30, path: '/' }); // 30 dias
+        Cookies.set(REFRESH_COOKIE, refreshToken, { expires: 30, path: '/' }); // 30 dias
+        Cookies.set(REMEMBER_COOKIE, 'true', { expires: 30, path: '/' });
+      } else {
+        Cookies.set(ACCESS_COOKIE, accessToken, { path: '/' }); // Cookie de sessão
+        Cookies.set(REFRESH_COOKIE, refreshToken, { path: '/' }); // Cookie de sessão
+        Cookies.remove(REMEMBER_COOKIE);
+      }
 
       // 2. Configuração de Rede: Aplica o token nas requisições futuras do Axios.
       setAuthHeader(accessToken);
@@ -187,6 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       Cookies.remove(ACCESS_COOKIE);
       Cookies.remove(REFRESH_COOKIE);
+      Cookies.remove(REMEMBER_COOKIE);
       setAuthHeader(undefined);
       setToken(null);
       setUser(null);

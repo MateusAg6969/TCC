@@ -11,7 +11,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Check } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
@@ -22,6 +22,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  // Estado para armazenar se o usuário deseja permanecer logado (Lembre de mim)
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Estado de feedback ao usuário
   const [erro, setErro] = useState('');
@@ -57,11 +59,11 @@ export default function LoginPage() {
 
     try {
       // Delega a lógica de autenticação ao AuthContext:
-      // - Faz o POST /auth/login
-      // - Salva tokens nos cookies
+      // - Faz o POST /auth/login repassando email, senha e a preferência rememberMe
+      // - Salva tokens nos cookies (Sessão ou 30 dias)
       // - Configura o Axios para usar o token nas próximas requisições
       // - Redireciona para /home automaticamente
-      await login(email, senha);
+      await login(email, senha, rememberMe);
     } catch (err: any) {
       // ============================================================
       // TRATAMENTO DE ERROS DA API
@@ -138,12 +140,7 @@ export default function LoginPage() {
 
           {/* Campo de senha */}
           <div className="flex flex-col">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium" htmlFor="login-senha">Senha</label>
-              <Link href="/forgot-password" className="text-xs font-medium text-if-olive hover:underline transition-colors">
-                Esqueci minha senha
-              </Link>
-            </div>
+            <label className="text-sm font-medium" htmlFor="login-senha">Senha</label>
             <div className="relative">
               <input
                 id="login-senha"
@@ -164,6 +161,37 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+          </div>
+
+          {/* Opções extras do formulário: Lembre de mim e Esqueci minha senha */}
+          <div className="flex items-center justify-between pt-1">
+            <label
+              htmlFor="login-remember"
+              className="group flex cursor-pointer items-center gap-2.5 select-none"
+            >
+              <div className="relative flex items-center justify-center">
+                <input
+                  id="login-remember"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="peer sr-only"
+                />
+                <div className="h-5 w-5 rounded-lg border border-white/20 bg-if-olive/15 transition-all duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-if-olive peer-checked:border-if-olive peer-checked:bg-if-olive group-hover:border-if-olive/60 flex items-center justify-center shadow-xs">
+                  <Check className={`h-3.5 w-3.5 stroke-[3] text-if-bg transition-all duration-200 ${rememberMe ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`} />
+                </div>
+              </div>
+              <span className="text-sm text-if-text/80 transition-colors group-hover:text-if-text">
+                Lembre de mim
+              </span>
+            </label>
+
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-if-olive hover:underline transition-colors"
+            >
+              Esqueci minha senha
+            </Link>
           </div>
 
           {/* Exibição de erros — mensagem real da API ou validação local */}
