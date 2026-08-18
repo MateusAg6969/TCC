@@ -7,6 +7,9 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
+const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+
 const authRoutes = require('./routes/auth.routes');
 const comentariosRoutes = require('./routes/comentarios.routes');
 const usuariosRoutes = require('./routes/usuarios.routes');
@@ -44,22 +47,36 @@ const corsOrigins = (process.env.CORS_ORIGINS || '')
 const allowedCorsOrigins = corsOrigins.length ? corsOrigins : defaultCorsOrigins;
 
 app.use(
-  cors(
-    {
-      origin: true,
-      credentials: true,
-    }
-  )
+  cors({
+    origin: function (origin, callback) {
+      // Permite requisições sem header Origin (ex: ferramentas servidor-a-servidor, mobile ou ferramentas locais)
+      if (!origin || allowedCorsOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Acesso bloqueado pela política de CORS.'));
+    },
+    credentials: true,
+  })
 );
 app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
+app.use(mongoSanitize({ replaceWith: '_' }));
 app.use(morgan('dev'));
 app.use(apiLimiter);
 app.use(responseMiddleware);
 
 // Exposicao controlada de arquivos enviados nas postagens.
 // Entrada: arquivos gravados localmente em uploads/postagens.
-// Saida: URL publica /uploads/<arquivo> para consumo do frontend.
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// Saida: URL publica /uploads/<arquivo> para consumo do frontend com cabeçalhos restritivos.
+app.use(
+  '/uploads',
+  express.static(path.join(process.cwd(), 'uploads'), {
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; media-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'");
+    },
+  })
+);
 
 app.get('/health', (req, res) => {
   return res.success(

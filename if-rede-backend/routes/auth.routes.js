@@ -9,7 +9,36 @@ const {
 } = require('../services/token.service');
 const { enviarEmailConfirmacao, enviarEmailRecuperacao } = require('../services/email.service');
 
+const rateLimit = require('express-rate-limit');
+
 const router = express.Router();
+
+// Rate limiter estrito para rotas de autenticação sensíveis (previne força bruta)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, error: 'Muitas tentativas de autenticação. Tente novamente em 15 minutos.' },
+});
+
+router.use('/login', authLimiter);
+router.use('/register', authLimiter);
+router.use('/forgot-password', authLimiter);
+router.use('/reset-password', authLimiter);
+router.use('/resend-verification', authLimiter);
+
+// Helper para definir cookie seguro HttpOnly para o Refresh Token
+function setRefreshTokenCookie(res, refreshToken, rememberMe = false) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.cookie('ifrede_refresh', refreshToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000,
+    path: '/',
+  });
+}
 
 router.post('/register', async (req, res, next) => {
   try {
@@ -109,6 +138,9 @@ router.post('/login', async (req, res, next) => {
     const accessToken = gerarAccessToken(usuario, Boolean(rememberMe));
     const refreshToken = gerarRefreshToken(usuario, Boolean(rememberMe));
 
+    // Grava o Refresh Token em cookie HttpOnly seguro
+    setRefreshTokenCookie(res, refreshToken, Boolean(rememberMe));
+
     // 7. Resposta de Sucesso: Retorna dados do perfil e tokens.
     // O que faz: Garante que mod_voluntario esteja presente para liberar a UI de moderação no front.
     return res.success(
@@ -135,7 +167,7 @@ router.post('/login', async (req, res, next) => {
 });
 
 router.post('/refresh', async (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies?.ifrede_refresh || req.body?.refreshToken;
 
   if (!refreshToken) {
     return res.fail('Refresh token é obrigatório.', 400);
@@ -159,6 +191,9 @@ router.post('/refresh', async (req, res) => {
     const newAccessToken = gerarAccessToken(usuario);
     const newRefreshToken = gerarRefreshToken(usuario);
 
+    // Atualiza o cookie HttpOnly com o novo Refresh Token
+    setRefreshTokenCookie(res, newRefreshToken);
+
     return res.success(
       { tokens: { accessToken: newAccessToken, refreshToken: newRefreshToken } },
       'Token renovado com sucesso.'
@@ -171,7 +206,7 @@ router.post('/refresh', async (req, res) => {
 router.post('/logout', async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies?.ifrede_refresh || req.body?.refreshToken;
     
     // Revoga o access token atual se ele for enviado
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -208,6 +243,9 @@ router.post('/logout', async (req, res, next) => {
         console.error('Erro ao revogar refresh token:', e);
       }
     }
+
+    // Limpa o cookie HttpOnly no cliente
+    res.clearCookie('ifrede_refresh', { path: '/' });
 
     return res.success(null, 'Logout realizado com sucesso.');
   } catch (error) {

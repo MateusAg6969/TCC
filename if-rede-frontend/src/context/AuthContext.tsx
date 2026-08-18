@@ -135,13 +135,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Se rememberMe for false: cookies de sessão (removidos ao fechar o navegador).
       if (rememberMe) {
         Cookies.set(ACCESS_COOKIE, accessToken, { expires: 30, path: '/' }); // 30 dias
-        Cookies.set(REFRESH_COOKIE, refreshToken, { expires: 30, path: '/' }); // 30 dias
         Cookies.set(REMEMBER_COOKIE, 'true', { expires: 30, path: '/' });
       } else {
         Cookies.set(ACCESS_COOKIE, accessToken, { path: '/' }); // Cookie de sessão
-        Cookies.set(REFRESH_COOKIE, refreshToken, { path: '/' }); // Cookie de sessão
         Cookies.remove(REMEMBER_COOKIE);
       }
+      // O Refresh Token é definido automaticamente pelo backend como cookie HttpOnly seguro.
+      Cookies.remove(REFRESH_COOKIE);
 
       // 2. Configuração de Rede: Aplica o token nas requisições futuras do Axios.
       setAuthHeader(accessToken);
@@ -188,10 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      const refreshToken = Cookies.get(REFRESH_COOKIE);
-      if (refreshToken) {
-        await api.post('/auth/logout', { refreshToken });
-      }
+      await api.post('/auth/logout');
     } catch (error) {
       console.error('Erro ao encerrar sessão:', error);
     } finally {

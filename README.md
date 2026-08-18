@@ -96,6 +96,11 @@ if-rede-backend/
 
 - **Senha** nunca é retornada (`select: false`).
 - **Índices únicos** garantem consistência de e‑mail e matrícula.
+- **CORS Restritivo**: Validação estrita de origem (`CORS_ORIGINS`) impedindo requisições cruzadas maliciosas.
+- **Proteção NoSQL Injection**: Higienização com `express-mongo-sanitize` contra operadores `$` e `.` em payloads.
+- **Refresh Token via Cookie HttpOnly**: Armazenamento seguro de sessão em cookie `HttpOnly`, `SameSite` e `Secure`, imune a roubo por XSS.
+- **Rate Limiting Estrito**: Limite de 10 requisições a cada 15 minutos em rotas sensíveis de autenticação (`/auth/login`, `/auth/register`, `/auth/forgot-password`).
+- **Headers de Uploads**: Servidor de arquivos estáticos configurado com `X-Content-Type-Options: nosniff` e `Content-Security-Policy`.
 - **Validações regex** evitam inserções mal‑formadas.
 - **Campos imutáveis** (`createdAt`, `senha`) não podem ser alterados via `findOneAndUpdate` sem `new:true`.
 

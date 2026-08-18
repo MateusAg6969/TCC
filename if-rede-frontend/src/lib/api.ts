@@ -10,6 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 export const api = axios.create({
   baseURL: API_URL,
   timeout: 12000,
+  withCredentials: true,
 });
 
 api.interceptors.response.use(
@@ -34,45 +35,29 @@ api.interceptors.response.use(
       !originalRequest.url?.includes('/auth/')
     ) {
       originalRequest._retry = true;
-      const refreshToken = Cookies.get('ifrede_refresh');
 
-      if (refreshToken) {
-        try {
-          const response = await axios.post(`${API_URL}/auth/refresh`, {
-            refreshToken,
-          });
+      try {
+        // Tenta renovar o token chamando /auth/refresh (o cookie HttpOnly será enviado automaticamente se presente)
+        const response = await axios.post(
+          `${API_URL}/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
 
-          const { accessToken: newAccess, refreshToken: newRefresh } = response.data?.data?.tokens || {};
+        const { accessToken: newAccess } = response.data?.data?.tokens || {};
 
-          if (newAccess) {
-            // Verifica se o usuário optou por "Lembre de mim" (sessão estendida)
-            const isRemember = Cookies.get('ifrede_remember') === 'true';
-            const cookieOptions = isRemember ? { expires: 30, path: '/' } : { path: '/' };
+        if (newAccess) {
+          const isRemember = Cookies.get('ifrede_remember') === 'true';
+          const cookieOptions = isRemember ? { expires: 30, path: '/' } : { path: '/' };
 
-            Cookies.set('ifrede_token', newAccess, cookieOptions);
-            if (newRefresh) {
-              Cookies.set('ifrede_refresh', newRefresh, cookieOptions);
-            }
+          Cookies.set('ifrede_token', newAccess, cookieOptions);
 
-            setAuthHeader(newAccess);
-            originalRequest.headers.Authorization = `Bearer ${newAccess}`;
-            
-            return api(originalRequest);
-          }
-        } catch (refreshError) {
-          Cookies.remove('ifrede_token');
-          Cookies.remove('ifrede_refresh');
-          Cookies.remove('ifrede_remember');
-          setAuthHeader(undefined);
-          if (typeof window !== 'undefined') {
-            const publicPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password'];
-            const isPublic = publicPaths.some(p => window.location.pathname.startsWith(p));
-            if (!isPublic) {
-              window.location.href = '/login';
-            }
-          }
+          setAuthHeader(newAccess);
+          originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+
+          return api(originalRequest);
         }
-      } else {
+      } catch (refreshError) {
         Cookies.remove('ifrede_token');
         Cookies.remove('ifrede_refresh');
         Cookies.remove('ifrede_remember');
@@ -86,7 +71,7 @@ api.interceptors.response.use(
         }
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
