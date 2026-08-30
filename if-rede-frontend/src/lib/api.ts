@@ -7,9 +7,11 @@ import Cookies from 'js-cookie';
 // Fluxo de dados: chamadas axios -> baseURL -> backend Express na porta correta.
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+// O que faz: Instância global do Axios configurada com a URL base da API.
+// Ajuste de resiliência: Timeout estendido para 60.000ms (60s) para suportar o Cold Start (inicialização a frio) do plano gratuito do Render.
 export const api = axios.create({
   baseURL: API_URL,
-  timeout: 12000,
+  timeout: 60000,
   withCredentials: true,
 });
 

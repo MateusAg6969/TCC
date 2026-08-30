@@ -244,8 +244,14 @@ router.post('/logout', async (req, res, next) => {
       }
     }
 
-    // Limpa o cookie HttpOnly no cliente
-    res.clearCookie('ifrede_refresh', { path: '/' });
+    // Limpa o cookie HttpOnly no cliente com os mesmos parâmetros de produção
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.clearCookie('ifrede_refresh', {
+      path: '/',
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    });
 
     return res.success(null, 'Logout realizado com sucesso.');
   } catch (error) {
