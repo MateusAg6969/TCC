@@ -8,13 +8,18 @@ let io;
  * @param {Object} httpServer - Servidor HTTP do Node.js
  */
 function init(httpServer) {
-  const defaultCorsOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'];
+  const defaultCorsOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5173',
+    'https://tcc-psi-ten.vercel.app',
+  ];
   const corsOrigins = (process.env.CORS_ORIGINS || '')
     .split(',')
-    .map((s) => s.trim())
+    .map((s) => s.trim().replace(/\/+$/, ''))
     .filter(Boolean);
 
-  const allowedCorsOrigins = corsOrigins.length ? corsOrigins : defaultCorsOrigins;
+  const allowedCorsOrigins = Array.from(new Set([...defaultCorsOrigins, ...corsOrigins]));
 
   io = new Server(httpServer, {
     cors: {

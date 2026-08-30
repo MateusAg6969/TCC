@@ -35,35 +35,57 @@ const apiLimiter = rateLimit({
   message: { error: 'Muitas requisições. Tente novamente em instantes.' },
 });
 
+// Registra o middleware de padronização de respostas no topo da pilha.
+// O que faz: Adiciona res.success e res.fail no objeto response.
+// Por que: Garante que os métodos de resposta estejam disponíveis mesmo se middlewares subsequentes (como CORS ou rateLimit) falharem.
+app.use(responseMiddleware);
+
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
-const defaultCorsOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'];
+// Domínios padrão confiáveis (ambientes locais e ambiente de produção no Vercel)
+const defaultCorsOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:5173',
+  'https://tcc-psi-ten.vercel.app',
+];
+
+// Processa a variável CORS_ORIGINS separando por vírgula e removendo barras finais excedentes (ex: https://dominio.com/ -> https://dominio.com)
 const corsOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
-  .map((s) => s.trim())
+  .map((s) => s.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 
-// Fallback seguro: sem variável de ambiente, libera apenas os ambientes locais comuns.
-const allowedCorsOrigins = corsOrigins.length ? corsOrigins : defaultCorsOrigins;
+// Combina os origens definidos na variável de ambiente com os origens padrão
+const allowedCorsOrigins = Array.from(new Set([...defaultCorsOrigins, ...corsOrigins]));
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Permite requisições sem header Origin (ex: ferramentas servidor-a-servidor, mobile ou ferramentas locais)
-      if (!origin || allowedCorsOrigins.includes(origin)) {
+      // Permite requisições sem header Origin (ex: chamadas servidor-a-servidor, mobile ou ferramentas locais como Postman)
+      if (!origin) {
         return callback(null, true);
       }
-      return callback(new Error('Acesso bloqueado pela política de CORS.'));
+
+      // Normaliza o origin recebido removendo barra final para comparação precisa
+      const cleanOrigin = origin.replace(/\/+$/, '');
+      if (allowedCorsOrigins.includes(cleanOrigin)) {
+        return callback(null, true);
+      }
+
+      const corsError = new Error('Acesso bloqueado pela política de CORS.');
+      corsError.status = 403;
+      return callback(corsError);
     },
     credentials: true,
   })
 );
+
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(mongoSanitize({ replaceWith: '_' }));
 app.use(morgan('dev'));
 app.use(apiLimiter);
-app.use(responseMiddleware);
 
 // Exposicao controlada de arquivos enviados nas postagens.
 // Entrada: arquivos gravados localmente em uploads/postagens.
