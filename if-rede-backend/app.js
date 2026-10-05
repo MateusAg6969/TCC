@@ -69,7 +69,11 @@ app.use(
 
       // Normaliza o origin recebido removendo barra final para comparação precisa
       const cleanOrigin = origin.replace(/\/+$/, '');
-      if (allowedCorsOrigins.includes(cleanOrigin)) {
+
+      // Permite se o domínio estiver na lista explícita ou for um subdomínio da Vercel (*.vercel.app)
+      const isVercelDomain = /\.vercel\.app$/.test(cleanOrigin);
+
+      if (allowedCorsOrigins.includes(cleanOrigin) || isVercelDomain) {
         return callback(null, true);
       }
 

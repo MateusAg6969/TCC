@@ -23,7 +23,15 @@ function init(httpServer) {
 
   io = new Server(httpServer, {
     cors: {
-      origin: allowedCorsOrigins,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const cleanOrigin = origin.replace(/\/+$/, '');
+        const isVercelDomain = /\.vercel\.app$/.test(cleanOrigin);
+        if (allowedCorsOrigins.includes(cleanOrigin) || isVercelDomain) {
+          return callback(null, true);
+        }
+        return callback(new Error('Acesso bloqueado pela política de CORS no Socket.'));
+      },
       methods: ['GET', 'POST'],
       credentials: true
     }
